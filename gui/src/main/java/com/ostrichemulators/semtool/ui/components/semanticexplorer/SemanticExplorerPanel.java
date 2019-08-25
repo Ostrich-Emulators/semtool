@@ -39,7 +39,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
@@ -87,8 +87,8 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 				if ( 2 == col ) {
 					int row = propertyTable.rowAtPoint( e.getPoint() );
 					Object obj = tablemodel.getValueAt( row, col );
-					if ( obj instanceof URI ) {
-						URI uri = URI.class.cast( obj );
+					if ( obj instanceof IRI ) {
+						IRI uri = IRI.class.cast( obj );
 
 						Enumeration<DefaultMutableTreeNode> enumer = invisibleRoot.depthFirstEnumeration();
 						while ( enumer.hasMoreElements() ) {
@@ -166,7 +166,7 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 						break;
 					case 3:
 						DefaultMutableTreeNode dmtn = DefaultMutableTreeNode.class.cast( e.getPath().getLastPathComponent() );
-						URI instance = URI.class.cast( dmtn.getUserObject() );
+						IRI instance = IRI.class.cast( dmtn.getUserObject() );
 						ModelQueryAdapter mqa = ModelQueryAdapter.describe( instance );
 						mqa.useInferred( false );
 						tablemodel.setModel( engine.constructNoEx( mqa ) );
@@ -200,21 +200,21 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 
 				StructureManager sm = StructureManagerFactory.getStructureManager( engine );
 
-				Set<URI> concepts = sm.getTopLevelConcepts();
-				Map<URI, String> clbls = Utility.getInstanceLabels( concepts, engine );
-				Map<URI, String> sortedconcepts = Utility.sortUrisByLabel( clbls );
+				Set<IRI> concepts = sm.getTopLevelConcepts();
+				Map<IRI, String> clbls = Utility.getInstanceLabels( concepts, engine );
+				Map<IRI, String> sortedconcepts = Utility.sortUrisByLabel( clbls );
 				rlc.putAll( clbls );
 
-				for ( URI concept : sortedconcepts.keySet() ) {
+				for ( IRI concept : sortedconcepts.keySet() ) {
 					DefaultMutableTreeNode conceptNode = new DefaultMutableTreeNode( concept );
 					invisibleRoot.add( conceptNode );
 
-					List<URI> instances = NodeDerivationTools.createInstanceList( concept, engine );
-					Map<URI, String> labels = Utility.getInstanceLabels( instances, engine );
+					List<IRI> instances = NodeDerivationTools.createInstanceList( concept, engine );
+					Map<IRI, String> labels = Utility.getInstanceLabels( instances, engine );
 					labels = Utility.sortUrisByLabel( labels );
 					rlc.putAll( labels );
 
-					for ( URI instance : labels.keySet() ) {
+					for ( IRI instance : labels.keySet() ) {
 						DefaultMutableTreeNode instNode = new DefaultMutableTreeNode( instance );
 						conceptNode.add( instNode );
 					}
@@ -225,9 +225,9 @@ public class SemanticExplorerPanel extends javax.swing.JPanel {
 
 				LabeledPairTableCellRenderer<Value> tablerenderer
 						= LabeledPairTableCellRenderer.getValuePairRenderer( rlc );
-				propertyTable.setDefaultRenderer( URI.class, tablerenderer );
+				propertyTable.setDefaultRenderer( IRI.class, tablerenderer );
 				propertyTable.setDefaultRenderer( Value.class, tablerenderer );
-				tablerenderer.cache( XMLSchema.ANYURI, "URI" );
+				tablerenderer.cache( XMLSchema.ANYURI, "IRI" );
 			}
 		} );
 	}

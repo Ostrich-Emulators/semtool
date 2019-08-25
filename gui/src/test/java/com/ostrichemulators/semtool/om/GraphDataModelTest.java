@@ -23,7 +23,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.LiteralImpl;
 import org.eclipse.rdf4j.model.impl.StatementImpl;
@@ -47,11 +47,11 @@ public class GraphDataModelTest {
 	private static final File DATAFILE = new File( "src/test/resources/test12.nt" );
 	private static final UriBuilder datab = UriBuilder.getBuilder( "http://os-em.com/semtool/database/Ke42d9335-1c26-475a-96bd-9bde6a2ab5e5/" );
 	private static final UriBuilder owlb = UriBuilder.getBuilder( "http://os-em.com/ontologies/semtool" );
-	private static final URI PRICE = owlb.build( "Price" );
-	private static final URI YUGO = datab.build( "Yugo" );
-	private static final URI YURI = datab.build( "Yuri" );
-	private static final URI YPY = datab.build( "Yuri_Purchased_Yugo" );
-	private static final URI PURCHASE = owlb.build( "Purchased" );
+	private static final IRI PRICE = owlb.build( "Price" );
+	private static final IRI YUGO = datab.build( "Yugo" );
+	private static final IRI YURI = datab.build( "Yuri" );
+	private static final IRI YPY = datab.build( "Yuri_Purchased_Yugo" );
+	private static final IRI PURCHASE = owlb.build( "Purchased" );
 
 	private InMemorySesameEngine eng;
 

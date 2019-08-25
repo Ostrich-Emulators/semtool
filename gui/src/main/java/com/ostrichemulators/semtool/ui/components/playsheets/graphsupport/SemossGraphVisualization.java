@@ -52,7 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
@@ -97,12 +97,12 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 			= new VertexPredicateFilter<>( (HidingPredicate<SEMOSSVertex>) predicate );
 	private final EdgePredicateFilter<SEMOSSVertex, SEMOSSEdge> visibleEdgesFilter
 			= new EdgePredicateFilter<>( (HidingPredicate<SEMOSSEdge>) predicate );
-	private final Set<URI> hiddenSingles = new HashSet<>();
-	private final Set<URI> hiddenTypes = new HashSet<>();
+	private final Set<IRI> hiddenSingles = new HashSet<>();
+	private final Set<IRI> hiddenTypes = new HashSet<>();
 	private final GraphColorShapeRepositoryListener listener = new GraphColorShapeRepositoryListener() {
 
 		@Override
-		public void dataChanged( URI uri, NamedShape ns, Color c, URL img ) {
+		public void dataChanged( IRI uri, NamedShape ns, Color c, URL img ) {
 			firePropertyChange( VISIBILITY_CHANGED, false, true );
 			repaint();
 		}
@@ -145,7 +145,7 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		repo.addListener( listener );
 	}
 
-	public void hideOne( URI uri, boolean hideme ) {
+	public void hideOne( IRI uri, boolean hideme ) {
 		if ( hideme ) {
 			hiddenSingles.add( uri );
 		}
@@ -157,7 +157,7 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 		refresh();
 	}
 
-	public void hideType( URI uri, boolean hideme ) {
+	public void hideType( IRI uri, boolean hideme ) {
 		if ( hideme ) {
 			hiddenTypes.add( uri );
 		}
@@ -170,7 +170,7 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 	}
 
 	public void hide( Collection<? extends GraphElement> elements, boolean hideme ) {
-		List<URI> uris = new ArrayList<>();
+		List<IRI> uris = new ArrayList<>();
 		for ( GraphElement e : elements ) {
 			uris.add( e.getGraphId() );
 		}
@@ -216,7 +216,7 @@ public class SemossGraphVisualization extends VisualizationViewer<SEMOSSVertex, 
 				|| hiddenTypes.contains( element.getType() ) );
 	}
 
-	public boolean isHidden( URI uri ) {
+	public boolean isHidden( IRI uri ) {
 		return ( hiddenSingles.contains( uri ) || hiddenTypes.contains( uri ) );
 	}
 

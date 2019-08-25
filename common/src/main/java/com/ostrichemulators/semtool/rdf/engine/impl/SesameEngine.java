@@ -20,7 +20,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.http.HTTPRepository;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
-import org.eclipse.rdf4j.sail.inferencer.fc.ForwardChainingRDFSInferencer;
+import org.eclipse.rdf4j.sail.inferencer.fc.SchemaCachingRDFSInferencer;
 import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
 
 /**
@@ -46,7 +46,7 @@ public class SesameEngine extends AbstractSesameEngine {
 		}
 
 		Repository repo = getRawRepository( url );
-		repo.initialize();
+		repo.init();
 		data = repo.getConnection();
 	}
 
@@ -95,7 +95,7 @@ public class SesameEngine extends AbstractSesameEngine {
 
 		}
 		else {
-			repository = new SailRepository( new ForwardChainingRDFSInferencer(
+			repository = new SailRepository( new SchemaCachingRDFSInferencer(
 					new NativeStore( new File( loc ) ) ) );
 		}
 
@@ -112,7 +112,7 @@ public class SesameEngine extends AbstractSesameEngine {
 		Repository repo = null;
 		try {
 			repo = getRawRepository( insightsloc );
-			repo.initialize();
+			repo.init();
 			im = InsightManagerImpl.createFromRepository( repo );
 		}
 		catch ( RepositoryException re ) {
@@ -148,7 +148,7 @@ public class SesameEngine extends AbstractSesameEngine {
 		RepositoryConnection rc = null;
 		try {
 			repo = getRawRepository( insightsloc );
-			repo.initialize();
+			repo.init();
 			rc = repo.getConnection();
 			rc.begin();
 			rc.clear();

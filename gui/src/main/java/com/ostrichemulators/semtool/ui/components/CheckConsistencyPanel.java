@@ -22,7 +22,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import org.apache.log4j.Logger;
-import org.apache.lucene.search.spell.LevensteinDistance;
+import org.apache.lucene.search.spell.LevenshteinDistance;
 import org.apache.lucene.search.spell.StringDistance;
 import org.eclipse.rdf4j.model.IRI;
 
@@ -47,7 +47,7 @@ public final class CheckConsistencyPanel extends javax.swing.JPanel {
 		algorithm.setRenderer( arend );
 
 		Map<StringDistance, String> dists = new LinkedHashMap<>();
-		dists.put( new LevensteinDistance(), "Levenstein" );
+		dists.put( new LevenshteinDistance(), "Levenstein" );
 		dists.put( new DoubleMetaphoneDistance(), "Double Metaphone" );
 		dists.put( new MetaphoneDistance(), "Metaphone" );
 		dists.put( new SoundexDistance(), "Soundex" );

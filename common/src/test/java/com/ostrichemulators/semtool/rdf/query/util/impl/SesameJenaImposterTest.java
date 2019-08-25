@@ -13,8 +13,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.eclipse.rdf4j.model.impl.LiteralImpl;
-import org.eclipse.rdf4j.model.impl.StatementImpl;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
@@ -34,7 +32,7 @@ public class SesameJenaImposterTest {
 		eng = InMemorySesameEngine.open();
 		RepositoryConnection rc = eng.getRawConnection();
 		rc.begin();
-		rc.add( new StatementImpl( RDFS.DOMAIN, RDFS.LABEL, new LiteralImpl( "test" ) ) );
+		rc.add( rc.getValueFactory().createStatement( RDFS.DOMAIN, RDFS.LABEL, rc.getValueFactory().createLiteral( "test" ) ) );
 		rc.commit();
 	}
 

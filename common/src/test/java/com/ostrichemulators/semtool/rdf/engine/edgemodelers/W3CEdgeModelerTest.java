@@ -15,7 +15,6 @@ import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil2;
 import com.ostrichemulators.semtool.rdf.engine.util.QaChecker;
 import com.ostrichemulators.semtool.util.DeterministicSanitizer;
 import com.ostrichemulators.semtool.util.UriBuilder;
-import info.aduna.iteration.Iterations;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -29,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -43,12 +43,12 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.model.impl.URIImpl;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
@@ -65,7 +65,7 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 public class W3CEdgeModelerTest {
 
 	private static final Logger log = Logger.getLogger( W3CEdgeModelerTest.class );
-	private static final ValueFactory vf = new ValueFactoryImpl();
+	private static final ValueFactory vf = SimpleValueFactory.getInstance();
 	private static final Date now;
 	private static final String SCHEMA = "http://semoss.org/ontologies/";
 	private static final String DATA = "http://va.gov/ontologies/";
@@ -110,7 +110,7 @@ public class W3CEdgeModelerTest {
 		engine.getRawConnection().setNamespace( XMLSchema.PREFIX, XMLSchema.NAMESPACE );
 
 		loader = new EngineLoader();
-		loader.setDefaultBaseUri( new URIImpl( "http://sales.data/purchases/2015" ),
+		loader.setDefaultBaseUri( vf.createIRI( "http://sales.data/purchases/2015" ),
 				false );
 
 		qaer = new QaChecker();
@@ -138,11 +138,11 @@ public class W3CEdgeModelerTest {
 		RepositoryConnection expectedrc = null;
 		List<Statement> stmts = new ArrayList<>();
 		try {
-			repo.initialize();
+			repo.init();
 			expectedrc = repo.getConnection();
 			expectedrc.add( rdf, null, RDFFormat.TURTLE );
-			stmts.addAll( Iterations.asList( expectedrc.getStatements( null, null,
-					null, true ) ) );
+			stmts.addAll( QueryResults.stream( expectedrc.getStatements( null, null,
+					null, true ) ).collect( Collectors.toList() ) );
 		}
 		catch ( RepositoryException | IOException | RDFParseException e ) {
 		}
@@ -187,8 +187,8 @@ public class W3CEdgeModelerTest {
 		}
 
 		Model model = getExpectedGraph( expected );
-		List<Statement> stmts = Iterations.asList( engine.getRawConnection()
-				.getStatements( null, null, null, false ) );
+		List<Statement> stmts = QueryResults.stream( engine.getRawConnection().getStatements( null, null,
+					null, true ) ).collect( Collectors.toList() );
 
 		assertEquals( model.size(), stmts.size() );
 

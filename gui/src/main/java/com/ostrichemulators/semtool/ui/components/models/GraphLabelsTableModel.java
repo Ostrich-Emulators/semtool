@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.Set;
 import javax.swing.table.AbstractTableModel;
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  *
@@ -33,7 +33,7 @@ public class GraphLabelsTableModel<V extends GraphElement> extends AbstractTable
 
 	private static final Logger log = Logger.getLogger( GraphLabelsTableModel.class );
 	private static final PropComparator PROPCOMP = new PropComparator();
-	private static final Class<?>[] ROWCLASSES = { URI.class, URI.class, Boolean.class,
+	private static final Class<?>[] ROWCLASSES = { IRI.class, IRI.class, Boolean.class,
 		Boolean.class, String.class };
 	private final List<ControlDataRow> data = new ArrayList<>();
 	private final String[] columnNames;
@@ -49,19 +49,19 @@ public class GraphLabelsTableModel<V extends GraphElement> extends AbstractTable
 		data.clear();
 		viz = vizzy;
 
-		MultiMap<URI, URI> propmap = new MultiMap<>(); // type -> possible properties
+		MultiMap<IRI, IRI> propmap = new MultiMap<>(); // type -> possible properties
 		for ( V v : instances ) {
-			Set<URI> keys = v.getPropertyKeys();
+			Set<IRI> keys = v.getPropertyKeys();
 			if ( propmap.containsKey( v.getType() ) ) {
 				keys.addAll( propmap.get( v.getType() ) );
 			}
 			propmap.put( v.getType(), new ArrayList<>( keys ) );
 		}
 
-		for ( Map.Entry<URI, List<URI>> en : propmap.entrySet() ) {
+		for ( Map.Entry<IRI, List<IRI>> en : propmap.entrySet() ) {
 			data.add( new ControlDataRow( en.getKey(), Constants.ANYNODE ) );
 
-			for ( URI prop : en.getValue() ) {
+			for ( IRI prop : en.getValue() ) {
 				ControlDataRow row = new ControlDataRow( en.getKey(), prop );
 				data.add( row );
 			}
@@ -132,7 +132,7 @@ public class GraphLabelsTableModel<V extends GraphElement> extends AbstractTable
 			case 2:
 			case 3: {
 				LabelTransformer lt = ( 2 == column ? texter : tooltipper );
-				List<URI> props = lt.getDisplayableProperties( cdr.type );
+				List<IRI> props = lt.getDisplayableProperties( cdr.type );
 				if ( cdr.isHeader() ) {
 					return ( this.getInstanceRows( cdr.type ).size() == props.size() );
 				}
@@ -145,7 +145,7 @@ public class GraphLabelsTableModel<V extends GraphElement> extends AbstractTable
 		}
 	}
 
-	private List<ControlDataRow> getInstanceRows( URI type ) {
+	private List<ControlDataRow> getInstanceRows( IRI type ) {
 		List<ControlDataRow> rows = new ArrayList<>();
 		for ( ControlDataRow cdr : data ) {
 			if ( cdr.type.equals( type ) && !cdr.isHeader() ) {
@@ -195,7 +195,7 @@ public class GraphLabelsTableModel<V extends GraphElement> extends AbstractTable
 		LabelTransformer<V> transformer = ( 2 == column ? texter : tooltipper );
 
 		if ( cdr.isHeader() ) {
-			Set<URI> tochange = new HashSet<>();
+			Set<IRI> tochange = new HashSet<>();
 			for ( ControlDataRow inst : getInstanceRows( cdr.type ) ) {
 				tochange.add( inst.prop );
 			}
@@ -217,11 +217,11 @@ public class GraphLabelsTableModel<V extends GraphElement> extends AbstractTable
 
 	public static class ControlDataRow implements Comparable<ControlDataRow> {
 
-		URI type;
-		URI prop;
+		IRI type;
+		IRI prop;
 		String other;
 
-		public ControlDataRow( URI type, URI prop ) {
+		public ControlDataRow( IRI type, IRI prop ) {
 			this.type = type;
 			this.prop = prop;
 		}

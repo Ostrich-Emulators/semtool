@@ -14,8 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.impl.LiteralImpl;
-import org.eclipse.rdf4j.model.impl.StatementImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 /**
@@ -49,8 +48,8 @@ public class StatementAddingExecutorTest {
 		StatementAddingExecutor sae = new StatementAddingExecutor();
 
 		Model before = eng.toModel();
-		sae.addStatement( new StatementImpl( RDFS.DOMAIN, RDFS.LABEL,
-				new LiteralImpl( "label" ) ) );
+		sae.addStatement( SimpleValueFactory.getInstance().createStatement( RDFS.DOMAIN, RDFS.LABEL,
+				SimpleValueFactory.getInstance().createLiteral( "label" ) ) );
 		eng.execute( sae );
 		Model after = eng.toModel();
 		eng.closeDB();
@@ -61,8 +60,8 @@ public class StatementAddingExecutorTest {
 	public void testExec2() throws Exception {
 		InMemorySesameEngine eng = InMemorySesameEngine.open();
 		StatementAddingExecutor sae = new StatementAddingExecutor(
-				Arrays.asList( new StatementImpl( RDFS.DOMAIN, RDFS.LABEL,
-								new LiteralImpl( "label" ) ) ), true );
+				Arrays.asList( SimpleValueFactory.getInstance().createStatement( RDFS.DOMAIN, RDFS.LABEL,
+						SimpleValueFactory.getInstance().createLiteral( "label" ) ) ), true );
 
 		Model before = eng.toModel();
 		eng.execute( sae );
@@ -75,10 +74,10 @@ public class StatementAddingExecutorTest {
 	public void testExec3() throws Exception {
 		InMemorySesameEngine eng = InMemorySesameEngine.open();
 		StatementAddingExecutor sae = new StatementAddingExecutor(
-				Arrays.asList( new StatementImpl( RDFS.DOMAIN, RDFS.LABEL,
-								new LiteralImpl( "label" ) ) ), true );
-		sae.resetStatements( new StatementImpl( RDFS.DOMAIN, RDFS.LABEL,
-				new LiteralImpl( "tester" ) ) );
+				Arrays.asList( SimpleValueFactory.getInstance().createStatement( RDFS.DOMAIN, RDFS.LABEL,
+				SimpleValueFactory.getInstance().createLiteral( "label" ) ) ), true );
+		sae.resetStatements( SimpleValueFactory.getInstance().createStatement( RDFS.DOMAIN, RDFS.LABEL,
+				SimpleValueFactory.getInstance().createLiteral( "tester" ) ) );
 
 		Model before = eng.toModel();
 		eng.execute( sae );
@@ -86,8 +85,8 @@ public class StatementAddingExecutorTest {
 		eng.closeDB();
 		assertTrue( ( before.size() + 1 ) == after.size() );
 
-		assertTrue( after.contains( RDFS.DOMAIN, RDFS.LABEL, new LiteralImpl( "tester" ) ) );
-		assertFalse( after.contains( RDFS.DOMAIN, RDFS.LABEL, new LiteralImpl( "label" ) ) );
+		assertTrue( after.contains( RDFS.DOMAIN, RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "tester" ) ) );
+		assertFalse( after.contains( RDFS.DOMAIN, RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "label" ) ) );
 	}
 
 }

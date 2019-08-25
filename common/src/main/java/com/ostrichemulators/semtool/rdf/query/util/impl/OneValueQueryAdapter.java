@@ -7,8 +7,8 @@ package com.ostrichemulators.semtool.rdf.query.util.impl;
 
 import com.ostrichemulators.semtool.rdf.query.util.QueryExecutorAdapter;
 import java.util.List;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.query.BindingSet;
@@ -57,17 +57,17 @@ public abstract class OneValueQueryAdapter<T> extends QueryExecutorAdapter<T> {
 
 	protected abstract T getValue( Value val, ValueFactory fac );
 
-	public static OneValueQueryAdapter<URI> getUri( String sparql, String var ) {
-		return new OneValueQueryAdapter<URI>( sparql, var ) {
+	public static OneValueQueryAdapter<IRI> getUri( String sparql, String var ) {
+		return new OneValueQueryAdapter<IRI>( sparql, var ) {
 
 			@Override
-			protected URI getValue( Value value, ValueFactory fac ) {
-				return URI.class.cast( value );
+			protected IRI getValue( Value value, ValueFactory fac ) {
+				return IRI.class.cast( value );
 			}
 		};
 	}
 
-	public static OneValueQueryAdapter<URI> getUri( String sparql ) {
+	public static OneValueQueryAdapter<IRI> getUri( String sparql ) {
 		return getUri( sparql, null );
 	}
 

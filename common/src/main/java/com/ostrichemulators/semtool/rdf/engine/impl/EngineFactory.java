@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.impl;
 
-import com.bigdata.rdf.sail.BigdataSail;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineManagementException.ErrorCode;
@@ -13,6 +12,7 @@ import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.Utility;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,7 +69,6 @@ public class EngineFactory {
 
 		if ( null == klass ) {
 			Map<String, Class<? extends IEngine>> heuristicKeys = new HashMap<>();
-			heuristicKeys.put( BigdataSail.Options.FILE, BigDataEngine.class );
 			heuristicKeys.put( InMemorySesameEngine.MEMSTORE_DIR, InMemorySesameEngine.class );
 			heuristicKeys.put( AbstractSesameEngine.REMOTE_KEY, SesameEngine.class );
 
@@ -87,10 +86,10 @@ public class EngineFactory {
 		}
 		else {
 			try {
-				engine = klass.newInstance();
+				engine = klass.getConstructor().newInstance();
 				engine.openDB( props );
 			}
-			catch ( InstantiationException | IllegalAccessException e ) {
+			catch ( IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException e ) {
 				throw new EngineManagementException( ErrorCode.UNKNOWN,
 						"Unable to determine engine type", e );
 			}
@@ -120,8 +119,7 @@ public class EngineFactory {
 				engine = getEngine( Utility.loadProp( file ) );
 			}
 			else if ( FilenameUtils.isExtension( name, "jnl" ) ) {
-				engine = new BigDataEngine();
-				props = BigDataEngine.generateProperties( file );
+				throw new IllegalArgumentException( "BigData/Blazegraph is no longer supported" );
 			}
 			else if ( name.isEmpty() ) {
 				engine = new InMemorySesameEngine();

@@ -5,11 +5,9 @@
  */
 package com.ostrichemulators.semtool.poi.main;
 
-import com.ostrichemulators.semtool.poi.main.GraphMLWriter;
-import com.ostrichemulators.semtool.poi.main.ImportData;
-import com.ostrichemulators.semtool.poi.main.LoadingSheetData;
 import java.io.File;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -22,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  *
@@ -54,7 +52,7 @@ public class GraphMLWriterTest {
 		data.add( rels );
 		data.add( nodes );
 
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		Map<String, Value> props = new HashMap<>();
 		props.put( "Price", vf.createLiteral( "3000 USD" ) );
 		props.put( "Date", vf.createLiteral( now ) );
@@ -74,11 +72,11 @@ public class GraphMLWriterTest {
 		if ( log.isTraceEnabled() ) {
 			File tmpdir = FileUtils.getTempDirectory();
 			File trace = new File( tmpdir, EXPECTED.getName() );
-			FileUtils.write( trace, strings.toString() );
+			FileUtils.write( trace, strings.toString(), Charset.defaultCharset() );
 		}
 
 //		log.fatal( strings.toString() );
 //		log.fatal(  FileUtils.readFileToString( EXPECTED ) );
-		assertEquals( FileUtils.readFileToString( EXPECTED ), strings.toString() );
+		assertEquals( FileUtils.readFileToString( EXPECTED, Charset.defaultCharset() ), strings.toString() );
 	}
 }

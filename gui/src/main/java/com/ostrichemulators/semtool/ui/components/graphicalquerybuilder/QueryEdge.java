@@ -5,7 +5,7 @@
  */
 package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  * An extension of SEMOSSVertex to allow multiple values for one property
@@ -14,11 +14,11 @@ import org.eclipse.rdf4j.model.URI;
  */
 public class QueryEdge extends AbstractQueryGraphElement implements QueryGraphElement {
 
-	public QueryEdge( URI id ) {
+	public QueryEdge( IRI id ) {
 		super( id );
 	}
 
-	public QueryEdge( URI id, URI type, String label ) {
+	public QueryEdge( IRI id, IRI type, String label ) {
 		super( id, type, label );
 	}
 

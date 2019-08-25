@@ -18,7 +18,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
@@ -125,7 +125,7 @@ public class LoadingSheetDataTest {
 		lsd.addProperty( "xx" );
 		lsd.addProperty( "yy" );
 		Map<String, Value> props = new HashMap<>();
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		props.put( "xx", vf.createLiteral( "testval" ) );
 		LoadingNodeAndPropertyValues naps = lsd.add( "instance", props );
 
@@ -141,7 +141,7 @@ public class LoadingSheetDataTest {
 		LoadingSheetData lsd = LoadingSheetData.relsheet( "tabname", "sbj", "obj", "relname" );
 		lsd.addProperty( "xx" );
 		Map<String, Value> props = new HashMap<>();
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		props.put( "xx", vf.createLiteral( "testval" ) );
 		LoadingNodeAndPropertyValues naps = lsd.add( "instance", "object", props );
 
@@ -157,7 +157,7 @@ public class LoadingSheetDataTest {
 		LoadingSheetData lsd = LoadingSheetData.nodesheet( "sbj" );
 		lsd.addProperty( "xx:label" );
 		Map<String, Value> props = new HashMap<>();
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		props.put( "xx:label", vf.createLiteral( "my label" ) );
 		LoadingNodeAndPropertyValues nap = lsd.add( "instance", "object", props );
 
@@ -171,7 +171,7 @@ public class LoadingSheetDataTest {
 		LoadingSheetData lsd = LoadingSheetData.nodesheet( "sbj" );
 		lsd.addProperties( Arrays.asList( "xx:label", "yy", "yy:junk" ) );
 		Map<String, Value> props = new HashMap<>();
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		props.put( "xx:label", vf.createLiteral( "my label" ) );
 		props.put( "yy", vf.createLiteral( "my y val" ) );
 		props.put( "yy:junk", vf.createLiteral( "my junk val" ) );

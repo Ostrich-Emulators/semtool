@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * A class to encapsulate relationship loading sheet information.
@@ -612,7 +612,7 @@ public class LoadingSheetData {
 		}
 
 		public boolean hasProperty( IRI needle, Map<String, String> namespaces ) {
-			ValueFactory vf = new ValueFactoryImpl();
+			ValueFactory vf = SimpleValueFactory.getInstance();
 			for ( String head : keySet() ) {
 				if ( head.contains( ":" ) ) {
 					int idx = head.indexOf( ":" );

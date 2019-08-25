@@ -24,9 +24,9 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.eclipse.rdf4j.model.URI;
-import org.eclipse.rdf4j.model.impl.LiteralImpl;
-import org.eclipse.rdf4j.model.impl.URIImpl;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -39,9 +39,11 @@ import org.eclipse.rdf4j.rio.RDFFormat;
  */
 public class QaCheckerTest {
 
-	private static final URI BASEURI = new URIImpl( "http://junk.com/testfiles" );
-	private static final URI OWLSTART = new URIImpl( "http://owl.junk.com/testfiles/" );
-	private static final URI DATAURI = new URIImpl( "http://seman.tc/data/northwind/" );
+	private static final ValueFactory VF = SimpleValueFactory.getInstance();
+
+	private static final IRI BASEURI = VF.createIRI( "http://junk.com/testfiles" );
+	private static final IRI OWLSTART = VF.createIRI( "http://owl.junk.com/testfiles/" );
+	private static final IRI DATAURI = VF.createIRI( "http://seman.tc/data/northwind/" );
 	private static final UriBuilder OWLB = UriBuilder.getBuilder( OWLSTART );
 	private static final UriBuilder DATAB = UriBuilder.getBuilder( DATAURI );
 
@@ -78,7 +80,7 @@ public class QaCheckerTest {
 	public void testInstanceExists() {
 		String type = "test";
 		String label = "label";
-		Map<String, URI> types = new HashMap<>();
+		Map<String, IRI> types = new HashMap<>();
 		types.put( label, BASEURI );
 		el.cacheConceptInstances( types, type );
 		assertTrue( el.instanceExists( type, label ) );
@@ -97,63 +99,63 @@ public class QaCheckerTest {
 		RepositoryConnection rc = engine.getRawConnection();
 		rc.begin();
 
-		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Category/Beverages" ),
-				new URIImpl( "http://owl.junk.com/testfiles/Description" ),
-				new LiteralImpl( "Soft drinks, coffees, teas, beers, and ales" ) );
-		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Category/Beverages" ),
-				RDF.TYPE, new URIImpl( "http://owl.junk.com/testfiles/Category" ) );
+		rc.add( VF.createIRI( "http://junk.com/testfiles/Concept/Category/Beverages" ),
+				VF.createIRI( "http://owl.junk.com/testfiles/Description" ),
+				SimpleValueFactory.getInstance().createLiteral( "Soft drinks, coffees, teas, beers, and ales" ) );
+		rc.add( VF.createIRI( "http://junk.com/testfiles/Concept/Category/Beverages" ),
+				RDF.TYPE, VF.createIRI( "http://owl.junk.com/testfiles/Category" ) );
 
-		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Category/Beverages" ),
-				RDFS.LABEL, new LiteralImpl( "Beverages" ) );
-		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Product/Chai" ),
-				new URIImpl( "http://junk.com/testfiles/Relation/Category/Chai_x_Beverages" ),
-				new URIImpl( "http://junk.com/testfiles/Concept/Category/Beverages" ) );
-		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Product/Chai" ),
-				RDF.TYPE, new URIImpl( "http://owl.junk.com/testfiles/Product" ) );
-		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Product/Chai" ),
-				RDFS.LABEL, new LiteralImpl( "Chai" ) );
-		rc.add( new URIImpl( "http://junk.com/testfiles/Concept/Product/Chang" ),
-				new URIImpl( "http://junk.com/testfiles/Relation/Category/Chang_x_Beverages" ),
-				new URIImpl( "http://junk.com/testfiles/Concept/Category/Beverages" ) );
+		rc.add( VF.createIRI( "http://junk.com/testfiles/Concept/Category/Beverages" ),
+				RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "Beverages" ) );
+		rc.add( VF.createIRI( "http://junk.com/testfiles/Concept/Product/Chai" ),
+				VF.createIRI( "http://junk.com/testfiles/Relation/Category/Chai_x_Beverages" ),
+				VF.createIRI( "http://junk.com/testfiles/Concept/Category/Beverages" ) );
+		rc.add( VF.createIRI( "http://junk.com/testfiles/Concept/Product/Chai" ),
+				RDF.TYPE, VF.createIRI( "http://owl.junk.com/testfiles/Product" ) );
+		rc.add( VF.createIRI( "http://junk.com/testfiles/Concept/Product/Chai" ),
+				RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "Chai" ) );
+		rc.add( VF.createIRI( "http://junk.com/testfiles/Concept/Product/Chang" ),
+				VF.createIRI( "http://junk.com/testfiles/Relation/Category/Chang_x_Beverages" ),
+				VF.createIRI( "http://junk.com/testfiles/Concept/Category/Beverages" ) );
 
-		rc.add( new URIImpl( "http://junk.com/testfiles/Relation/Category/Chai_x_Beverages" ),
-				new URIImpl( "http://owl.junk.com/testfiles/extraprop" ),
-				new LiteralImpl( "1.0", new URIImpl( "http://www.w3.org/2001/XMLSchema#double" ) ) );
-		rc.add( new URIImpl( "http://junk.com/testfiles/Relation/Category/Chai_x_Beverages" ),
-				RDFS.LABEL, new LiteralImpl( "Chai Category Beverages" ) );
-		rc.add( new URIImpl( "http://junk.com/testfiles/Relation/Category/Chai_x_Beverages" ),
-				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation/Category" ) );
+		rc.add( VF.createIRI( "http://junk.com/testfiles/Relation/Category/Chai_x_Beverages" ),
+				VF.createIRI( "http://owl.junk.com/testfiles/extraprop" ),
+				SimpleValueFactory.getInstance().createLiteral( "1.0", VF.createIRI( "http://www.w3.org/2001/XMLSchema#double" ) ) );
+		rc.add( VF.createIRI( "http://junk.com/testfiles/Relation/Category/Chai_x_Beverages" ),
+				RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "Chai Category Beverages" ) );
+		rc.add( VF.createIRI( "http://junk.com/testfiles/Relation/Category/Chai_x_Beverages" ),
+				RDFS.SUBPROPERTYOF, VF.createIRI( "http://owl.junk.com/testfiles/Relation/Category" ) );
 
-		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Relation/Category" ),
+		rc.add( VF.createIRI( "http://owl.junk.com/testfiles/Relation/Category" ),
 				RDF.TYPE, OWL.OBJECTPROPERTY );
-		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Relation/Category" ),
-				RDFS.LABEL, new LiteralImpl( "Category" ) );
-		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Relation/Category" ),
-				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation" ) );
+		rc.add( VF.createIRI( "http://owl.junk.com/testfiles/Relation/Category" ),
+				RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "Category" ) );
+		rc.add( VF.createIRI( "http://owl.junk.com/testfiles/Relation/Category" ),
+				RDFS.SUBPROPERTYOF, VF.createIRI( "http://owl.junk.com/testfiles/Relation" ) );
 
-		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Description" ),
-				RDFS.LABEL, new LiteralImpl( "Description" ) );
-		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Description" ),
-				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation" ) );
-		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Description" ),
-				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation/Contains" ) );
+		rc.add( VF.createIRI( "http://owl.junk.com/testfiles/Description" ),
+				RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "Description" ) );
+		rc.add( VF.createIRI( "http://owl.junk.com/testfiles/Description" ),
+				RDFS.SUBPROPERTYOF, VF.createIRI( "http://owl.junk.com/testfiles/Relation" ) );
+		rc.add( VF.createIRI( "http://owl.junk.com/testfiles/Description" ),
+				RDFS.SUBPROPERTYOF, VF.createIRI( "http://owl.junk.com/testfiles/Relation/Contains" ) );
 
-		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Relation/Category" ),
+		rc.add( VF.createIRI( "http://owl.junk.com/testfiles/Relation/Category" ),
 				RDF.TYPE, OWL.OBJECTPROPERTY );
-		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Relation/Category" ),
-				RDFS.LABEL, new LiteralImpl( "Category" ) );
-		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Relation/Category" ),
-				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation" ) );
+		rc.add( VF.createIRI( "http://owl.junk.com/testfiles/Relation/Category" ),
+				RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "Category" ) );
+		rc.add( VF.createIRI( "http://owl.junk.com/testfiles/Relation/Category" ),
+				RDFS.SUBPROPERTYOF, VF.createIRI( "http://owl.junk.com/testfiles/Relation" ) );
 
-		rc.add( new URIImpl( "http://schema.org/xyz" ),
-				RDFS.LABEL, new LiteralImpl( "508 Compliant?" ) );
-		rc.add( new URIImpl( "http://schema.org/xyz" ),
-				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation" ) );
-		rc.add( new URIImpl( "http://schema.org/xyz" ),
-				RDFS.SUBPROPERTYOF, new URIImpl( "http://owl.junk.com/testfiles/Relation/Contains" ) );
+		rc.add( VF.createIRI( "http://schema.org/xyz" ),
+				RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "508 Compliant?" ) );
+		rc.add( VF.createIRI( "http://schema.org/xyz" ),
+				RDFS.SUBPROPERTYOF, VF.createIRI( "http://owl.junk.com/testfiles/Relation" ) );
+		rc.add( VF.createIRI( "http://schema.org/xyz" ),
+				RDFS.SUBPROPERTYOF, VF.createIRI( "http://owl.junk.com/testfiles/Relation/Contains" ) );
 
-		rc.add( new URIImpl( "http://owl.junk.com/testfiles/Relation" ),
-				RDF.TYPE, new URIImpl( "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property" ) );
+		rc.add( VF.createIRI( "http://owl.junk.com/testfiles/Relation" ),
+				RDF.TYPE, VF.createIRI( "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property" ) );
 
 		rc.commit();
 
@@ -174,45 +176,45 @@ public class QaCheckerTest {
 		rc.setNamespace( "schema", OWLB.toString() );
 		rc.setNamespace( "data", DATAURI.stringValue() );
 
-		final URI DESC = OWLB.build( "Description" );
+		final IRI DESC = OWLB.build( "Description" );
 		rc.add( DESC, RDF.TYPE, OWL.DATATYPEPROPERTY );
-		rc.add( DESC, RDFS.LABEL, new LiteralImpl( "508 Compliance" ) );
+		rc.add( DESC, RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "508 Compliance" ) );
 
-		final URI RELDESC = OWLB.build( "RelDesc" );
+		final IRI RELDESC = OWLB.build( "RelDesc" );
 		rc.add( RELDESC, RDF.TYPE, OWL.DATATYPEPROPERTY );
-		rc.add( RELDESC, RDFS.LABEL, new LiteralImpl( "Zippalee!" ) );
+		rc.add( RELDESC, RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "Zippalee!" ) );
 
-		final URI conceptclass = OWLB.build( "myconceptclass1" );
+		final IRI conceptclass = OWLB.build( "myconceptclass1" );
 		rc.add( conceptclass, RDF.TYPE, RDFS.CLASS );
 		rc.add( conceptclass, RDFS.SUBCLASSOF, OWLB.getConceptIri().build() );
-		rc.add( conceptclass, RDFS.LABEL, new LiteralImpl( "My Concept Class 1" ) );
+		rc.add( conceptclass, RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "My Concept Class 1" ) );
 
-		final URI conceptclass2 = OWLB.build( "myconceptclass2" );
+		final IRI conceptclass2 = OWLB.build( "myconceptclass2" );
 		rc.add( conceptclass2, RDF.TYPE, RDFS.CLASS );
 		rc.add( conceptclass2, RDFS.SUBCLASSOF, OWLB.getConceptIri().build() );
-		rc.add( conceptclass2, RDFS.LABEL, new LiteralImpl( "My Concept Class 2" ) );
+		rc.add( conceptclass2, RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "My Concept Class 2" ) );
 
-		final URI concept = DATAB.build( "myconcept1" );
+		final IRI concept = DATAB.build( "myconcept1" );
 		rc.add( concept, RDF.TYPE, RDFS.CLASS );
 		rc.add( concept, RDFS.SUBCLASSOF, conceptclass );
-		rc.add( concept, RDFS.LABEL, new LiteralImpl( "My Concept" ) );
-		rc.add( concept, DESC, new LiteralImpl( "508 Compliant?" ) );
+		rc.add( concept, RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "My Concept" ) );
+		rc.add( concept, DESC, SimpleValueFactory.getInstance().createLiteral( "508 Compliant?" ) );
 
-		final URI concept2 = DATAB.build( "myconcept2" );
+		final IRI concept2 = DATAB.build( "myconcept2" );
 		rc.add( concept2, RDF.TYPE, RDFS.CLASS );
 		rc.add( concept2, RDFS.SUBCLASSOF, conceptclass2 );
-		rc.add( concept2, RDFS.LABEL, new LiteralImpl( "My Other Concept" ) );
-		rc.add( concept2, DESC, new LiteralImpl( "feliz cumpleaños" ) );
+		rc.add( concept2, RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "My Other Concept" ) );
+		rc.add( concept2, DESC, SimpleValueFactory.getInstance().createLiteral( "feliz cumpleaños" ) );
 
-		final URI relclass = OWLB.build( "relationclass" );
+		final IRI relclass = OWLB.build( "relationclass" );
 		rc.add( relclass, RDF.TYPE, OWL.OBJECTPROPERTY );
 		rc.add( relclass, RDFS.SUBPROPERTYOF, OWLB.getRelationIri().build() );
-		rc.add( relclass, RDFS.LABEL, new LiteralImpl( "A Relation Class" ) );
+		rc.add( relclass, RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "A Relation Class" ) );
 
-		final URI rel = DATAB.build( "myrel" );
+		final IRI rel = DATAB.build( "myrel" );
 		rc.add( rel, RDFS.SUBPROPERTYOF, relclass );
-		rc.add( rel, RDFS.LABEL, new LiteralImpl( "My Relation" ) );
-		rc.add( rel, RELDESC, new LiteralImpl( "A Relation Prop" ) );
+		rc.add( rel, RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "My Relation" ) );
+		rc.add( rel, RELDESC, SimpleValueFactory.getInstance().createLiteral( "A Relation Prop" ) );
 		rc.add( concept, rel, concept2 );
 
 		rc.commit();
@@ -288,7 +290,7 @@ public class QaCheckerTest {
 
 	@Test
 	public void testClear() {
-		Map<String, URI> types = new HashMap<>();
+		Map<String, IRI> types = new HashMap<>();
 		types.put( "rawlabel", BASEURI );
 		el.cacheConceptInstances( types, "testType" );
 		el.clear();

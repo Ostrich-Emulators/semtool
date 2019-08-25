@@ -11,7 +11,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
@@ -21,6 +20,7 @@ import com.ostrichemulators.semtool.rdf.query.util.MetadataQuery;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil.DbCloneMetadata;
 import java.util.prefs.Preferences;
 import javax.swing.JOptionPane;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  *
@@ -53,7 +53,6 @@ public class CloneDataPanel extends javax.swing.JPanel {
   private void initComponents() {
 
     jLabel1 = new javax.swing.JLabel();
-    dbdir = new com.ostrichemulators.semtool.ui.components.FileBrowsePanel();
     jLabel2 = new javax.swing.JLabel();
     dbname = new javax.swing.JTextField();
     jLabel3 = new javax.swing.JLabel();
@@ -88,22 +87,19 @@ public class CloneDataPanel extends javax.swing.JPanel {
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
               .addComponent(dbname)
-              .addComponent(title)
-              .addComponent(dbdir, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)))
+              .addComponent(title)))
           .addGroup(layout.createSequentialGroup()
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
               .addComponent(insights)
               .addComponent(data))
-            .addGap(0, 0, Short.MAX_VALUE)))
+            .addGap(0, 294, Short.MAX_VALUE)))
         .addContainerGap())
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-          .addComponent(dbdir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-          .addComponent(jLabel1))
+        .addComponent(jLabel1)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
           .addComponent(jLabel2)
@@ -123,7 +119,6 @@ public class CloneDataPanel extends javax.swing.JPanel {
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JCheckBox data;
-  private com.ostrichemulators.semtool.ui.components.FileBrowsePanel dbdir;
   private javax.swing.JTextField dbname;
   private javax.swing.JCheckBox insights;
   private javax.swing.JLabel jLabel1;
@@ -138,7 +133,7 @@ public class CloneDataPanel extends javax.swing.JPanel {
 		cdp.insights.setSelected( doinsights );
 		cdp.data.setSelected( dodata );
 
-		Map<URI, String> metas = null;
+		Map<IRI, String> metas = null;
 		try {
 			MetadataQuery mq = new MetadataQuery();
 			engine.query( mq );

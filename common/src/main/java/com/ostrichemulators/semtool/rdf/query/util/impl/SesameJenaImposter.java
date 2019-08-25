@@ -7,8 +7,8 @@ package com.ostrichemulators.semtool.rdf.query.util.impl;
 
 
 import com.ostrichemulators.semtool.util.RDFDatatypeTools;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.query.BindingSet;
@@ -42,7 +42,7 @@ public class SesameJenaImposter extends ListQueryAdapter<Object[]> {
 	}
 
 	private static Object convertToBaseObject( Value v ) {
-		if ( null == v || v instanceof URI ) {
+		if ( null == v || v instanceof IRI ) {
 			return v;
 		}
 

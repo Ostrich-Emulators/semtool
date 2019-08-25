@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.URI;
 
 /**
@@ -30,7 +31,7 @@ import org.eclipse.rdf4j.model.URI;
 public class GraphAnimationPanel extends javax.swing.JPanel {
 
 	private final LabeledPairRenderer renderer;
-	private final MultiSetMap<URI, URI> elements = new MultiSetMap<>();
+	private final MultiSetMap<IRI, IRI> elements = new MultiSetMap<>();
 
 	/**
 	 * Creates new form GraphAnimationInput
@@ -40,9 +41,9 @@ public class GraphAnimationPanel extends javax.swing.JPanel {
 	 * @param modelvals
 	 */
 	public GraphAnimationPanel( RetrievingLabelCache rlc, IEngine engine,
-			MultiMap<URI, URI> modelvals ) {
+			MultiMap<IRI, IRI> modelvals ) {
 
-		for ( Map.Entry<URI, List<URI>> en : modelvals.entrySet() ) {
+		for ( Map.Entry<IRI, List<IRI>> en : modelvals.entrySet() ) {
 			elements.addAll( en.getKey(), en.getValue() );
 		}
 
@@ -52,10 +53,10 @@ public class GraphAnimationPanel extends javax.swing.JPanel {
 		edgetype.setRenderer( renderer );
 		predicate.setRenderer( renderer );
 
-		Map<URI, String> labels = Utility.getInstanceLabels( modelvals.keySet(), engine );
-		labels = Utility.sortUrisByLabel( labels );
+		Map<IRI, String> labels = Utility.getInstanceLabels( modelvals.keySet(), engine );
+		labels = Utility.sortIrisByLabel( labels );
 
-		for ( URI u : labels.keySet() ) {
+		for ( IRI u : labels.keySet() ) {
 			edgetype.addItem( u );
 		}
 
@@ -67,8 +68,8 @@ public class GraphAnimationPanel extends javax.swing.JPanel {
 	 *
 	 * @return
 	 */
-	public Map<URI, URI> getAnimationInputs() {
-		Map<URI, URI> map = new HashMap<>();
+	public Map<IRI, IRI> getAnimationInputs() {
+		Map<IRI, IRI> map = new HashMap<>();
 		map.put( edgetype.getItemAt( edgetype.getSelectedIndex() ),
 				predicate.getItemAt( predicate.getSelectedIndex() ) );
 		return map;
@@ -76,9 +77,9 @@ public class GraphAnimationPanel extends javax.swing.JPanel {
 
 	public static boolean hasAnimationCandidates( Collection<? extends GraphElement> gelements ) {
 
-		MultiMap<URI, URI> modelvals = new MultiMap<>();
+		MultiMap<IRI, IRI> modelvals = new MultiMap<>();
 		for ( GraphElement ge : gelements ) {
-			List<URI> countables = AbstractGraphElement.getCountablePropertyKeys( ge );
+			List<IRI> countables = AbstractGraphElement.getCountablePropertyKeys( ge );
 			if ( !countables.isEmpty() ) {
 				modelvals.addAll( ge.getType(), countables );
 			}
@@ -87,7 +88,7 @@ public class GraphAnimationPanel extends javax.swing.JPanel {
 		return !modelvals.isEmpty();
 	}
 
-	public static Map<URI, URI> getAnimationInput( Frame frame, RetrievingLabelCache rlc,
+	public static Map<IRI, IRI> getAnimationInput( Frame frame, RetrievingLabelCache rlc,
 			IEngine engine, Collection<? extends GraphElement> gelements ) {
 
 		if ( !hasAnimationCandidates( gelements ) ) {
@@ -96,9 +97,9 @@ public class GraphAnimationPanel extends javax.swing.JPanel {
 			return new HashMap<>();
 		}
 
-		MultiMap<URI, URI> modelvals = new MultiMap<>();
+		MultiMap<IRI, IRI> modelvals = new MultiMap<>();
 		for ( GraphElement ge : gelements ) {
-			List<URI> countables = AbstractGraphElement.getCountablePropertyKeys( ge );
+			List<IRI> countables = AbstractGraphElement.getCountablePropertyKeys( ge );
 			if ( !countables.isEmpty() ) {
 				modelvals.addAll( ge.getType(), countables );
 			}
@@ -122,8 +123,8 @@ public class GraphAnimationPanel extends javax.swing.JPanel {
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
-    predicate = new javax.swing.JComboBox<URI>();
-    edgetype = new javax.swing.JComboBox<URI>();
+    predicate = new javax.swing.JComboBox<>();
+    edgetype = new javax.swing.JComboBox<>();
     jLabel2 = new javax.swing.JLabel();
     jLabel3 = new javax.swing.JLabel();
 
@@ -170,20 +171,20 @@ public class GraphAnimationPanel extends javax.swing.JPanel {
   }// </editor-fold>//GEN-END:initComponents
 
   private void edgetypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_edgetypeActionPerformed
-		URI edger = edgetype.getItemAt( edgetype.getSelectedIndex() );
-		Set<URI> fields = elements.getNN( edger );
+		IRI edger = edgetype.getItemAt( edgetype.getSelectedIndex() );
+		Set<IRI> fields = elements.getNN( edger );
 
 		predicate.removeAllItems();
-		for ( URI u : fields ) {
+		for ( IRI u : fields ) {
 			predicate.addItem( u );
 		}
   }//GEN-LAST:event_edgetypeActionPerformed
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JComboBox<URI> edgetype;
+  private javax.swing.JComboBox<IRI> edgetype;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JLabel jLabel3;
-  private javax.swing.JComboBox<URI> predicate;
+  private javax.swing.JComboBox<IRI> predicate;
   // End of variables declaration//GEN-END:variables
 }

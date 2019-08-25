@@ -37,6 +37,7 @@ import java.util.Map;
 
 import javax.swing.table.AbstractTableModel;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.LiteralImpl;
@@ -105,7 +106,7 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel implements It
 	}
 
 	private void refresh( GraphElement item ) {
-		for ( Map.Entry<URI, Value> entry : item.getValues().entrySet() ) {
+		for ( Map.Entry<IRI, Value> entry : item.getValues().entrySet() ) {
 			if ( !RDF.SUBJECT.equals( entry.getKey() ) ) {
 				rows.add( new PropertyRow( entry.getKey(), entry.getValue() ) );
 			}
@@ -145,7 +146,7 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel implements It
 	public void setValueAt( Object val, int row, int column ) {
 		PropertyRow pRow = rows.get( row );
 		if ( 0 == column ) {
-			pRow.name = URI.class.cast( val );
+			pRow.name = IRI.class.cast( val );
 		}
 		else {
 			pRow.value = Value.class.cast( val );
@@ -229,18 +230,18 @@ public class NodeEdgePropertyTableModel extends AbstractTableModel implements It
 
 	protected class PropertyRow {
 
-		public URI name;
+		public IRI name;
 		public Value value;
 		public final boolean ro;
 
-		public PropertyRow( URI name, Value value, boolean readonly ) {
+		public PropertyRow( IRI name, Value value, boolean readonly ) {
 			this.name = name;
 			this.value = value;
 			this.ro = readonly;
 		}
 
-		public PropertyRow( URI name, Value value ) {
-			this( name, value, value instanceof URI );
+		public PropertyRow( IRI name, Value value ) {
+			this( name, value, value instanceof IRI );
 		}
 	}
 }

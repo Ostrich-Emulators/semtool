@@ -43,8 +43,7 @@ import org.supercsv.prefs.CsvPreference;
 import java.io.FileNotFoundException;
 import java.util.Properties;
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.impl.URIImpl;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * Loading data into SEMOSS using comma separated value (CSV) files
@@ -109,7 +108,7 @@ public class CSVReader implements ImportFileReader {
 	public ImportData readOneFile( File file ) throws IOException, ImportValidationException {
 		ImportData data = new ImportData();
 		ImportMetadata im = data.getMetadata();
-		im.setSourceOfData( new URIImpl( file.toURI().toString() ) );
+		im.setSourceOfData( SimpleValueFactory.getInstance().createIRI( file.toURI().toString() ) );
 		im.setLegacyMode( true );
 
 		try ( Reader rdr = new BufferedReader( new FileReader( file ) ) ) {
@@ -242,7 +241,7 @@ public class CSVReader implements ImportFileReader {
 		if ( null != rdfMap.getProperty( RELATION ) ) {
 			String relationNames = rdfMap.getProperty( RELATION );
 
-			ValueFactory vf = new ValueFactoryImpl();
+			ValueFactory vf = SimpleValueFactory.getInstance();
 
 			relationArrayList.clear();
 			for ( String relation : relationNames.split( ";" ) ) {
@@ -383,7 +382,7 @@ public class CSVReader implements ImportFileReader {
 	}
 
 	private Value createObject( String object, Map<String, String> jcrMap ) {
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 
 		// need to do the class vs. object magic
 		if ( object.contains( "+" ) ) {

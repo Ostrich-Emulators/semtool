@@ -12,8 +12,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Logger;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 
 /**
@@ -29,7 +29,7 @@ public final class RetrievingLabelCache extends HashMap<Value, String> {
 	private IEngine engine;
 	private boolean caching = true;
 	// if we use the localname to determine the label, recache when an engine is set
-	private final Set<URI> labelFromLocalName = new HashSet<>();
+	private final Set<IRI> labelFromLocalName = new HashSet<>();
 
 	public RetrievingLabelCache( IEngine eng, boolean docache ) {
 		engine = eng;
@@ -50,7 +50,7 @@ public final class RetrievingLabelCache extends HashMap<Value, String> {
 
 	public void setEngine( IEngine e ) {
 		engine = e;
-		for ( URI u : labelFromLocalName ) {
+		for ( IRI u : labelFromLocalName ) {
 			super.remove( u );
 		}
 		labelFromLocalName.clear();
@@ -101,8 +101,8 @@ public final class RetrievingLabelCache extends HashMap<Value, String> {
 		String label = null;
 
 		if ( !super.containsKey( val ) ) {
-			if ( value instanceof URI ) {
-				URI uri = URI.class.cast( value );
+			if ( value instanceof IRI ) {
+				IRI uri = IRI.class.cast( value );
 
 				if ( null == engine ) {
 					labelFromLocalName.add( uri );

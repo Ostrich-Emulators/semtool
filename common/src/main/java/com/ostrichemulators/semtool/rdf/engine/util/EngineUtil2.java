@@ -5,8 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.util;
 
-import com.bigdata.rdf.sail.BigdataSail;
-import com.bigdata.rdf.sail.BigdataSailRepository;
 import com.ostrichemulators.semtool.model.vocabulary.SEMCORE;
 import com.ostrichemulators.semtool.model.vocabulary.SEMONTO;
 import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
@@ -15,7 +13,6 @@ import com.ostrichemulators.semtool.poi.main.ImportMetadata;
 import com.ostrichemulators.semtool.poi.main.ImportValidationException;
 import java.util.Map;
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.query.MalformedQueryException;
@@ -26,7 +23,6 @@ import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.MetadataConstants;
 import com.ostrichemulators.semtool.rdf.engine.api.ReificationStyle;
 import com.ostrichemulators.semtool.rdf.engine.impl.AbstractEngine;
-import com.ostrichemulators.semtool.rdf.engine.impl.BigDataEngine;
 import com.ostrichemulators.semtool.rdf.engine.impl.EngineFactory;
 import com.ostrichemulators.semtool.rdf.engine.impl.InsightManagerImpl;
 import com.ostrichemulators.semtool.rdf.engine.impl.SesameEngine;
@@ -49,12 +45,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import org.apache.commons.io.FilenameUtils;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.impl.StatementImpl;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -62,7 +60,7 @@ import org.eclipse.rdf4j.rio.RDFParseException;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.rio.turtle.TurtleParser;
 import org.eclipse.rdf4j.sail.Sail;
-import org.eclipse.rdf4j.sail.inferencer.fc.ForwardChainingRDFSInferencer;
+import org.eclipse.rdf4j.sail.inferencer.fc.SchemaCachingRDFSInferencer;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
 
@@ -82,7 +80,7 @@ public class EngineUtil2 {
 
 	public static void clear( IEngine engine ) throws RepositoryException {
 		try {
-			final Map<URI, Value> metas = engine.query( new MetadataQuery() );
+			final Map<IRI, Value> metas = engine.query( new MetadataQuery() );
 			metas.remove( SEMTOOL.Database );
 
 			engine.execute( new ModificationExecutorAdapter( true ) {
@@ -93,9 +91,9 @@ public class EngineUtil2 {
 					ValueFactory vf = conn.getValueFactory();
 
 					// re-add the metadata
-					for ( Map.Entry<URI, Value> en : metas.entrySet() ) {
+					for ( Map.Entry<IRI, Value> en : metas.entrySet() ) {
 						conn.add( engine.getBaseIri(),
-								URI.class.cast( EngineLoader.cleanValue( en.getKey(), vf ) ),
+								IRI.class.cast( EngineLoader.cleanValue( en.getKey(), vf ) ),
 								EngineLoader.cleanValue( en.getValue(), vf ) );
 					}
 				}
@@ -125,13 +123,13 @@ public class EngineUtil2 {
 	 * is defined
 	 */
 	public static ReificationStyle getReificationStyle( IEngine engine ) {
-		URI reif = Constants.NONODE;
+		IRI reif = Constants.NONODE;
 		if ( null != engine ) {
 			MetadataQuery mq = new MetadataQuery( SEMTOOL.ReificationModel );
 			try {
 				engine.query( mq );
 				Value str = mq.getOne();
-				reif = ( null == str ? Constants.NONODE : URI.class.cast( str ) );
+				reif = ( null == str ? Constants.NONODE : IRI.class.cast( str ) );
 			}
 			catch ( RepositoryException | MalformedQueryException | QueryEvaluationException e ) {
 				// don't care
@@ -226,7 +224,6 @@ public class EngineUtil2 {
 
 	private static File createEngine( EngineCreateBuilder ecb, User user )
 			throws IOException, EngineManagementException {
-		boolean useBlazegraph = BigDataEngine.class.equals( ecb.getEngineImpl() );
 
 		String dbname = ecb.getEngineName();
 		File enginedir = ecb.getEngineDir();
@@ -235,18 +232,8 @@ public class EngineUtil2 {
 
 		File db;
 
-		// make the big data journal, and then write out the (empty) OWL file
-		if ( useBlazegraph ) {
-			db = new File( enginedir, dbname + ".jnl" );
-			String dprop = "/defaultdb/Default.properties";
-			smssprops.load( EngineUtil2.class.getResourceAsStream( dprop ) );
-			smssprops.setProperty( BigdataSail.Options.FILE, db.getAbsolutePath() );
-		}
-		else {
-			// right now, we only support Blazegraph and OpenRDF
-			db = new File( enginedir, dbname );
-			smssprops = SesameEngine.generateProperties( db );
-		}
+		db = new File( enginedir, dbname );
+		smssprops = SesameEngine.generateProperties( db );
 
 		if ( db.exists() ) {
 			throw new IOException( "KB journal already exists" );
@@ -261,78 +248,69 @@ public class EngineUtil2 {
 			log.debug( sb.toString() );
 		}
 
-		Repository repo;
-		if ( useBlazegraph ) {
-			BigdataSail sail = new BigdataSail( smssprops );
-			repo = new BigdataSailRepository( sail );
-		}
-		else {
-			NativeStore store
-					= new NativeStore( new File( smssprops.getProperty( SesameEngine.REPOSITORY_KEY ) ) );
-			Sail sail = ( ecb.isCalcInfers()
-					? new ForwardChainingRDFSInferencer( store )
-					: store );
-			repo = new SailRepository( sail );
-		}
+		NativeStore store
+				= new NativeStore( new File( smssprops.getProperty( SesameEngine.REPOSITORY_KEY ) ) );
+		Sail sail = ( ecb.isCalcInfers()
+				? new SchemaCachingRDFSInferencer( store )
+				: store );
+		Repository repo = new SailRepository( sail );
 		try {
-			repo.initialize();
-			RepositoryConnection rc = repo.getConnection();
-
-			if ( ecb.isDoMetamodel() ) {
-				rc.begin();
-				for ( URL url : ecb.getVocabularies() ) {
-					rc.add( getStatementsFromResource( url, RDFFormat.TURTLE ) );
+			repo.init();
+			try (RepositoryConnection rc = repo.getConnection()) {
+				if ( ecb.isDoMetamodel() ) {
+					rc.begin();
+					for ( URL url : ecb.getVocabularies() ) {
+						rc.add( getStatementsFromResource( url, RDFFormat.TURTLE ) );
+					}
+					rc.commit();
 				}
+
+				IRI baseuri = AbstractEngine.getNewBaseUri();
+
+				// add the metadata
+				rc.begin();
+				ValueFactory vf = rc.getValueFactory();
+				rc.add( vf.createStatement( baseuri, RDF.TYPE, SEMTOOL.Database ) );
+				Date today = new Date();
+				rc.add( vf.createStatement( baseuri, MetadataConstants.DCT_CREATED,
+						vf.createLiteral( QueryExecutorAdapter.getCal( today ) ) ) );
+				rc.add( vf.createStatement( baseuri, MetadataConstants.DCT_MODIFIED,
+						vf.createLiteral( QueryExecutorAdapter.getCal( today ) ) ) );
+
+				rc.add( vf.createStatement( baseuri, SEMTOOL.ReificationModel,
+						ecb.getReificationModel().uri ) );
+
+				String tooling = Utility.getBuildProperties( EngineUtil2.class )
+						.getProperty( "name", "unknown" );
+				rc.add( vf.createStatement( baseuri, SEMCORE.SOFTWARE_AGENT,
+						vf.createLiteral( tooling ) ) );
+
+				String username = user.getProperty( User.UserProperty.USER_FULLNAME );
+				String email = user.getProperty( User.UserProperty.USER_EMAIL );
+				String org = user.getProperty( User.UserProperty.USER_ORG );
+
+				if ( !( username.isEmpty() && email.isEmpty() ) ) {
+					StringBuilder poc = new StringBuilder();
+					if ( username.isEmpty() ) {
+						poc.append( email );
+					}
+					else {
+						poc.append( username );
+					}
+					if ( !email.isEmpty() ) {
+						poc.append( " <" ).append( email ).append( ">" );
+					}
+
+					rc.add( vf.createStatement( baseuri, MetadataConstants.DCT_PUBLISHER,
+							vf.createLiteral( poc.toString() ) ) );
+				}
+				if ( !org.isEmpty() ) {
+					rc.add( vf.createStatement( baseuri, MetadataConstants.DCT_CREATOR,
+							vf.createLiteral( org ) ) );
+				}
+
 				rc.commit();
 			}
-
-			URI baseuri = AbstractEngine.getNewBaseUri();
-
-			// add the metadata
-			rc.begin();
-			ValueFactory vf = rc.getValueFactory();
-			rc.add( new StatementImpl( baseuri, RDF.TYPE, SEMTOOL.Database ) );
-			Date today = new Date();
-			rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_CREATED,
-					vf.createLiteral( QueryExecutorAdapter.getCal( today ) ) ) );
-			rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_MODIFIED,
-					vf.createLiteral( QueryExecutorAdapter.getCal( today ) ) ) );
-
-			rc.add( new StatementImpl( baseuri, SEMTOOL.ReificationModel,
-					ecb.getReificationModel().uri ) );
-
-			String tooling = Utility.getBuildProperties( EngineUtil2.class )
-					.getProperty( "name", "unknown" );
-			rc.add( new StatementImpl( baseuri, SEMCORE.SOFTWARE_AGENT,
-					vf.createLiteral( tooling ) ) );
-
-			String username = user.getProperty( User.UserProperty.USER_FULLNAME );
-			String email = user.getProperty( User.UserProperty.USER_EMAIL );
-			String org = user.getProperty( User.UserProperty.USER_ORG );
-
-			if ( !( username.isEmpty() && email.isEmpty() ) ) {
-				StringBuilder poc = new StringBuilder();
-				if ( username.isEmpty() ) {
-					poc.append( email );
-				}
-				else {
-					poc.append( username );
-				}
-				if ( !email.isEmpty() ) {
-					poc.append( " <" ).append( email ).append( ">" );
-				}
-
-				rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_PUBLISHER,
-						vf.createLiteral( poc.toString() ) ) );
-			}
-			if ( !org.isEmpty() ) {
-				rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_CREATOR,
-						vf.createLiteral( org ) ) );
-			}
-
-			rc.commit();
-
-			rc.close();
 			repo.shutDown();
 		}
 		catch ( RepositoryException e ) {
@@ -350,7 +328,7 @@ public class EngineUtil2 {
 		StatementCollector coll = new StatementCollector();
 		tp.setRDFHandler( coll );
 		try ( InputStream is = resource.openStream() ) {
-			tp.parse( is, SEMONTO.BASE_URI );
+			tp.parse( is, SEMONTO.BASE_IRI );
 		}
 		catch ( Exception e ) {
 			log.warn( "could not open/parse model resource: " + resource, e );
@@ -379,13 +357,14 @@ public class EngineUtil2 {
 
 		try {
 			Repository repo = new SailRepository( new MemoryStore() );
-			repo.initialize();
+			repo.init();
 			if ( FilenameUtils.isExtension( modelquestions.toString(), extfmt.keySet() ) ) {
-				RepositoryConnection rc = repo.getConnection();
-				rc.add( modelquestions, "",
-						extfmt.get( FilenameUtils.getExtension( modelquestions.toString() ) ) );
-				loader.loadFromRepository( rc );
-				rc.close();
+				try (RepositoryConnection rc = repo.getConnection()) {
+					rc.add( modelquestions, "",
+							extfmt.get( FilenameUtils.getExtension( modelquestions.toString() ) ) );
+					Model m = QueryResults.asModel( rc.getStatements( null, null, null ) );
+					loader.loadFromModel( m );
+				}
 				repo.shutDown();
 			}
 		}

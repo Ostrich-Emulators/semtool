@@ -518,12 +518,12 @@ public class Utility {
 	}
 
 	public static Properties getBuildProperties( Class<?> klass ) {
-		try {
-			return Utility.loadProp( klass.getResource( "/build.properties" ) );
-		}
-		catch ( IOException ioe ) {
-			log.warn( ioe, ioe );
-		}
+//		try {
+//			return Utility.loadProp( klass.getResource( "/build.properties" ) );
+//		}
+//		catch ( IOException ioe ) {
+//			log.warn( ioe, ioe );
+//		}
 		return new Properties();
 	}
 

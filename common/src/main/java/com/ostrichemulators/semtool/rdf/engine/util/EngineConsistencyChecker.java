@@ -26,7 +26,7 @@ import org.apache.lucene.search.spell.SpellChecker;
 import org.apache.lucene.search.spell.StringDistance;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.query.BindingSet;
 
@@ -49,9 +49,9 @@ public class EngineConsistencyChecker {
 	private final IEngine engine;
 	private final boolean across;
 	private final StringDistance strdist;
-	private final Map<URI, String> labels = new HashMap<>();
-	private final Map<URI, URI> uriToTypeLkp = new HashMap<>();
-	private final MultiMap<URI, URI> typeToURILkp = new MultiMap<>();
+	private final Map<IRI, String> labels = new HashMap<>();
+	private final Map<IRI, IRI> uriToTypeLkp = new HashMap<>();
+	private final MultiMap<IRI, IRI> typeToURILkp = new MultiMap<>();
 
 	public EngineConsistencyChecker( IEngine eng, boolean across, StringDistance dist ) {
 		this.engine = eng;
@@ -71,30 +71,30 @@ public class EngineConsistencyChecker {
 	 * @param uris A collection of concept classes (not instances)
 	 * @param type
 	 */
-	public void add( Collection<URI> uris, Type type ) {
+	public void add( Collection<IRI> uris, Type type ) {
 		if ( Type.CONCEPT == type ) {
-			for ( URI uri : uris ) {
+			for ( IRI uri : uris ) {
 				makeConceptDocuments( uri );
 			}
 		}
 		else {
-			for ( URI uri : uris ) {
+			for ( IRI uri : uris ) {
 				makeRelationDocuments( uri );
 			}
 		}
 	}
 
-	private void makeConceptDocuments( URI concept ) {
+	private void makeConceptDocuments( IRI concept ) {
 
 		String query = "SELECT DISTINCT ?s ?slabel WHERE { ?s a ?concept ; rdfs:label ?slabel } ORDER BY ?s";
 		VoidQueryAdapter vqa = new VoidQueryAdapter( query ) {
-			URI lastS = null;
+			IRI lastS = null;
 			Document currentDoc = null;
 			Set<String> seenLabels = new HashSet<>();
 
 			@Override
 			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				URI s = URI.class.cast( set.getValue( "s" ) );
+				IRI s = IRI.class.cast( set.getValue( "s" ) );
 				if ( s != lastS ) {
 					seenLabels.clear();
 					typeToURILkp.add( concept, s );
@@ -116,19 +116,19 @@ public class EngineConsistencyChecker {
 		engine.queryNoEx( vqa );
 	}
 
-	private void makeRelationDocuments( URI superclass ) {
+	private void makeRelationDocuments( IRI superclass ) {
 		// get all suclasses of superclass
 		String query = "SELECT DISTINCT ?rel ?label WHERE {\n"
 				+ " ?rel rdfs:subPropertyOf ?superclass ; rdfs:label ?label .\n"
 				+ " FILTER( ?rel != ?superclass )\n"
 				+ "} ORDER BY ?rel";
 		VoidQueryAdapter vqa = new VoidQueryAdapter( query ) {
-			URI lastRel = null;
+			IRI lastRel = null;
 			Set<String> seenLabels = new HashSet<>();
 
 			@Override
 			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				URI rel = URI.class.cast( set.getValue( "rel" ) );
+				IRI rel = IRI.class.cast( set.getValue( "rel" ) );
 				if ( rel != lastRel ) {
 					seenLabels.clear();
 
@@ -152,7 +152,7 @@ public class EngineConsistencyChecker {
 		engine.queryNoEx( vqa );
 	}
 
-	public int getItemsForType( URI uri ) {
+	public int getItemsForType( IRI uri ) {
 		return typeToURILkp.getNN( uri ).size();
 	}
 
@@ -165,18 +165,18 @@ public class EngineConsistencyChecker {
 	 * @param minDistance the minimum allowable similarity
 	 * @return map of uri-to-hits
 	 */
-	public MultiMap<URI, Hit> check( URI uri, final float minDistance ) {
-		MultiMap<URI, Hit> hits = new MultiMap<>();
+	public MultiMap<IRI, Hit> check( IRI uri, final float minDistance ) {
+		MultiMap<IRI, Hit> hits = new MultiMap<>();
 
 		// get our universe of possible hits
-		Map<URI, String> possibles = getHitUniverse( uri );
-		MultiMap<String, URI> revpos = MultiMap.flip( possibles );
+		Map<IRI, String> possibles = getHitUniverse( uri );
+		MultiMap<String, IRI> revpos = MultiMap.flip( possibles );
 
 		Directory ramdir = new RAMDirectory();
 		StandardAnalyzer analyzer = null;
 		SpellChecker speller = null;
 
-		List<URI> errors = new ArrayList<>();
+		List<IRI> errors = new ArrayList<>();
 		try {
 			analyzer = new StandardAnalyzer();
 			IndexWriterConfig config = new IndexWriterConfig( analyzer );
@@ -189,8 +189,8 @@ public class EngineConsistencyChecker {
 			PlainTextDictionary ptd = new PlainTextDictionary( new StringReader( names.toString() ) );
 			speller.indexDictionary( ptd, config, true );
 
-			List<URI> needles = typeToURILkp.get( uri );
-			for ( URI needle : needles ) {
+			List<IRI> needles = typeToURILkp.get( uri );
+			for ( IRI needle : needles ) {
 				String needlelabel = labels.get( needle );
 				try {
 					String[] suggestions = speller.suggestSimilar( needlelabel, 20, minDistance );
@@ -198,7 +198,7 @@ public class EngineConsistencyChecker {
 						// found a match, so figure out what we actually matched
 						float distance = strdist.getDistance( needlelabel, s );
 
-						for ( URI match : revpos.get( s ) ) {
+						for ( IRI match : revpos.get( s ) ) {
 							hits.add( needle,
 									new Hit( match, s, uriToTypeLkp.get( match ), distance ) );
 						}
@@ -243,15 +243,15 @@ public class EngineConsistencyChecker {
 	 * @param levy the string distance object to use to measure hits
 	 * @param minDistance the minimum similarity measure
 	 */
-	private void fallbackResolve( Collection<URI> needles, Map<URI, String> possibles,
-			MultiMap<URI, Hit> hits, StringDistance levy, float minDistance ) {
+	private void fallbackResolve( Collection<IRI> needles, Map<IRI, String> possibles,
+			MultiMap<IRI, Hit> hits, StringDistance levy, float minDistance ) {
 		log.debug( "falling back to resolve " + needles.size() + " items" );
 
-		for ( URI needle : needles ) {
+		for ( IRI needle : needles ) {
 			String needlelabel = labels.get( needle );
 
-			for ( Map.Entry<URI, String> en : possibles.entrySet() ) {
-				URI match = en.getKey();
+			for ( Map.Entry<IRI, String> en : possibles.entrySet() ) {
+				IRI match = en.getKey();
 				String matchlabel = en.getValue();
 
 				float distance = levy.getDistance( needlelabel, matchlabel );
@@ -263,13 +263,13 @@ public class EngineConsistencyChecker {
 		}
 	}
 
-	private Map<URI, String> getHitUniverse( URI type ) {
-		Map<URI, String> possibles = new HashMap<>();
+	private Map<IRI, String> getHitUniverse( IRI type ) {
+		Map<IRI, String> possibles = new HashMap<>();
 		if ( across ) {
 			possibles.putAll( labels );
 		}
 		else {
-			for ( URI key : typeToURILkp.getNN( type ) ) {
+			for ( IRI key : typeToURILkp.getNN( type ) ) {
 				possibles.put( key, labels.get( key ) );
 			}
 		}
@@ -279,19 +279,19 @@ public class EngineConsistencyChecker {
 
 	public class Hit {
 
-		private final URI match;
+		private final IRI match;
 		private final String matchLabel;
-		private final URI matchType;
+		private final IRI matchType;
 		private final float score;
 
-		public Hit( URI match, String matchLabel, URI matchType, float score ) {
+		public Hit( IRI match, String matchLabel, IRI matchType, float score ) {
 			this.match = match;
 			this.matchLabel = matchLabel;
 			this.matchType = matchType;
 			this.score = score;
 		}
 
-		public URI getMatch() {
+		public IRI getMatch() {
 			return match;
 		}
 
@@ -299,7 +299,7 @@ public class EngineConsistencyChecker {
 			return matchLabel;
 		}
 
-		public URI getMatchType() {
+		public IRI getMatchType() {
 			return matchType;
 		}
 

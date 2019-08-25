@@ -52,9 +52,9 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  */
@@ -62,7 +62,7 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 
 	private static final Logger log = Logger.getLogger( TreeGraphPlaySheet.class );
 	//private TreeGraphDataModel model;
-	public static final URI DUPLICATES_SIZE = Utility.makeInternalUri( "num-duplicates" );
+	public static final IRI DUPLICATES_SIZE = Utility.makeInternalIRI( "num-duplicates" );
 
 	private final RingsButtonListener rings = new RingsButtonListener();
 
@@ -100,7 +100,7 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 	@Override
 	public void populateToolBar( JToolBar toolBar, String tabTitle ) {
 		super.populateToolBar( toolBar, tabTitle );
-		
+
 		rings.setViewer( getView() );
 		rings.setGraph( Forest.class.cast( getGraphData().getGraph() ) );
 		Layout lay = getView().getEffectiveLayout();
@@ -130,7 +130,7 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 		ll.addAll( newforest.getVertices() );
 		ll.addAll( newforest.getEdges() );
 
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		for ( GraphElement ge : ll ) {
 			ge.setValue( DUPLICATES_SIZE,
 					vf.createLiteral( gdm.getDuplicatesOf( ge ).size() ) );
@@ -178,31 +178,31 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 
 		DelegateForest<SEMOSSVertex, SEMOSSEdge> newforest = new DelegateForest<>();
 		for ( SEMOSSVertex root : roots ) {
-			Map<URI, SEMOSSVertex> vlkp = new HashMap<>();
-			Map<URI, SEMOSSEdge> elkp = new HashMap<>();
+			Map<IRI, SEMOSSVertex> vlkp = new HashMap<>();
+			Map<IRI, SEMOSSEdge> elkp = new HashMap<>();
 
-			Tree<URI, URI> tree = gttc.convert( graph, root, vlkp, elkp );
+			Tree<IRI, IRI> tree = gttc.convert( graph, root, vlkp, elkp );
 
-			// convert the URI tree to our node/edge tree
+			// convert the IRI tree to our node/edge tree
 			DelegateTree<SEMOSSVertex, SEMOSSEdge> dupetree = new DelegateTree<>();
 
 			// make duplicate vertices and edges with the new URIs
-			Map<URI, SEMOSSVertex> dupesV = new HashMap<>();
-			Map<URI, SEMOSSEdge> dupesE = new HashMap<>();
-			for ( Map.Entry<URI, SEMOSSVertex> en : vlkp.entrySet() ) {
+			Map<IRI, SEMOSSVertex> dupesV = new HashMap<>();
+			Map<IRI, SEMOSSEdge> dupesE = new HashMap<>();
+			for ( Map.Entry<IRI, SEMOSSVertex> en : vlkp.entrySet() ) {
 				dupesV.put( en.getKey(), duplicate( en.getKey(), vlkp ) );
 			}
-			for ( Map.Entry<URI, SEMOSSEdge> en : elkp.entrySet() ) {
+			for ( Map.Entry<IRI, SEMOSSEdge> en : elkp.entrySet() ) {
 				dupesE.put( en.getKey(), duplicate( en.getKey(), elkp ) );
 			}
 
 			dupetree.setRoot( dupesV.get( tree.getRoot() ) );
 
-			Deque<URI> todo = new ArrayDeque<>( tree.getChildren( tree.getRoot() ) );
+			Deque<IRI> todo = new ArrayDeque<>( tree.getChildren( tree.getRoot() ) );
 			while ( !todo.isEmpty() ) {
-				URI child = todo.poll();
-				URI edge = tree.getParentEdge( child );
-				URI parent = tree.getParent( child );
+				IRI child = todo.poll();
+				IRI edge = tree.getParentEdge( child );
+				IRI parent = tree.getParent( child );
 
 				dupetree.addChild( dupesE.get( edge ),
 						dupesV.get( parent ), dupesV.get( child ) );
@@ -216,7 +216,7 @@ public class TreeGraphPlaySheet extends GraphPlaySheet {
 		return newforest;
 	}
 
-	private static <X extends GraphElement> X duplicate( URI uri, Map<URI, X> lkp ) {
+	private static <X extends GraphElement> X duplicate( IRI uri, Map<IRI, X> lkp ) {
 		X old = lkp.get( uri );
 		X newer = old.duplicate();
 		newer.setGraphId( uri );

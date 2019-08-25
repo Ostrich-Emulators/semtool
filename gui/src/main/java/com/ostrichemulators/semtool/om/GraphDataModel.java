@@ -418,7 +418,7 @@ public class GraphDataModel {
 				};
 
 				specifics.useInferred( false );
-				specifics.bind( "semrel", engine.getSchemaBuilder().getRelationIRI().build() );
+				specifics.bind( "semrel", engine.getSchemaBuilder().getRelationIri().build() );
 				log.debug( specifics.bindAndGetSparql() );
 				engine.query( specifics );
 			}

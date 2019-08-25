@@ -5,6 +5,7 @@
  */
 package com.ostrichemulators.semtool.util;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -146,9 +147,9 @@ public class UriBuilder {
   public UriBuilder copy() {
     UriBuilder bldr = new UriBuilder( content.toString() );
     try {
-      bldr.setSanitizer( sanitizer.getClass().newInstance() );
+      bldr.setSanitizer( sanitizer.getClass().getConstructor().newInstance() );
     }
-    catch ( InstantiationException | IllegalAccessException e ) {
+    catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException e ) {
       log.error( "BUG: unable to create new instance of " + sanitizer, e );
       bldr.setSanitizer( new DefaultSanitizer() );
     }
@@ -171,9 +172,9 @@ public class UriBuilder {
     newcontent.append( additional );
     UriBuilder bldr = getBuilder( newcontent.toString() );
     try {
-      bldr.setSanitizer( sanitizer.getClass().newInstance() );
+      bldr.setSanitizer( sanitizer.getClass().getConstructor().newInstance() );
     }
-    catch ( InstantiationException | IllegalAccessException e ) {
+    catch ( IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException e ) {
       log.error( "BUG: unable to create new instance of " + sanitizer, e );
       bldr.setSanitizer( new DefaultSanitizer() );
     }
@@ -184,17 +185,17 @@ public class UriBuilder {
     UriBuilder ldr;
     UriSanitizer sani;
     try {
-      ldr = bldrclass.newInstance();
+      ldr = bldrclass.getConstructor().newInstance();
     }
-    catch ( InstantiationException | IllegalAccessException e ) {
+    catch ( IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException e ) {
       log.error( "BUG: cannot create UriBuilder instance; using fallback", e );
       ldr = new UriBuilder();
     }
 
     try {
-      sani = saniclass.newInstance();
+      sani = saniclass.getConstructor().newInstance();
     }
-    catch ( InstantiationException | IllegalAccessException e ) {
+    catch ( IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException e ) {
       log.error( "BUG: cannot create UriSanitizer instance; using fallback", e );
       sani = new DefaultSanitizer();
     }

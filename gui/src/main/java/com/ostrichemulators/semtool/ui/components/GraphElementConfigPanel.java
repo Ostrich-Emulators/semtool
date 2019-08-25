@@ -41,6 +41,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
 import org.apache.log4j.Logger;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.URI;
 
 /**
@@ -55,7 +56,7 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 	private final DefaultListModel<Color> colormodel = new DefaultListModel<>();
 	private final DefaultListModel<NamedShape> shapemodel = new DefaultListModel<>();
 	private final DefaultColorShapeRepository shapefactory = new DefaultColorShapeRepository();
-	private final DefaultComboBoxModel<URI> dbmodel = new DefaultComboBoxModel<>();
+	private final DefaultComboBoxModel<IRI> dbmodel = new DefaultComboBoxModel<>();
 
 	/**
 	 * Creates new form GraphElementConfigPanel
@@ -69,11 +70,11 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 		model = new GraphElementTreeModel( engine );
 		initComponents();
 
-		LabeledPairRenderer<URI> dbrenderer
+		LabeledPairRenderer<IRI> dbrenderer
 				= LabeledPairRenderer.getUriPairRenderer( engine );
 		dbrenderer.cache( Constants.ANYNODE, "Default" );
 		dbmodel.addElement( Constants.ANYNODE );
-		Set<URI> dbs = DIHelper.getInstance().getMetadataStore().getDatabases();
+		Set<IRI> dbs = DIHelper.getInstance().getMetadataStore().getDatabases();
 
 		// per-database graph settings don't work yet, so don't give a user the option
 //		for ( URI u : dbs ) {
@@ -109,10 +110,10 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 
 			@Override
 			public void treeNodesInserted( TreeModelEvent e ) {
-				Set<URI> children = new HashSet<>();
+				Set<IRI> children = new HashSet<>();
 				for ( Object o : e.getChildren() ) {
 					Object u = DefaultMutableTreeNode.class.cast( o ).getUserObject();
-					children.add( URI.class.cast( u ) );
+					children.add( IRI.class.cast( u ) );
 				}
 
 				// pre-fetch all the new labels
@@ -182,23 +183,23 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
 		}
 	}
 
-	public URI getDb() {
-		URI uri = dbchsr.getItemAt( dbchsr.getSelectedIndex() );
+	public IRI getDb() {
+		IRI uri = dbchsr.getItemAt( dbchsr.getSelectedIndex() );
 		return ( Constants.ANYNODE.equals( uri ) ? null : uri );
 	}
 
-	public Map<URI, Color> getColors() {
-		Map<URI, Color> cols = new HashMap<>();
+	public Map<IRI, Color> getColors() {
+		Map<IRI, Color> cols = new HashMap<>();
 		return cols;
 	}
 
-	public Map<URI, Shape> getShape() {
-		Map<URI, Shape> shape = new HashMap<>();
+	public Map<IRI, Shape> getShape() {
+		Map<IRI, Shape> shape = new HashMap<>();
 		return shape;
 	}
 
-	public Map<URI, String> getIcon() {
-		Map<URI, String> icons = new HashMap<>();
+	public Map<IRI, String> getIcon() {
+		Map<IRI, String> icons = new HashMap<>();
 		return icons;
 	}
 
@@ -258,16 +259,16 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
     title = new javax.swing.JLabel();
     jLabel1 = new javax.swing.JLabel();
     jScrollPane2 = new javax.swing.JScrollPane();
-    shapes = new javax.swing.JList<NamedShape>();
+    shapes = new javax.swing.JList<>();
     jLabel2 = new javax.swing.JLabel();
     jScrollPane3 = new javax.swing.JScrollPane();
-    colors = new javax.swing.JList<Color>();
+    colors = new javax.swing.JList<>();
     jLabel3 = new javax.swing.JLabel();
     jLabel4 = new javax.swing.JLabel();
     was = new javax.swing.JLabel();
     is = new javax.swing.JLabel();
     uri = new javax.swing.JLabel();
-    dbchsr = new javax.swing.JComboBox<URI>();
+    dbchsr = new javax.swing.JComboBox<>();
     jLabel5 = new javax.swing.JLabel();
     jButton1 = new javax.swing.JButton();
 
@@ -400,7 +401,7 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
   }// </editor-fold>//GEN-END:initComponents
 
   private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-		URI dbid = dbchsr.getItemAt( dbchsr.getSelectedIndex() );
+		IRI dbid = dbchsr.getItemAt( dbchsr.getSelectedIndex() );
 		DIHelper.getInstance().getMetadataStore().clearGraphSettings( dbid );
   }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -408,7 +409,7 @@ public class GraphElementConfigPanel extends javax.swing.JPanel {
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel Panel1;
   private javax.swing.JList<Color> colors;
-  private javax.swing.JComboBox<URI> dbchsr;
+  private javax.swing.JComboBox<IRI> dbchsr;
   private javax.swing.JLabel is;
   private javax.swing.JButton jButton1;
   private javax.swing.JLabel jLabel1;

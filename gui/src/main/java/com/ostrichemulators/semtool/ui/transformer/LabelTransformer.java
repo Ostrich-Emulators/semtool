@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -46,18 +46,18 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 public class LabelTransformer<T extends GraphElement> extends SelectingTransformer<T, String> {
 
 	// node type -> what properties to display
-	private final MultiMap<URI, URI> displayables = new MultiMap<>();
+	private final MultiMap<IRI, IRI> displayables = new MultiMap<>();
 	// don't show property type for these properties
-	private final Set<URI> nolabels;
+	private final Set<IRI> nolabels;
 	private Map<Value, String> labelmap = new HashMap<>();
-	private final Set<URI> defaults = new HashSet<>();
+	private final Set<IRI> defaults = new HashSet<>();
 
 	/**
 	 * Constructor for VertexLabelTransformer.
 	 *
 	 * @param data ControlData
 	 */
-	public LabelTransformer( MultiMap<URI, URI> data ) {
+	public LabelTransformer( MultiMap<IRI, IRI> data ) {
 		this();
 		displayables.putAll( data );
 	}
@@ -67,7 +67,7 @@ public class LabelTransformer<T extends GraphElement> extends SelectingTransform
 		defaults.addAll( nolabels );
 	}
 
-	public void setDefaultDisplayables( Collection<URI> propsToDisplay ) {
+	public void setDefaultDisplayables( Collection<IRI> propsToDisplay ) {
 		defaults.clear();
 		defaults.addAll( propsToDisplay );
 	}
@@ -82,12 +82,12 @@ public class LabelTransformer<T extends GraphElement> extends SelectingTransform
 	 * @param type
 	 * @param propsToDisplay
 	 */
-	public void setDisplay( URI type, Collection<URI> propsToDisplay ) {
+	public void setDisplay( IRI type, Collection<IRI> propsToDisplay ) {
 		displayables.remove( type );
 		displayables.addAll( type, propsToDisplay );
 	}
 
-	public void setDisplay( URI type, URI prop, boolean showit ) {
+	public void setDisplay( IRI type, IRI prop, boolean showit ) {
 		if ( showit ) {
 			if ( !displayables.getNN( type ).contains( prop ) ) {
 				displayables.add( type, prop );
@@ -98,8 +98,8 @@ public class LabelTransformer<T extends GraphElement> extends SelectingTransform
 		}
 	}
 
-	public List<URI> getDisplayableProperties( URI type ) {
-		List<URI> list = displayables.get( type );
+	public List<IRI> getDisplayableProperties( IRI type ) {
+		List<IRI> list = displayables.get( type );
 		if ( null == list ) {
 			displayables.addAll( type, defaults );
 			list = new ArrayList<>( defaults );
@@ -108,24 +108,24 @@ public class LabelTransformer<T extends GraphElement> extends SelectingTransform
 		return list;
 	}
 
-	public String getLabel( URI prop ) {
+	public String getLabel( IRI prop ) {
 		return labelmap.get( prop );
 	}
 
-	public boolean displayLabelFor( URI prop ) {
+	public boolean displayLabelFor( IRI prop ) {
 		return !nolabels.contains( prop );
 	}
 
-	public void setLabels( Map<URI, String> propToLabel ) {
+	public void setLabels( Map<IRI, String> propToLabel ) {
 		labelmap.putAll( propToLabel );
 	}
 
-	public void resetLabels( Map<URI, String> propToLabel ) {
+	public void resetLabels( Map<IRI, String> propToLabel ) {
 		labelmap.clear();
 		setLabels( propToLabel );
 	}
 
-	public void addLabel( URI uri, String label ) {
+	public void addLabel( IRI uri, String label ) {
 		labelmap.put( uri, label );
 	}
 
@@ -137,14 +137,14 @@ public class LabelTransformer<T extends GraphElement> extends SelectingTransform
 	 * @return String - the property name of the vertex
 	 */
 	public String getText( T vertex ) {
-		List<URI> propertiesList = getDisplayableProperties( vertex.getType() );
+		List<IRI> propertiesList = getDisplayableProperties( vertex.getType() );
 
 		//uri required for uniqueness, need these font tags so that when you increase 
 		//font through font transformer, the label doesn't get really far away from the vertex
 		StringBuilder html = new StringBuilder();
 		html.append( "<html><!--" ).append( vertex.getIRI() ).append( "-->" );
 		boolean first = true;
-		for ( URI property : propertiesList ) {
+		for ( IRI property : propertiesList ) {
 			if ( vertex.hasProperty( property ) ) {
 				if ( first ) {
 					first = false;
@@ -160,7 +160,7 @@ public class LabelTransformer<T extends GraphElement> extends SelectingTransform
 
 				Value val = vertex.getValue( property );
 				String propval = ( RDF.TYPE.equals( property )
-						? getLabel( URI.class.cast( val ) ) : val.stringValue() );
+						? getLabel( IRI.class.cast( val ) ) : val.stringValue() );
 				html.append( chop( propval, 50 ) );
 			}
 		}

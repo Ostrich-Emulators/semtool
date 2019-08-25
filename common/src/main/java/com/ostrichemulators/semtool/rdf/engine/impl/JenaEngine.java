@@ -24,8 +24,8 @@ import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.repository.Repository;
@@ -95,7 +95,7 @@ public class JenaEngine extends AbstractSesameEngine {
 		}
 
 		try {
-			repo.initialize();
+			repo.init();
 			rc = repo.getConnection();
 		}
 		catch ( Exception e ) {
@@ -136,20 +136,20 @@ public class JenaEngine extends AbstractSesameEngine {
 				try {
 					sub = ( rsr.isAnon()
 							? vf.createBNode( valnode.getBlankNodeLabel() )
-							: vf.createURI( rsr.toString() ) );
+							: vf.createIRI( rsr.toString() ) );
 				}
 				catch ( UnsupportedOperationException uoo ) {
 					log.warn( uoo, uoo );
 					continue;
 				}
 				
-				URI pred2 = vf.createURI( pred.toString() );
+				IRI pred2 = vf.createIRI( pred.toString() );
 				Value val2;
 
 				if ( val.isLiteral() ) {
 					Literal lit = val.asLiteral();
 					String dtstr = lit.getDatatypeURI();
-					URI dt = ( null == dtstr ? null : vf.createURI( dtstr ) );
+					IRI dt = ( null == dtstr ? null : vf.createIRI( dtstr ) );
 					String langstr = lit.getLanguage();
 
 					if ( null == dt ) {
@@ -169,7 +169,7 @@ public class JenaEngine extends AbstractSesameEngine {
 						val2 = vf.createBNode( valnode.getBlankNodeLabel() );
 					}
 					else {
-						val2 = vf.createURI( val.toString() );
+						val2 = vf.createIRI( val.toString() );
 					}
 				}
 				rc.add( sub, pred2, val2 );
@@ -314,7 +314,7 @@ public class JenaEngine extends AbstractSesameEngine {
 		public void handleStatement( org.eclipse.rdf4j.model.Statement stmt ) throws RDFHandlerException {
 			Resource rsr = stmt.getSubject();
 			com.hp.hpl.jena.rdf.model.Resource sub;
-			if ( rsr instanceof URI ) {
+			if ( rsr instanceof IRI ) {
 				sub = model.createResource( rsr.stringValue() );
 			}
 			else {
@@ -326,7 +326,7 @@ public class JenaEngine extends AbstractSesameEngine {
 
 			Value val = stmt.getObject();
 			RDFNode obj;
-			if ( val instanceof URI ) {
+			if ( val instanceof IRI ) {
 				obj = model.createResource( val.stringValue() );
 			}
 			else if ( val instanceof BNode ) {
@@ -336,11 +336,11 @@ public class JenaEngine extends AbstractSesameEngine {
 			else if ( val instanceof org.eclipse.rdf4j.model.Literal ) {
 				org.eclipse.rdf4j.model.Literal lit = org.eclipse.rdf4j.model.Literal.class.cast( val );
 				if ( null == lit.getDatatype() ) {
-					if ( null == lit.getLanguage() ) {
+					if ( lit.getLanguage().isPresent() ) {
 						obj = model.createLiteral( val.stringValue() );
 					}
 					else {
-						obj = model.createLiteral( val.stringValue(), lit.getLanguage() );
+						obj = model.createLiteral( val.stringValue(), lit.getLanguage().get() );
 					}
 				}
 				else {

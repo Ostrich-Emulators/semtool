@@ -70,10 +70,10 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
 import org.apache.log4j.Logger;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
@@ -106,7 +106,7 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 
 		final JScrollPane jsp = new JScrollPane( table );
 		table.setAutoCreateRowSorter( true );
-		table.setDefaultEditor( URI.class, new URIEditor() );
+		table.setDefaultEditor( IRI.class, new URIEditor() );
 
 		table.getInputMap( JComponent.WHEN_IN_FOCUSED_WINDOW ).
 				put( KeyStroke.getKeyStroke( KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK ),
@@ -354,7 +354,7 @@ public class GridRAWPlaySheet extends PlaySheetCentralComponent {
 
 		@Override
 		public void actionPerformed( ActionEvent e ) {
-			SEMOSSVertex vertex = new SEMOSSVertexImpl( URI.class.cast( uri ) );
+			SEMOSSVertex vertex = new SEMOSSVertexImpl( IRI.class.cast( uri ) );
 			try {
 				Model model = getEngine().construct( ModelQueryAdapter.describe( uri ) );
 				for ( Statement s : model ) {

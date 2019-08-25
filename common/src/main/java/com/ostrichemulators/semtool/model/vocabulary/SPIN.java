@@ -1,10 +1,10 @@
 package com.ostrichemulators.semtool.model.vocabulary;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Namespace;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.NamespaceImpl;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleNamespace;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 
 /**
@@ -32,7 +32,7 @@ public class SPIN {
 	 * An immutable {@link Namespace} constant that represents the SPIN
 	 * Modeling Vocabulary namespace.
 	 */
-	public static final Namespace NS = new NamespaceImpl(PREFIX, NAMESPACE);
+	public static final Namespace NS = new SimpleNamespace(PREFIX, NAMESPACE);
 
 
 	// ----- Classes ------
@@ -40,38 +40,38 @@ public class SPIN {
 	/**
 	 * http://spinrdf.org/spin#Function
 	 */
-    public final static URI Function;
+    public final static IRI Function;
 
 	/**
 	 * http://spinrdf.org/spin#MagicProperties
 	 */
     
-    public final static URI MagicProperty;
+    public final static IRI MagicProperty;
     
 	// ----- Properties ------
     
 	/**
 	 * http://spinrdf.org/spin#body
 	 */
-	public final static URI body;
+	public final static IRI body;
     
 	/**
 	 * http://spinrdf.org/spin#constraint
 	 */
-	public final static URI constraint;
+	public final static IRI constraint;
 	
 	
 	static {
-		final ValueFactory factory = ValueFactoryImpl.getInstance();
+		final ValueFactory factory = SimpleValueFactory.getInstance();
 		
 		// ----- Classes ------
-		Function = factory.createURI(NAMESPACE, "Function");
+		Function = factory.createIRI(NAMESPACE, "Function");
 		
-		MagicProperty = factory.createURI(NAMESPACE, "MagicProperty");
+		MagicProperty = factory.createIRI(NAMESPACE, "MagicProperty");
 
 		// ----- Properties ------
-		body = factory.createURI(NAMESPACE, "body");
+		body = factory.createIRI(NAMESPACE, "body");
 		
-		constraint = factory.createURI(NAMESPACE, "constraint");
+		constraint = factory.createIRI(NAMESPACE, "constraint");
 	}
 }

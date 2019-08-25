@@ -15,17 +15,17 @@ import com.ostrichemulators.semtool.rdf.engine.util.QaChecker;
 import com.ostrichemulators.semtool.rdf.engine.util.QaChecker.RelationCacheKey;
 import static com.ostrichemulators.semtool.rdf.query.util.QueryExecutorAdapter.getCal;
 import com.ostrichemulators.semtool.util.Constants;
+import static com.ostrichemulators.semtool.util.RDFDatatypeTools.getIriFromRawString;
 import static com.ostrichemulators.semtool.util.RDFDatatypeTools.getRDFStringValue;
-import static com.ostrichemulators.semtool.util.RDFDatatypeTools.getUriFromRawString;
 import com.ostrichemulators.semtool.util.UriBuilder;
 import java.util.Date;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.impl.TreeModel;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -78,16 +78,16 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 				nap.getObjectType(), sheet.getRelname(), nap.getSubject(), nap.getObject() );
 
 		if ( !hasCachedRelation( lkey ) ) {
-			URI connector;
+			IRI connector;
 			String rellocalname;
 			if ( alreadyMadeRel ) {
-				rellocalname = srawlabel + Constants.RELATION_URI_CONCATENATOR + orawlabel;
+				rellocalname = srawlabel + Constants.RELATION_IRI_CONCATENATOR + orawlabel;
 				connector = metas.getDataBuilder().getRelationIri().build( rellocalname );
 			}
 			else {
 				UriBuilder typebuilder
 						= metas.getDataBuilder().getRelationIri().add( sheet.getRelname() );
-				rellocalname = srawlabel + Constants.RELATION_URI_CONCATENATOR + orawlabel;
+				rellocalname = srawlabel + Constants.RELATION_IRI_CONCATENATOR + orawlabel;
 				connector = typebuilder.add( rellocalname ).build();
 			}
 
@@ -95,9 +95,9 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 			cacheRelationNode( connector, lkey );
 		}
 
-		URI relClassBaseURI = getCachedRelationClass( sheet.getRelname() );
+		IRI relClassBaseURI = getCachedRelationClass( sheet.getRelname() );
 
-		URI connector = getCachedRelation( lkey );
+		IRI connector = getCachedRelation( lkey );
 		if ( metas.isAutocreateMetamodel() ) {
 			ValueFactory vf = myrc.getValueFactory();
 
@@ -118,7 +118,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 
 		String typename = nap.getSubjectType();
 		String rawlabel = nap.getSubject();
-		URI subject = addSimpleNode( typename, rawlabel, namespaces, metas, myrc );
+		IRI subject = addSimpleNode( typename, rawlabel, namespaces, metas, myrc );
 
 		ValueFactory vf = myrc.getValueFactory();
 		boolean savelabel = metas.isAutocreateMetamodel();
@@ -128,7 +128,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 
 			Value val = getRDFStringValue( rawlabel, namespaces, vf );
 			// check if we have a prefixed URI
-			URI u = getUriFromRawString( rawlabel, namespaces );
+			IRI u = getIriFromRawString( rawlabel, namespaces );
 			savelabel = ( savelabel && null == u );
 			rawlabel = val.stringValue();
 		}
@@ -145,7 +145,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 	}
 
 	@Override
-	public void addProperties( URI subject, Map<String, Value> properties,
+	public void addProperties( IRI subject, Map<String, Value> properties,
 			Map<String, String> namespaces, LoadingSheetData sheet,
 			ImportMetadata metas, RepositoryConnection myrc ) throws RepositoryException {
 
@@ -153,7 +153,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 
 		for ( Map.Entry<String, Value> entry : properties.entrySet() ) {
 			String propname = entry.getKey();
-			URI predicate = getCachedPropertyClass( propname );
+			IRI predicate = getCachedPropertyClass( propname );
 
 			Value value = entry.getValue();
 			if ( sheet.isLink( propname ) ) {
@@ -179,16 +179,16 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 		}
 	}
 
-	protected URI addSimpleNode( String typename, String rawlabel, Map<String, String> namespaces,
+	protected IRI addSimpleNode( String typename, String rawlabel, Map<String, String> namespaces,
 			ImportMetadata metas, RepositoryConnection myrc ) throws RepositoryException {
 
 		boolean nodeIsAlreadyUri = isUri( rawlabel, namespaces );
 
 		if ( !hasCachedInstance( typename, rawlabel ) ) {
-			URI subject;
+			IRI subject;
 
 			if ( nodeIsAlreadyUri ) {
-				subject = getUriFromRawString( rawlabel, namespaces );
+				subject = getIriFromRawString( rawlabel, namespaces );
 			}
 			else {
 				if ( metas.isAutocreateMetamodel() ) {
@@ -207,7 +207,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 			cacheInstance( subject, typename, rawlabel );
 		}
 
-		URI subject = getCachedInstance( typename, rawlabel );
+		IRI subject = getCachedInstance( typename, rawlabel );
 		myrc.add( subject, RDF.TYPE, getCachedInstanceClass( typename ) );
 		return subject;
 	}
@@ -221,7 +221,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 		boolean save = metas.isAutocreateMetamodel();
 
 		if ( null == vf ) {
-			vf = new ValueFactoryImpl();
+			vf = SimpleValueFactory.getInstance();
 		}
 
 		for ( LoadingSheetData sheet : alldata.getSheets() ) {
@@ -229,8 +229,8 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 			if ( !hasCachedInstanceClass( stype ) ) {
 				boolean nodeAlreadyMade = isUri( stype, namespaces );
 
-				URI uri = ( nodeAlreadyMade
-						? getUriFromRawString( stype, namespaces )
+				IRI uri = ( nodeAlreadyMade
+						? getIriFromRawString( stype, namespaces )
 						: schema.build( stype ) );
 				cacheInstanceClass( uri, stype );
 
@@ -246,8 +246,8 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 				if ( !hasCachedInstanceClass( otype ) ) {
 					boolean nodeAlreadyMade = isUri( otype, namespaces );
 
-					URI uri = ( nodeAlreadyMade
-							? getUriFromRawString( otype, namespaces )
+					IRI uri = ( nodeAlreadyMade
+							? getIriFromRawString( otype, namespaces )
 							: schema.build( otype ) );
 
 					cacheInstanceClass( uri, otype );
@@ -264,10 +264,10 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 				if ( !hasCachedRelationClass( rellabel ) ) {
 					boolean relationAlreadyMade = isUri( rellabel, namespaces );
 
-					URI ret = ( relationAlreadyMade
-							? getUriFromRawString( rellabel, namespaces )
+					IRI ret = ( relationAlreadyMade
+							? getIriFromRawString( rellabel, namespaces )
 							: schema.getRelationIri( rellabel ) );
-					URI relation = schema.getRelationIri().build();
+					IRI relation = schema.getRelationIri().build();
 
 					cacheRelationClass( ret, rellabel );
 
@@ -304,9 +304,9 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 				boolean alreadyMadeProp = isUri( propname, namespaces );
 
 				if ( !hasCachedPropertyClass( propname ) ) {
-					URI predicate;
+					IRI predicate;
 					if ( alreadyMadeProp ) {
-						predicate = getUriFromRawString( propname, namespaces );
+						predicate = getIriFromRawString( propname, namespaces );
 					}
 					else {
 						// UriBuilder bb = schema.getRelationIri().add( Constants.CONTAINS );
@@ -314,7 +314,7 @@ public class LegacyEdgeModeler extends AbstractEdgeModeler {
 					}
 					cachePropertyClass( predicate, propname );
 				}
-				URI predicate = getCachedPropertyClass( propname );
+				IRI predicate = getCachedPropertyClass( propname );
 
 				if ( save && !alreadyMadeProp ) {
 					model.add( predicate, RDFS.LABEL, vf.createLiteral( propname ) );

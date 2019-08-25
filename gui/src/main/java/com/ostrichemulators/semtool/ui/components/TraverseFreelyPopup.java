@@ -42,6 +42,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.JLabel;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -56,7 +57,7 @@ public class TraverseFreelyPopup extends JMenu {
 			= Logger.getLogger( TraverseFreelyPopup.class );
 	private static final long serialVersionUID = -3788376340326236013L;
 	private final GraphPlaySheet gps;
-	private final Collection<URI> instances = new HashSet<>();
+	private final Collection<IRI> instances = new HashSet<>();
 	private final boolean isInstance;
 	private boolean populated = false;
 
@@ -77,8 +78,8 @@ public class TraverseFreelyPopup extends JMenu {
 		// need to process the graph
 		Set<SEMOSSVertex> verts = new HashSet<>( picked );
 		if ( !isInstance ) {
-			MultiMap<URI, SEMOSSVertex> typelkp = gps.getVerticesByType();
-			Set<URI> seen = new HashSet<>();
+			MultiMap<IRI, SEMOSSVertex> typelkp = gps.getVerticesByType();
+			Set<IRI> seen = new HashSet<>();
 
 			for ( SEMOSSVertex v : picked ) {
 				if ( !seen.contains( v.getType() ) ) {
@@ -114,10 +115,10 @@ public class TraverseFreelyPopup extends JMenu {
 	 */
 	public int addRelations( boolean subjectStyle ) {
 		// we have two alternate st
-		Set<URI> neighborTypes = new HashSet<>();
+		Set<IRI> neighborTypes = new HashSet<>();
 
 		if ( isInstance ) {
-			for ( URI instance : instances ) {
+			for ( IRI instance : instances ) {
 				neighborTypes.addAll(
 						NodeDerivationTools.getConnectedConceptTypes( instance, engine,
 								subjectStyle ) );
@@ -131,21 +132,21 @@ public class TraverseFreelyPopup extends JMenu {
 		neighborTypes.removeAll( Arrays.asList( OWL.THING, RDFS.RESOURCE, SKOS.CONCEPT,
 				engine.getSchemaBuilder().getConceptIri().build() ) );
 
-		for ( URI nt : neighborTypes ) {
+		for ( IRI nt : neighborTypes ) {
 			logger.debug( "neighbor type: " + nt );
 		}
 
 		neighborTypes.removeAll( Arrays.asList( RDFS.RESOURCE, RDFS.CLASS,
 				OWL.NOTHING, OWL.THING, OWL.CLASS ) );
 
-		Map<URI, String> labelmap = Utility.getInstanceLabels( neighborTypes, engine );
-		labelmap = Utility.sortUrisByLabel( labelmap );
+		Map<IRI, String> labelmap = Utility.getInstanceLabels( neighborTypes, engine );
+		labelmap = Utility.sortIrisByLabel( labelmap );
 
 		if ( !labelmap.isEmpty() ) {
 			add( new JLabel( subjectStyle ? "To:" : "From:" ) );
 		}
 
-		for ( Map.Entry<URI, String> en : labelmap.entrySet() ) {
+		for ( Map.Entry<IRI, String> en : labelmap.entrySet() ) {
 			add( new NeighborMenuItem( en.getValue(), gps,
 					getExpander( instances, en.getKey(), subjectStyle ) ) );
 		}
@@ -154,7 +155,7 @@ public class TraverseFreelyPopup extends JMenu {
 		return neighborTypes.size();
 	}
 
-	private ModelQueryAdapter getExpander( Collection<URI> instances, URI totype,
+	private ModelQueryAdapter getExpander( Collection<IRI> instances, IRI totype,
 			boolean instanceIsSubject ) {
 		// we only want the "root" edges (those in the 
 		// schema namespace, also, those without properties)

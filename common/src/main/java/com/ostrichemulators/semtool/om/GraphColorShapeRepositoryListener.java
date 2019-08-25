@@ -7,12 +7,12 @@ package com.ostrichemulators.semtool.om;
 
 import java.awt.Color;
 import java.net.URL;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  *
  * @author ryan
  */
 public interface GraphColorShapeRepositoryListener {
-	public void dataChanged( URI uri, NamedShape ns, Color c, URL img );
+	public void dataChanged( IRI uri, NamedShape ns, Color c, URL img );
 }

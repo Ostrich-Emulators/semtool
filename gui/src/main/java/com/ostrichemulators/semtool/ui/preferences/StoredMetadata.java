@@ -16,7 +16,6 @@ import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
 import com.ostrichemulators.semtool.ui.helpers.DefaultColorShapeRepository;
 import com.ostrichemulators.semtool.user.LocalUserImpl;
 import com.ostrichemulators.semtool.util.Utility;
-import info.aduna.iteration.Iterations;
 import java.awt.Color;
 import java.io.File;
 import java.net.MalformedURLException;
@@ -28,16 +27,16 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
+import org.eclipse.rdf4j.common.iteration.Iterations;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ContextStatementImpl;
-import org.eclipse.rdf4j.model.impl.URIImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
-import org.eclipse.rdf4j.repository.contextaware.ContextAwareConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
@@ -55,17 +54,17 @@ public class StoredMetadata {
 	private RepositoryConnection rc;
 	private ValueFactory vf;
 
-	public static final URI INSIGHT_LOC = Utility.makeInternalUri( "insight-loc" );
-	public static final URI GRAPH_COLOR = Utility.makeInternalUri( "graph-color" );
-	public static final URI GRAPH_SHAPE = Utility.makeInternalUri( "graph-shape" );
-	public static final URI GRAPH_ICON = Utility.makeInternalUri( "graph-icon" );
+	public static final IRI INSIGHT_LOC = Utility.makeInternalIRI( "insight-loc" );
+	public static final IRI GRAPH_COLOR = Utility.makeInternalIRI( "graph-color" );
+	public static final IRI GRAPH_SHAPE = Utility.makeInternalIRI( "graph-shape" );
+	public static final IRI GRAPH_ICON = Utility.makeInternalIRI( "graph-icon" );
 
 	public StoredMetadata( File datadir ) {
 		try {
 			MemoryStore store = new MemoryStore( datadir );
 			store.setSyncDelay( 2000 ); // every two seconds (arbitrary)
 			SailRepository repo = new SailRepository( store );
-			repo.initialize();
+			repo.init();
 			rc = repo.getConnection();
 			vf = rc.getValueFactory();
 
@@ -93,11 +92,11 @@ public class StoredMetadata {
 		}
 	}
 
-	public Set<URI> getDatabases() {
-		Set<URI> set = new HashSet<>();
+	public Set<IRI> getDatabases() {
+		Set<IRI> set = new HashSet<>();
 		try {
 			for ( Resource r : Iterations.asList( rc.getContextIDs() ) ) {
-				set.add( URI.class.cast( r ) );
+				set.add( IRI.class.cast( r ) );
 			}
 		}
 		catch ( RepositoryException e ) {
@@ -107,21 +106,21 @@ public class StoredMetadata {
 		return set;
 	}
 
-	public Set<String> getInsightLocations( URI database ) {
+	public Set<String> getInsightLocations( IRI database ) {
 		return getStrings( null, database, INSIGHT_LOC );
 	}
 
-	public void setInsightLocations( URI database, String... locs ) {
+	public void setInsightLocations( IRI database, String... locs ) {
 		set( null, database, INSIGHT_LOC, locs );
 	}
 
-	public void set( URI database, URI uri, Color col ) {
-		set( database, uri, GRAPH_COLOR, String.format( "%d,%d,%d",
+	public void set( IRI database, IRI IRI, Color col ) {
+		set( database, IRI, GRAPH_COLOR, String.format( "%d,%d,%d",
 				col.getRed(), col.getGreen(), col.getBlue() ) );
 	}
 
-	public Color get( URI database, URI uri, Color defaultval ) {
-		String col = getString( database, uri, GRAPH_COLOR, "" );
+	public Color get( IRI database, IRI IRI, Color defaultval ) {
+		String col = getString( database, IRI, GRAPH_COLOR, "" );
 
 		Color color = defaultval;
 		Pattern PAT = Pattern.compile( "(\\d+),(\\d+),(\\d)" );
@@ -134,22 +133,22 @@ public class StoredMetadata {
 		return color;
 	}
 
-	public void set( URI database, URI uri, NamedShape ns ) {
-		set( database, uri, GRAPH_SHAPE, ns.toString() );
+	public void set( IRI database, IRI IRI, NamedShape ns ) {
+		set( database, IRI, GRAPH_SHAPE, ns.toString() );
 	}
 
-	public NamedShape getShape( URI database, URI uri, NamedShape defaultval ) {
-		String str = getString( database, uri, GRAPH_SHAPE, "" );
+	public NamedShape getShape( IRI database, IRI IRI, NamedShape defaultval ) {
+		String str = getString( database, IRI, GRAPH_SHAPE, "" );
 		return ( str.isEmpty() ? defaultval : NamedShape.valueOf( str ) );
 	}
 
-	public GraphColorShapeRepository getCSRepo( URI database ) {
+	public GraphColorShapeRepository getCSRepo( IRI database ) {
 		DefaultColorShapeRepository repo = new DefaultColorShapeRepository();
 		try {
 			List<Statement> stmts = Iterations.asList( rc.getStatements( null,
 					GRAPH_SHAPE, null, false, database ) );
 			for ( Statement s : stmts ) {
-				repo.set( URI.class.cast( s.getSubject() ),
+				repo.set( IRI.class.cast( s.getSubject() ),
 						NamedShape.valueOf( s.getObject().stringValue() ) );
 			}
 
@@ -159,14 +158,14 @@ public class StoredMetadata {
 				String vals[] = s.getObject().stringValue().split( "," );
 				Color color = new Color( Integer.parseInt( vals[0] ),
 						Integer.parseInt( vals[1] ), Integer.parseInt( vals[2] ) );
-				repo.set( URI.class.cast( s.getSubject() ), color );
+				repo.set( IRI.class.cast( s.getSubject() ), color );
 			}
 
 			stmts = Iterations.asList( rc.getStatements( null,
 					GRAPH_ICON, null, false, database ) );
 			for ( Statement s : stmts ) {
 				try {
-					repo.set( URI.class.cast( s.getSubject() ),
+					repo.set( IRI.class.cast( s.getSubject() ),
 							new URL( s.getObject().stringValue() ) );
 				}
 				catch ( MalformedURLException x ) {
@@ -181,7 +180,7 @@ public class StoredMetadata {
 		return repo;
 	}
 
-	public void clearGraphSettings( URI database ) {
+	public void clearGraphSettings( IRI database ) {
 		try {
 			rc.remove( rc.getStatements( null, GRAPH_SHAPE, null, false, database ) );
 			rc.remove( rc.getStatements( null, GRAPH_COLOR, null, false, database ) );
@@ -192,26 +191,26 @@ public class StoredMetadata {
 		}
 	}
 
-	public void set( URI database, GraphColorShapeRepository repo ) {
+	public void set( IRI database, GraphColorShapeRepository repo ) {
 		clearGraphSettings( database );
 
-		for ( Map.Entry<URI, NamedShape> en : repo.getShapes().entrySet() ) {
+		for ( Map.Entry<IRI, NamedShape> en : repo.getShapes().entrySet() ) {
 			set( database, en.getKey(), en.getValue() );
 		}
-		for ( Map.Entry<URI, Color> en : repo.getColors().entrySet() ) {
+		for ( Map.Entry<IRI, Color> en : repo.getColors().entrySet() ) {
 			set( database, en.getKey(), en.getValue() );
 		}
-		for ( Map.Entry<URI, URL> en : repo.getIcons().entrySet() ) {
+		for ( Map.Entry<IRI, URL> en : repo.getIcons().entrySet() ) {
 			set( database, en.getKey(), GRAPH_ICON,
-					new URIImpl( en.getValue().toExternalForm() ) );
+					SimpleValueFactory.getInstance().createIRI( en.getValue().toExternalForm() ) );
 		}
 	}
 
-	private void set( URI ctx, URI subj, URI pref, boolean bool ) {
+	private void set( IRI ctx, IRI subj, IRI pref, boolean bool ) {
 		try {
 			rc.begin();
 			rc.remove( subj, pref, null, ctx );
-			rc.add( new ContextStatementImpl( subj, pref, vf.createLiteral( bool ), ctx ) );
+			rc.add( rc.getValueFactory().createStatement( subj, pref, vf.createLiteral( bool ), ctx ) );
 			rc.commit();
 		}
 		catch ( Exception e ) {
@@ -225,14 +224,14 @@ public class StoredMetadata {
 		}
 	}
 
-	public void set( URI ctx, URI subj, URI pref, URI... uris ) {
+	public void set( IRI ctx, IRI subj, IRI pref, IRI... uris ) {
 		try {
 			rc.begin();
 			rc.remove( subj, pref, null, ctx );
 
 			if ( !( null == uris || 0 == uris.length ) ) {
-				for ( URI u : uris ) {
-					rc.add( new ContextStatementImpl( subj, pref, u, ctx ) );
+				for ( IRI u : uris ) {
+					rc.add( rc.getValueFactory().createStatement( subj, pref, u, ctx ) );
 				}
 			}
 			rc.commit();
@@ -248,12 +247,12 @@ public class StoredMetadata {
 		}
 	}
 
-	public void set( URI ctx, URI subj, URI pref, String... val ) {
+	public void set( IRI ctx, IRI subj, IRI pref, String... val ) {
 		try {
 			rc.begin();
 			rc.remove( subj, pref, null, ctx );
 			for ( String s : val ) {
-				rc.add( new ContextStatementImpl( subj, pref, vf.createLiteral( s ), ctx ) );
+				rc.add( rc.getValueFactory().createStatement( subj, pref, vf.createLiteral( s ), ctx ) );
 			}
 			rc.commit();
 		}
@@ -268,48 +267,46 @@ public class StoredMetadata {
 		}
 	}
 
-	private <X> X get( URI ctx, URI subj, URI pref, QueryExecutor<X> qa ) {
+	private <X> X get( IRI ctx, IRI subj, IRI pref, QueryExecutor<X> qa ) {
 		qa.bind( "db", subj );
 		qa.bind( "pred", pref );
 		qa.setContext( ctx );
 		return AbstractSesameEngine.getSelectNoEx( qa, rc, true );
 	}
 
-	public boolean getBool( URI ctx, URI uri, URI pref, boolean defaultval ) {
-		Boolean b = get( ctx, uri, pref,
+	public boolean getBool( IRI ctx, IRI IRI, IRI pref, boolean defaultval ) {
+		Boolean b = get( ctx, IRI, pref,
 				OneValueQueryAdapter.getBoolean( "SELECT ?val WHERE { ?db ?pred ?val }" ) );
 
 		return ( null == b ? defaultval : b );
 	}
 
-	public String getString( URI ctx, URI uri, URI pref, String defaultval ) {
-		String str = get( ctx, uri, pref,
+	public String getString( IRI ctx, IRI IRI, IRI pref, String defaultval ) {
+		String str = get( ctx, IRI, pref,
 				OneValueQueryAdapter.getString( "SELECT ?val WHERE { ?db ?pred ?val }" ) );
 		return ( null == str ? defaultval : str );
 	}
 
-	public Set<String> getStrings( URI ctx, URI uri, URI pref ) {
-		return new HashSet<>( get( ctx, uri, pref,
+	public Set<String> getStrings( IRI ctx, IRI IRI, IRI pref ) {
+		return new HashSet<>( get( ctx, IRI, pref,
 				OneVarListQueryAdapter.getStringList( "SELECT ?val WHERE { ?db ?pred ?val }" ) ) );
 	}
 
-	public Set<URI> getUris( URI ctx, URI uri, URI pref ) {
-		return new HashSet<>( get( ctx, uri, pref,
-				OneVarListQueryAdapter.getUriList( "SELECT ?val WHERE { ?db ?pred ?val }" ) ) );
+	public Set<IRI> getUris( IRI ctx, IRI IRI, IRI pref ) {
+		return new HashSet<>( get( ctx, IRI, pref,
+				OneVarListQueryAdapter.getIriList( "SELECT ?val WHERE { ?db ?pred ?val }" ) ) );
 	}
 
-	public URI getUri( URI ctx, URI uri, URI pref ) {
-		return get( ctx, uri, pref,
+	public IRI getUri( IRI ctx, IRI IRI, IRI pref ) {
+		return get( ctx, IRI, pref,
 				OneValueQueryAdapter.getUri( "SELECT ?val WHERE { ?db ?pred ?val }" ) );
 	}
 
-	public InsightManager getLocalInsightManager( URI database ) {
+	public InsightManager getLocalInsightManager( IRI database ) {
 		InsightManagerImpl imi = new InsightManagerImpl();
-		ContextAwareConnection imirc = null;
 		try {
-			imirc = new ContextAwareConnection( rc );
-			imirc.setReadContexts( getInsightContext( database ) );
-			imi.loadFromRepository( imirc );
+			Model imirc = QueryResults.asModel( rc.getStatements( null, null, null, getInsightContext( database ) ) );
+			imi.loadFromModel( imirc );
 		}
 		catch ( RepositoryException re ) {
 			log.warn( re, re );
@@ -318,35 +315,22 @@ public class StoredMetadata {
 		return imi;
 	}
 
-	public void setLocalInsights( URI database, InsightManager imi ) {
+	public void setLocalInsights( IRI database, InsightManager imi ) {
 		Model model = InsightManagerImpl.getModel( imi, new LocalUserImpl() );
 
-		ContextAwareConnection imirc = null;
 		try {
-			URI realctx = getInsightContext( database );
-			imirc = new ContextAwareConnection( rc );
-			imirc.setReadContexts( realctx );
-			imirc.setRemoveContexts( realctx );
-			imirc.setInsertContext( realctx );
-			imirc.begin();
-			imirc.clear();
-			imirc.add( model );
-			imirc.commit();
+			IRI realctx = getInsightContext( database );
+			rc.begin();
+			rc.clear( realctx );
+			rc.add( model );
+			rc.commit();
 		}
 		catch ( RepositoryException re ) {
 			log.warn( re, re );
-			if ( null != imirc ) {
-				try {
-					imirc.rollback();
-				}
-				catch ( Exception e ) {
-					log.warn( e, e );
-				}
-			}
 		}
 	}
 
-	private static URI getInsightContext( URI database ) {
-		return new URIImpl( database.toString() + "_insights" );
+	private static IRI getInsightContext( IRI database ) {
+		return SimpleValueFactory.getInstance().createIRI( database.toString() + "_insights" );
 	}
 }

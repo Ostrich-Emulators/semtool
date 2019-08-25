@@ -35,6 +35,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 
 import org.apache.log4j.Logger;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -106,12 +107,12 @@ public abstract class NodeEdgeBasePopup<T extends QueryGraphElement> extends JPo
 	protected void finishMenu( T v, GraphicalQueryPanel pnl ) {
 	}
 
-	protected static Collection<URI> getAllPossibleProperties( URI type, IEngine engine ) {
+	protected static Collection<IRI> getAllPossibleProperties( IRI type, IEngine engine ) {
 		String query = "SELECT DISTINCT ?pred WHERE { ?s ?pred ?o . ?s a ?type . FILTER ( isLiteral( ?o ) ) }";
-		ListQueryAdapter<URI> qa = OneVarListQueryAdapter.getUriList( query, "pred" );
+		ListQueryAdapter<IRI> qa = OneVarListQueryAdapter.getIriList( query, "pred" );
 		qa.bind( "type", type );
 
-		List<URI> props = new ArrayList<>();
+		List<IRI> props = new ArrayList<>();
 		props.add( Constants.ANYNODE );
 		try {
 			props.addAll( engine.query( qa ) );
@@ -129,7 +130,7 @@ public abstract class NodeEdgeBasePopup<T extends QueryGraphElement> extends JPo
 		ConstraintRemover cr = new ConstraintRemover( v, pnl );
 		add( cr );
 
-		Set<URI> myprops = v.getValues().keySet();
+		Set<IRI> myprops = v.getValues().keySet();
 		myprops.removeAll( Arrays.asList( RDF.SUBJECT, RDF.TYPE ) );
 		cr.setEnabled( !myprops.isEmpty() );
 	}
@@ -142,20 +143,20 @@ public abstract class NodeEdgeBasePopup<T extends QueryGraphElement> extends JPo
 
 			@Override
 			protected Action makeTypeItem( QueryNode v, GraphicalQueryPanel pnl ) {
-				Map<URI, String> labels = Utility.getInstanceLabels(
+				Map<IRI, String> labels = Utility.getInstanceLabels(
 						sm.getTopLevelConcepts(), pnl.getEngine() );
 				labels.put( Constants.ANYNODE, "<Any>" );
 				return new OneVariableDialogItem( v, pnl, RDF.TYPE, "Set Type",
 						"Change the type of this Vertex", "New Type",
-						Utility.sortUrisByLabel( labels ) );
+						Utility.sortIrisByLabel( labels ) );
 			}
 
 			@Override
 			protected void finishMenu( QueryNode v, GraphicalQueryPanel pnl ) {
-				Collection<URI> props
+				Collection<IRI> props
 						= getAllPossibleProperties( v.getType(), pnl.getEngine() );
 
-				Map<URI, String> propmap = Utility.getInstanceLabels( props, pnl.getEngine() );
+				Map<IRI, String> propmap = Utility.getInstanceLabels( props, pnl.getEngine() );
 				propmap.put( Constants.ANYNODE, "<Any>" );
 				add( new OneVariableDialogItem( v, pnl, null, "Add Constraint",
 						"Add a constraint to this Vertex", "New Value", propmap ) );
@@ -176,8 +177,8 @@ public abstract class NodeEdgeBasePopup<T extends QueryGraphElement> extends JPo
 				Graph<QueryNode, QueryEdge> graph
 						= pnl.getViewer().getGraphLayout().getGraph();
 
-				URI starttype = graph.getSource( v ).getType();
-				URI endtype = graph.getDest( v ).getType();
+				IRI starttype = graph.getSource( v ).getType();
+				IRI endtype = graph.getDest( v ).getType();
 
 				Model alllinks = sm.getLinksBetween( starttype, endtype );
 				Model links = alllinks.filter( starttype, null, null );
@@ -188,7 +189,7 @@ public abstract class NodeEdgeBasePopup<T extends QueryGraphElement> extends JPo
 
 			@Override
 			protected void finishMenu( QueryEdge v, GraphicalQueryPanel pnl ) {
-				Set<URI> preds = sm.getPropertiesOf( v.getType() );
+				Set<IRI> preds = sm.getPropertiesOf( v.getType() );
 
 				add( new OneVariableDialogItem( v, pnl, null, "Add Constraint",
 						"Add a constraint to this Edge", "New Value", preds ) );
@@ -211,11 +212,11 @@ public abstract class NodeEdgeBasePopup<T extends QueryGraphElement> extends JPo
 
 		@Override
 		public void actionPerformed( ActionEvent e ) {
-			Set<URI> props = new HashSet<>( nodeedge.getAllValues().keySet() );
+			Set<IRI> props = new HashSet<>( nodeedge.getAllValues().keySet() );
 			props.remove( RDF.SUBJECT );
 			props.remove( RDF.TYPE );
-			JList<URI> cons = new JList<>( props.toArray( new URI[0] ) );
-			LabeledPairRenderer<URI> renderer = LabeledPairRenderer.getUriPairRenderer();
+			JList<IRI> cons = new JList<>( props.toArray( new IRI[0] ) );
+			LabeledPairRenderer<IRI> renderer = LabeledPairRenderer.getUriPairRenderer();
 			renderer.cache( Utility.getInstanceLabels( props, pnl.getEngine() ) );
 			cons.setCellRenderer( renderer );
 
@@ -224,7 +225,7 @@ public abstract class NodeEdgeBasePopup<T extends QueryGraphElement> extends JPo
 					"Constraints to Remove", JOptionPane.YES_NO_OPTION,
 					JOptionPane.PLAIN_MESSAGE, null, choices, choices[0] );
 			if ( 0 == ans ) {
-				for ( URI u : cons.getSelectedValuesList() ) {
+				for ( IRI u : cons.getSelectedValuesList() ) {
 					nodeedge.removeProperty( u );
 				}
 				pnl.update();

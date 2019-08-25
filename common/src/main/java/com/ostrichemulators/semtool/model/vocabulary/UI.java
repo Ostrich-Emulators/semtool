@@ -1,10 +1,10 @@
 package com.ostrichemulators.semtool.model.vocabulary;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Namespace;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.NamespaceImpl;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleNamespace;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 
 /**
@@ -35,7 +35,7 @@ public class UI {
 	 * An immutable {@link Namespace} constant that represents the UISPIN 
 	 * Modeling Vocabulary namespace.
 	 */
-	public static final Namespace NS = new NamespaceImpl(PREFIX, NAMESPACE);
+	public static final Namespace NS = new SimpleNamespace(PREFIX, NAMESPACE);
 
 	
 	// ----- Properties ------
@@ -43,25 +43,25 @@ public class UI {
 	/**
 	 * http://uispin.org/ui#element
 	 */
-	public final static URI element;
+	public final static IRI element;
     
 	/**
 	 * http://uispin.org/ui#dataView
 	 */
-	public final static URI dataView;
+	public final static IRI dataView;
     
 	/**
 	 * http://uispin.org/ui#viewClass
 	 */
-	public final static URI viewClass;
+	public final static IRI viewClass;
 	
 	
 	static {
-		final ValueFactory factory = ValueFactoryImpl.getInstance();
+		final ValueFactory factory = SimpleValueFactory.getInstance();
 		
 		// ----- Properties ------
-		element = factory.createURI(NAMESPACE, "element");
-		dataView = factory.createURI(NAMESPACE, "dataView");
-		viewClass = factory.createURI(NAMESPACE, "viewClass");
+		element = factory.createIRI(NAMESPACE, "element");
+		dataView = factory.createIRI(NAMESPACE, "dataView");
+		viewClass = factory.createIRI(NAMESPACE, "viewClass");
 	}
 }

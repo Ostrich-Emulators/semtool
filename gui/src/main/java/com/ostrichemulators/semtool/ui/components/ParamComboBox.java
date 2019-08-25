@@ -24,8 +24,9 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
-import org.eclipse.rdf4j.model.impl.URIImpl;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+
 
 /**
  * This class allows the user to pick parameters by combining a button and a
@@ -37,18 +38,18 @@ public class ParamComboBox extends IriComboBox {
   private String fieldName = null;
   private final List<String> dependency = new ArrayList<>();
   private String query;
-  private URI type;
+  private IRI type;
 
   /**
    * Constructor for ParamComboBox.
    *
    * @param array String[]
    */
-  public ParamComboBox( URI[] array ) {
+  public ParamComboBox( IRI[] array ) {
     super( array );
   }
 
-  public ParamComboBox( Collection<URI> array ) {
+  public ParamComboBox( Collection<IRI> array ) {
     super( array );
   }
 
@@ -56,7 +57,7 @@ public class ParamComboBox extends IriComboBox {
   }
   
   public void setType( String typ ) {
-    type = new URIImpl( typ );
+    type = SimpleValueFactory.getInstance().createIRI( typ );
   }
 
   public String getType() {

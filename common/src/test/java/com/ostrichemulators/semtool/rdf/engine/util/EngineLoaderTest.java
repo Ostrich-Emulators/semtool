@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.util;
 
-import com.bigdata.rdf.model.BigdataValueFactoryImpl;
 import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.poi.main.CSVReader;
 import com.ostrichemulators.semtool.poi.main.ImportData;
@@ -15,15 +14,10 @@ import com.ostrichemulators.semtool.poi.main.LoadingSheetData;
 import com.ostrichemulators.semtool.poi.main.POIReader;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.MetadataConstants;
-import com.ostrichemulators.semtool.rdf.engine.impl.BigDataEngine;
-import com.ostrichemulators.semtool.rdf.engine.impl.EngineFactory;
 import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
-import com.ostrichemulators.semtool.util.Constants;
 import com.ostrichemulators.semtool.util.DeterministicSanitizer;
 import com.ostrichemulators.semtool.util.UriBuilder;
-import com.ostrichemulators.semtool.util.UriBuilder.DefaultSanitizer;
-import info.aduna.iteration.Iterations;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
@@ -36,14 +30,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.eclipse.rdf4j.model.IRI;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -51,16 +45,15 @@ import org.junit.Test;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.model.impl.LiteralImpl;
-import org.eclipse.rdf4j.model.impl.URIImpl;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleLiteral;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
@@ -77,12 +70,13 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
  */
 public class EngineLoaderTest {
 
+	private static final ValueFactory VF = SimpleValueFactory.getInstance();
 	private static final Logger log = Logger.getLogger( EngineLoaderTest.class );
 
-	private static final URI BASEURI = new URIImpl( "http://junk.com/testfiles" );
-	private static final URI OWLSTART = new URIImpl( "http://owl.junk.com/testfiles" );
-	private static final URI DATAURI = new URIImpl( "http://seman.tc/data/northwind/" );
-	private static final URI SCHEMAURI = new URIImpl( "http://seman.tc/models/northwind#" );
+	private static final IRI BASEURI = VF.createIRI( "http://junk.com/testfiles" );
+	private static final IRI OWLSTART = VF.createIRI( "http://owl.junk.com/testfiles" );
+	private static final IRI DATAURI = VF.createIRI( "http://seman.tc/data/northwind/" );
+	private static final IRI SCHEMAURI = VF.createIRI( "http://seman.tc/models/northwind#" );
 
 	private static final File CSVLOADER = new File( "src/test/resources/airplanes.txt" );
 	private static final File CSVDATA = new File( "src/test/resources/airplanes.csv" );
@@ -135,29 +129,30 @@ public class EngineLoaderTest {
 	private File dbfile;
 
 	private IEngine extractKb() throws Exception {
-		if ( null != dbfile ) {
-			FileUtils.deleteQuietly( dbfile );
-		}
-
-		try {
-			dbfile = File.createTempFile( "semoss-test-", ".jnl" );
-		}
-		catch ( Exception e ) {
-			log.error( e, e );
-		}
-
-		UriBuilder schema = UriBuilder.getBuilder( OWLSTART );
-		final UriBuilder data = UriBuilder.getBuilder( BASEURI );
-		data.setSanitizer( new DefaultSanitizer() );
-		schema.setSanitizer( new DefaultSanitizer() );
-
-		Properties props = BigDataEngine.generateProperties( dbfile );
-		props.setProperty( Constants.SEMOSS_URI, OWLSTART.stringValue() );
-		props.setProperty( Constants.ENGINE_NAME, "Empty KB" );
-		IEngine eng = EngineFactory.getEngine( props );
-		eng.setDataBuilder( data );
-		eng.setSchemaBuilder( schema );
-		return eng;
+		throw new IllegalArgumentException( "BigData/Blazegraph is no longer supported" );
+//		if ( null != dbfile ) {
+//			FileUtils.deleteQuietly( dbfile );
+//		}
+//
+//		try {
+//			dbfile = File.createTempFile( "semoss-test-", ".jnl" );
+//		}
+//		catch ( IOException e ) {
+//			log.error( e, e );
+//		}
+//
+//		UriBuilder schema = UriBuilder.getBuilder( OWLSTART );
+//		final UriBuilder data = UriBuilder.getBuilder( BASEURI );
+//		data.setSanitizer( new DefaultSanitizer() );
+//		schema.setSanitizer( new DefaultSanitizer() );
+//
+//		Properties props = BigDataEngine.generateProperties( dbfile );
+//		props.setProperty( Constants.SEMOSS_IRI, OWLSTART.stringValue() );
+//		props.setProperty( Constants.ENGINE_NAME, "Empty KB" );
+//		IEngine eng = EngineFactory.getEngine( props );
+//		eng.setDataBuilder( data );
+//		eng.setSchemaBuilder( schema );
+//		return eng;
 	}
 
 	private void removeKb( IEngine eng ) {
@@ -499,52 +494,51 @@ public class EngineLoaderTest {
 				engine.getDataBuilder() );
 	}
 
-	@Test
-	public void testLoadToEngine_two_loadsLegacy() throws Exception {
-		// check to make sure if we load the same data twice, we don't expand the
-		// data in the KB (basically, make sure the caching works)
-		IEngine eng = extractKb();
-		EngineLoader el = new EngineLoader();
-		el.setDefaultBaseUri( BASEURI, false );
-		el.loadToEngine( Arrays.asList( LEGACY ), eng, true, null );
-		el.release();
-		OneVarListQueryAdapter<URI> o
-				= OneVarListQueryAdapter.getUriList( "SELECT ?uri WHERE { ?uri ?p ?o . FILTER( isUri( ?uri ) ) }",
-						"uri" );
-		List<URI> oldlist = eng.query( o );
-
-		EngineLoader el2 = new EngineLoader();
-		el2.setDefaultBaseUri( BASEURI, false );
-		el2.loadToEngine( Arrays.asList( LEGACY ), eng, true, null );
-		el2.release();
-		List<URI> newlist = engine.query( o );
-		removeKb( eng );
-		assertEquals( oldlist, newlist );
-	}
-
-	@Test
-	public void testLoadToEngine_two_loadsCurrent() throws Exception {
-		// same as the two_loads1 test, but in the custom metamodel mode
-		IEngine eng = extractKb();
-		EngineLoader el = new EngineLoader();
-		el.setDefaultBaseUri( BASEURI, false );
-		el.loadToEngine( Arrays.asList( CUSTOM ), eng, true, null );
-		el.release();
-		OneVarListQueryAdapter<URI> o
-				= OneVarListQueryAdapter.getUriList( "SELECT ?uri WHERE { ?uri ?p ?o . FILTER( isUri( ?uri ) ) }",
-						"uri" );
-		List<URI> oldlist = eng.query( o );
-
-		EngineLoader el2 = new EngineLoader();
-		el2.setDefaultBaseUri( BASEURI, false );
-		el2.loadToEngine( Arrays.asList( CUSTOM ), eng, true, null );
-		el2.release();
-
-		List<URI> newlist = engine.query( o );
-		removeKb( eng );
-		assertEquals( oldlist, newlist );
-	}
-
+//	@Test
+//	public void testLoadToEngine_two_loadsLegacy() throws Exception {
+//		// check to make sure if we load the same data twice, we don't expand the
+//		// data in the KB (basically, make sure the caching works)
+//		IEngine eng = extractKb();
+//		EngineLoader el = new EngineLoader();
+//		el.setDefaultBaseUri( BASEURI, false );
+//		el.loadToEngine( Arrays.asList( LEGACY ), eng, true, null );
+//		el.release();
+//		OneVarListQueryAdapter<IRI> o
+//				= OneVarListQueryAdapter.getIriList( "SELECT ?IRI WHERE { ?IRI ?p ?o . FILTER( isUri( ?IRI ) ) }",
+//						"IRI" );
+//		List<IRI> oldlist = eng.query( o );
+//
+//		EngineLoader el2 = new EngineLoader();
+//		el2.setDefaultBaseUri( BASEURI, false );
+//		el2.loadToEngine( Arrays.asList( LEGACY ), eng, true, null );
+//		el2.release();
+//		List<IRI> newlist = engine.query( o );
+//		removeKb( eng );
+//		assertEquals( oldlist, newlist );
+//	}
+//
+//	@Test
+//	public void testLoadToEngine_two_loadsCurrent() throws Exception {
+//		// same as the two_loads1 test, but in the custom metamodel mode
+//		IEngine eng = extractKb();
+//		EngineLoader el = new EngineLoader();
+//		el.setDefaultBaseUri( BASEURI, false );
+//		el.loadToEngine( Arrays.asList( CUSTOM ), eng, true, null );
+//		el.release();
+//		OneVarListQueryAdapter<IRI> o
+//				= OneVarListQueryAdapter.getIriList( "SELECT ?IRI WHERE { ?IRI ?p ?o . FILTER( isUri( ?IRI ) ) }",
+//						"IRI" );
+//		List<IRI> oldlist = eng.query( o );
+//
+//		EngineLoader el2 = new EngineLoader();
+//		el2.setDefaultBaseUri( BASEURI, false );
+//		el2.loadToEngine( Arrays.asList( CUSTOM ), eng, true, null );
+//		el2.release();
+//
+//		List<IRI> newlist = engine.query( o );
+//		removeKb( eng );
+//		assertEquals( oldlist, newlist );
+//	}
 	@Test
 	public void testTicket583() throws Exception {
 		RepositoryConnection rc = engine.getRawConnection();
@@ -667,14 +661,14 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
-		el.setDefaultBaseUri( new URIImpl( "test://something-different/blah" ), true );
+		el.setDefaultBaseUri( VF.createIRI( "test://something-different/blah" ), true );
 
 		ImportData errs = new ImportData();
 		ImportData id = new ImportData();
 		LoadingSheetData lsd = LoadingSheetData.nodesheet( "testtype" );
 		id.getMetadata().setSchemaBuilder( "http://schema.foo.bar/" );
 		id.getMetadata().setDataBuilder( "http://data.foo.bar/" );
-		id.getMetadata().setBase( new URIImpl( "http://base.foo.bar" ) );
+		id.getMetadata().setBase( VF.createIRI( "http://base.foo.bar" ) );
 
 		id.add( lsd );
 		lsd.add( "uno" );
@@ -682,11 +676,11 @@ public class EngineLoaderTest {
 		el.loadToEngine( id, engine, errs );
 		el.release();
 
-		OneVarListQueryAdapter<URI> q
-				= OneVarListQueryAdapter.getUriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
+		OneVarListQueryAdapter<IRI> q
+				= OneVarListQueryAdapter.getIriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
 		q.bind( "db", engine.getBaseIri() );
 		q.bind( "subset", MetadataConstants.VOID_SUBSET );
-		List<URI> uris = engine.query( q );
+		List<IRI> uris = engine.query( q );
 		assertEquals( "test://something-different/blah", uris.get( 0 ).stringValue() );
 	}
 
@@ -696,14 +690,14 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
-		el.setDefaultBaseUri( new URIImpl( "test://something-different/blah" ), false );
+		el.setDefaultBaseUri( VF.createIRI( "test://something-different/blah" ), false );
 
 		ImportData errs = new ImportData();
 		ImportData id = new ImportData();
 		LoadingSheetData lsd = LoadingSheetData.nodesheet( "testtype" );
 		id.getMetadata().setSchemaBuilder( "http://schema.foo.bar/" );
 		id.getMetadata().setDataBuilder( "http://data.foo.bar/" );
-		id.getMetadata().setBase( new URIImpl( "http://base.foo.bar" ) );
+		id.getMetadata().setBase( VF.createIRI( "http://base.foo.bar" ) );
 
 		id.add( lsd );
 		lsd.add( "uno" );
@@ -715,11 +709,11 @@ public class EngineLoaderTest {
 			el.release();
 		}
 
-		OneVarListQueryAdapter<URI> q
-				= OneVarListQueryAdapter.getUriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
+		OneVarListQueryAdapter<IRI> q
+				= OneVarListQueryAdapter.getIriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
 		q.bind( "db", engine.getBaseIri() );
 		q.bind( "subset", MetadataConstants.VOID_SUBSET );
-		List<URI> uris = engine.query( q );
+		List<IRI> uris = engine.query( q );
 		assertEquals( "http://base.foo.bar", uris.get( 0 ).stringValue() );
 	}
 
@@ -729,7 +723,7 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
-		el.setDefaultBaseUri( new URIImpl( "test://something-different/blah" ), false );
+		el.setDefaultBaseUri( VF.createIRI( "test://something-different/blah" ), false );
 
 		ImportData errs = new ImportData();
 		ImportData id = new ImportData();
@@ -747,11 +741,11 @@ public class EngineLoaderTest {
 			el.release();
 		}
 
-		OneVarListQueryAdapter<URI> q
-				= OneVarListQueryAdapter.getUriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
+		OneVarListQueryAdapter<IRI> q
+				= OneVarListQueryAdapter.getIriList( "SELECT ?file { ?db ?subset ?file } ", "file" );
 		q.bind( "db", engine.getBaseIri() );
 		q.bind( "subset", MetadataConstants.VOID_SUBSET );
-		List<URI> uris = engine.query( q );
+		List<IRI> uris = engine.query( q );
 		assertEquals( "test://something-different/blah", uris.get( 0 ).stringValue() );
 	}
 
@@ -761,7 +755,7 @@ public class EngineLoaderTest {
 				UriBuilder.getBuilder( SCHEMAURI ) );
 
 		EngineLoader el = new EngineLoader();
-		//el.setDefaultBaseUri( new URIImpl( "test://something-different/blah" ), false );
+		//el.setDefaultBaseUri( VF.createIRI( "test://something-different/blah" ), false );
 
 		ImportData errs = new ImportData();
 		ImportData id = new ImportData();
@@ -900,12 +894,11 @@ public class EngineLoaderTest {
 
 	@Test
 	public void testCleanValue() {
-		ValueFactory vf = BigdataValueFactoryImpl.getInstance( "kb" );
-		Value old = vf.createLiteral( "this is a test" );
-		Value result = EngineLoader.cleanValue( old, new ValueFactoryImpl() );
+		Value old = VF.createLiteral( "this is a test" );
+		Value result = EngineLoader.cleanValue( old, VF );
 
-		assertEquals( LiteralImpl.class, result.getClass() );
-		assertNotEquals( old.getClass(), result.getClass() );
+		assertEquals( SimpleLiteral.class, result.getClass() );
+		//assertNotEquals( old.getClass(), result.getClass() );
 	}
 
 	@Test
@@ -939,14 +932,14 @@ public class EngineLoaderTest {
 		engine.setBuilders( UriBuilder.getBuilder( "http://sales.data/purchases#" ),
 				UriBuilder.getBuilder( "http://sales.data/schema#" ) );
 
-		engine.getRawConnection().add( new URIImpl( "http://sales.data/purchases/2015/vocab" ),
+		engine.getRawConnection().add( VF.createIRI( "http://sales.data/purchases/2015/vocab" ),
 				RDF.TYPE, OWL.ONTOLOGY );
-		engine.getRawConnection().add( new URIImpl( "http://sales.data/schema#xyz" ),
-				RDFS.SUBPROPERTYOF, new URIImpl( "http://sales.data/schema#Relation" ) );
-		engine.getRawConnection().add( new URIImpl( "http://sales.data/schema#xyz" ),
-				RDFS.SUBPROPERTYOF, new URIImpl( "http://sales.data/schema#Relation/Contains" ) );
-		engine.getRawConnection().add( new URIImpl( "http://sales.data/schema#xyz" ),
-				RDFS.LABEL, new LiteralImpl( "508 Compliant?" ) );
+		engine.getRawConnection().add( VF.createIRI( "http://sales.data/schema#xyz" ),
+				RDFS.SUBPROPERTYOF, VF.createIRI( "http://sales.data/schema#Relation" ) );
+		engine.getRawConnection().add( VF.createIRI( "http://sales.data/schema#xyz" ),
+				RDFS.SUBPROPERTYOF, VF.createIRI( "http://sales.data/schema#Relation/Contains" ) );
+		engine.getRawConnection().add( VF.createIRI( "http://sales.data/schema#xyz" ),
+				RDFS.LABEL, VF.createLiteral( "508 Compliant?" ) );
 
 		EngineLoader el = new EngineLoader();
 		el.setDefaultBaseUri( BASEURI, false );
@@ -1004,11 +997,11 @@ public class EngineLoaderTest {
 		RepositoryConnection expectedrc = null;
 		List<Statement> stmts = new ArrayList<>();
 		try {
-			repo.initialize();
+			repo.init();
 			expectedrc = repo.getConnection();
 			expectedrc.add( rdf, null, fmt );
-			stmts.addAll( Iterations.asList( expectedrc.getStatements( null, null,
-					null, true ) ) );
+			stmts.addAll( QueryResults.stream( expectedrc.getStatements( null, null,
+					null, true ) ).collect( Collectors.toList() ) );
 		}
 		catch ( RepositoryException | IOException | RDFParseException e ) {
 		}
@@ -1047,11 +1040,11 @@ public class EngineLoaderTest {
 		Model expected = getExpectedGraph( filename );
 		Model test = new LinkedHashModel( owls );
 
-		compare( "category concept", expected, test, bldr.getConceptUri( "Category" ), null, null );
-		compare( "product concept", expected, test, bldr.getConceptUri( "Product" ), null, null );
+		compare( "category concept", expected, test, bldr.getConceptIRI( "Category" ), null, null );
+		compare( "product concept", expected, test, bldr.getConceptIRI( "Product" ), null, null );
 		compare( "category relation", expected, test, bldr.getRelationIri( "Category" ), null, null );
-		compare( "contains relation", expected, test, bldr.getConceptUri( "Contains" ), null, null );
-		URI contains = bldr.getRelationIri( "Contains" );
+		compare( "contains relation", expected, test, bldr.getConceptIRI( "Contains" ), null, null );
+		IRI contains = bldr.getRelationIri( "Contains" );
 		UriBuilder bldr2 = UriBuilder.getBuilder( contains );
 		compare( "contains relation description",
 				expected, test, bldr2.add( "Description" ).build(), null, null );
@@ -1061,31 +1054,31 @@ public class EngineLoaderTest {
 
 	private void compareData( RepositoryConnection testRc, Model expected,
 			UriBuilder owl, UriBuilder base ) throws Exception {
-		List<Statement> stmts
-				= Iterations.asList( testRc.getStatements( null, null, null, false ) );
+		List<Statement> stmts = QueryResults.stream( testRc.getStatements( null, null, null, false ) )
+				.collect( Collectors.toList() );
 
 		Model test = new LinkedHashModel( stmts );
 
 		assertEquals( "dataset size", expected.size(), test.size() );
 
 		compare( "category concept", expected, test, null, RDF.TYPE,
-				owl.getConceptUri( "Category" ) );
+				owl.getConceptIRI( "Category" ) );
 		compare( "beverages concept", expected, test,
 				base.getConceptIri().add( "Category" ).add( "Beverages" ).build(),
 				null, null );
 		compare( "dairy products", expected, test,
-				null, RDFS.LABEL, new LiteralImpl( "Dairy Products" ) );
+				null, RDFS.LABEL, VF.createLiteral( "Dairy Products" ) );
 		compare( "chai-beverages link", expected, test,
-				null, RDFS.LABEL, new LiteralImpl( "Chai Category Beverages" ) );
+				null, RDFS.LABEL, VF.createLiteral( "Chai Category Beverages" ) );
 
-		URI bev
+		IRI bev
 				= base.getRelationIri().add( "Category" ).add( "Chai_x_Beverages" ).build();
 		compare( "chai-beverages category", expected, test,
 				bev, RDFS.SUBPROPERTYOF, owl.getRelationIri( "Category" ) );
 	}
 
 	private void compare( String label, Model expected, Model test, Resource s,
-			URI p, Value o ) {
+			IRI p, Value o ) {
 		Model exp = new LinkedHashModel( expected.filter( s, p, o ) );
 		Model tst = new LinkedHashModel( test.filter( s, p, o ) );
 		assertEquals( label + " size mismatch", exp.size(), tst.size() );
@@ -1119,8 +1112,8 @@ public class EngineLoaderTest {
 		}
 
 		Model model = getExpectedGraph( expected, RDFFormat.TURTLE );
-		List<Statement> stmts = Iterations.asList( engine.getRawConnection()
-				.getStatements( null, null, null, false ) );
+		List<Statement> stmts = QueryResults.stream( engine.getRawConnection()
+				.getStatements( null, null, null, false ) ).collect( Collectors.toList() );
 
 		assertEquals( model.size(), stmts.size() );
 

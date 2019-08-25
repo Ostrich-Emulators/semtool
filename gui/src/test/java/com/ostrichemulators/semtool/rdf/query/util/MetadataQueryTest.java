@@ -12,7 +12,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.DC;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -36,7 +36,7 @@ public class MetadataQueryTest {
 		engine = InMemorySesameEngine.open();
 		try {
 			RepositoryConnection rc = engine.getRawConnection();
-			rc.add(bldr.toUri(), RDF.TYPE, SEMTOOL.Database );
+			rc.add(bldr.toIRI(), RDF.TYPE, SEMTOOL.Database );
 		}
 		catch ( Exception e ) {
 		}
@@ -52,11 +52,11 @@ public class MetadataQueryTest {
 		ValueFactory vf = engine.getRawConnection().getValueFactory();
 		String raw = "The Team!";
 
-		engine.getRawConnection().add( bldr.toUri(), MetadataConstants.DCT_CREATOR,
+		engine.getRawConnection().add( bldr.toIRI(), MetadataConstants.DCT_CREATOR,
 				vf.createLiteral( raw ) );
 		MetadataQuery mq = new MetadataQuery();
 		engine.query( mq );
-		Map<URI, String> data = mq.asStrings();
+		Map<IRI, String> data = mq.asStrings();
 		assertTrue( 2 == data.size() );
 		assertEquals( raw, data.get( MetadataConstants.DCT_CREATOR ) );
 	}
@@ -65,11 +65,11 @@ public class MetadataQueryTest {
 	public void testHandleTupleUpgradeDcToDct() throws Exception {
 		ValueFactory vf = engine.getRawConnection().getValueFactory();
 		String raw = "old publisher predicate";
-		engine.getRawConnection().add( bldr.toUri(), DC.PUBLISHER,
+		engine.getRawConnection().add( bldr.toIRI(), DC.PUBLISHER,
 				vf.createLiteral( raw ) );
 		MetadataQuery mq = new MetadataQuery();
 		engine.query( mq );
-		Map<URI, String> data = mq.asStrings();
+		Map<IRI, String> data = mq.asStrings();
 
 		assertEquals( raw, data.get( MetadataConstants.DCT_PUBLISHER ) );
 		assertTrue( 2 == data.size() );
@@ -79,11 +79,11 @@ public class MetadataQueryTest {
 	public void testHandleTupleNonUpgradeDcToDct() throws Exception {
 		ValueFactory vf = engine.getRawConnection().getValueFactory();
 		String raw = "should be a date, but that's okay";
-		engine.getRawConnection().add( bldr.toUri(), MetadataConstants.DCT_CREATED,
+		engine.getRawConnection().add( bldr.toIRI(), MetadataConstants.DCT_CREATED,
 				vf.createLiteral( raw ) );
 		MetadataQuery mq = new MetadataQuery();
 		engine.query( mq );
-		Map<URI, String> data = mq.asStrings();
+		Map<IRI, String> data = mq.asStrings();
 
 		assertEquals( raw, data.get( MetadataConstants.DCT_CREATED ) );
 		assertTrue( 2 == data.size() );
@@ -93,11 +93,11 @@ public class MetadataQueryTest {
 	public void testHandleTupleMissingDc() throws Exception {
 		ValueFactory vf = engine.getRawConnection().getValueFactory();
 		String raw = "desc";
-		engine.getRawConnection().add( bldr.toUri(), MetadataConstants.DCT_DESC,
+		engine.getRawConnection().add( bldr.toIRI(), MetadataConstants.DCT_DESC,
 				vf.createLiteral( raw ) );
 		MetadataQuery mq = new MetadataQuery();
 		engine.query( mq );
-		Map<URI, String> data = mq.asStrings();
+		Map<IRI, String> data = mq.asStrings();
 
 		assertFalse( data.containsKey( MetadataConstants.DCT_CREATED ) );
 		assertTrue( 2 == data.size() );

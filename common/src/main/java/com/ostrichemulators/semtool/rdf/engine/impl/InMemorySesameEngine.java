@@ -30,19 +30,20 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 
 import com.ostrichemulators.semtool.util.UriBuilder;
-import info.aduna.iteration.Iterations;
 import java.io.File;
-import java.util.List;
+import java.util.Optional;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.impl.TreeModel;
+import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.Sail;
-import org.eclipse.rdf4j.sail.inferencer.fc.ForwardChainingRDFSInferencer;
+import org.eclipse.rdf4j.sail.inferencer.fc.SchemaCachingRDFSInferencer;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
 /**
@@ -71,7 +72,7 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 		try {
 			eng.openDB( props );
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException e ) {
 			log.error( e );
 		}
 		return eng;
@@ -112,20 +113,20 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 		}
 
 		Sail sail = ( p.containsKey( INFER )
-				? new ForwardChainingRDFSInferencer( memstore )
+				? new SchemaCachingRDFSInferencer( memstore )
 				: memstore );
 
 		Repository repo = new SailRepository( sail );
 
 		try {
-			repo.initialize();
+			repo.init();
 			rc = repo.getConnection();
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException e ) {
 			try {
 				repo.shutDown();
 			}
-			catch ( Exception ex ) {
+			catch ( RepositoryException ex ) {
 				log.error( ex, ex );
 			}
 		}
@@ -147,14 +148,12 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 
 		try {
 
-			URI baseuri = null;
+			IRI baseuri = null;
 			// if the baseuri isn't already set, then query the kb for void:Dataset
-			RepositoryResult<Statement> rr
-					= rc.getStatements( null, RDF.TYPE, SEMTOOL.Database, false );
-			List<Statement> stmts = Iterations.asList( rr );
-			for ( Statement s : stmts ) {
-				baseuri = URI.class.cast( s.getSubject() );
-				break;
+			
+			Optional<IRI> iri = Models.subjectIRI( QueryResults.asModel( rc.getStatements( null, RDF.TYPE, SEMTOOL.Database, false ) ) );
+			if( iri.isPresent() ){
+				baseuri = iri.get();
 			}
 
 			if ( null == baseuri ) {
@@ -216,7 +215,7 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 			try {
 				rc.close();
 			}
-			catch ( Exception e ) {
+			catch ( RepositoryException e ) {
 				log.error( e, e );
 			}
 
@@ -224,7 +223,7 @@ public class InMemorySesameEngine extends AbstractSesameEngine {
 			try {
 				repo.shutDown();
 			}
-			catch ( Exception e ) {
+			catch ( RepositoryException e ) {
 				log.error( e, e );
 			}
 

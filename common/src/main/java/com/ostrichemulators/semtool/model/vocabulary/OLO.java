@@ -1,10 +1,10 @@
 package com.ostrichemulators.semtool.model.vocabulary;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Namespace;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleNamespace;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * Minimal vocabulary of the Ordered List Ontology.
@@ -16,7 +16,7 @@ public class OLO {
 	 * Ordered List Ontology Base URI: http://purl.org/ontology/olo/core
 	 */
 	public final static String BASE_URI = "http://purl.org/ontology/olo/core";
-	
+
 	/**
 	 * V-CAMP SEMOSS Tool namespace: http://purl.org/ontology/olo/core#
 	 */
@@ -31,34 +31,30 @@ public class OLO {
 	 * An immutable {@link Namespace} constant that represents the V-CAMP SEMOSS
 	 * Tool namespace.
 	 */
-	public static final Namespace NS = new SimpleNamespace(PREFIX, NAMESPACE);
-	
-	
+	public static final Namespace NS = new SimpleNamespace( PREFIX, NAMESPACE );
 
 	// ----- Properties ------
-	
 	/**
 	 * http://purl.org/ontology/olo/core#slot
 	 */
-	public final static URI slot;
-	
+	public final static IRI slot;
+
 	/**
 	 * http://purl.org/ontology/olo/core#item
 	 */
-	public final static URI item;
-	
+	public final static IRI item;
+
 	/**
 	 * http://purl.org/ontology/olo/core#index
 	 */
-	public final static URI index;
+	public final static IRI index;
 
-	
 	static {
-		final ValueFactory factory = ValueFactoryImpl.getInstance();
-		
+		final ValueFactory factory = SimpleValueFactory.getInstance();
+
 		// ----- Properties ------
-		slot  = factory.createURI(NAMESPACE, "slot");
-		item  = factory.createURI(NAMESPACE, "item");
-		index = factory.createURI(NAMESPACE, "index");
+		slot = factory.createIRI( NAMESPACE, "slot" );
+		item = factory.createIRI( NAMESPACE, "item" );
+		index = factory.createIRI( NAMESPACE, "index" );
 	}
 }

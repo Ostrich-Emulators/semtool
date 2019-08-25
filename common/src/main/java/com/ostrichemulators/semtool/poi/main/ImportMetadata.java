@@ -5,7 +5,6 @@
  */
 package com.ostrichemulators.semtool.poi.main;
 
-import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.util.UriBuilder;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  *
@@ -24,23 +23,23 @@ public final class ImportMetadata {
 	private static final Logger log = Logger.getLogger( ImportMetadata.class );
 	private final Map<String, String> namespaces = new HashMap<>();
 	private final List<String[]> statements = new ArrayList<>();
-	private URI base;
+	private IRI base;
 	private UriBuilder databuilder;
 	private UriBuilder schemabuilder;
 	private boolean autocreateModel = true;
 	private boolean legacy = false;
-	private URI sourceOfData;
+	private IRI sourceOfData;
 
 	public ImportMetadata() {
 	}
 
-	public ImportMetadata( URI base, UriBuilder schema, UriBuilder data ) {
+	public ImportMetadata( IRI base, UriBuilder schema, UriBuilder data ) {
 		this.base = base;
 		this.databuilder = data;
 		this.schemabuilder = schema;
 	}
 
-	public void setSourceOfData( URI s ) {
+	public void setSourceOfData( IRI s ) {
 		sourceOfData = s;
 	}
 
@@ -49,7 +48,7 @@ public final class ImportMetadata {
 	 *
 	 * @return the URI of the data source, or null
 	 */
-	public URI getSourceOfData() {
+	public IRI getSourceOfData() {
 		return sourceOfData;
 	}
 
@@ -105,7 +104,7 @@ public final class ImportMetadata {
 		return autocreateModel;
 	}
 
-	public void setBase( URI b ) {
+	public void setBase( IRI b ) {
 		base = b;
 	}
 
@@ -117,7 +116,7 @@ public final class ImportMetadata {
 		schemabuilder = ( null == uri ? null : UriBuilder.getBuilder( uri ) );
 	}
 
-	public URI getBase() {
+	public IRI getBase() {
 		return base;
 	}
 

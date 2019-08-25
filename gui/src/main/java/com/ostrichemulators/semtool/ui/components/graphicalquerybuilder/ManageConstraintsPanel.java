@@ -29,6 +29,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.apache.log4j.Logger;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
@@ -186,8 +187,8 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
 
 	private class ConstraintTable extends JTable {
 
-		private final Set<URI> concepts;
-		private final Map<URI, String> conceptmap;
+		private final Set<IRI> concepts;
+		private final Map<IRI, String> conceptmap;
 		private final IEngine engine;
 		private final ValueEditor types = new ValueEditor();
 		private final ValueEditor normal = new ValueEditor();
@@ -200,7 +201,7 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
 			structs = StructureManagerFactory.getStructureManager( eng );
 			concepts = structs.getTopLevelConcepts();
 			conceptmap
-					= Utility.sortUrisByLabel( Utility.getInstanceLabels( concepts, eng ) );
+					= Utility.sortIrisByLabel( Utility.getInstanceLabels( concepts, eng ) );
 			engine = eng;
 			graph = gr;
 		}
@@ -214,50 +215,49 @@ public class ManageConstraintsPanel extends javax.swing.JPanel {
 		@Override
 		public TableCellEditor getCellEditor( int row, int column ) {
 			QueryOrder src = model.getRawRow( row );
-			if ( 2 == column ) {
-				ValueEditor editor;
-				if ( RDF.TYPE.equals( src.property ) ) {
-					// figure out if we're a concept or an edge
-					boolean isconcept = false;
-					for ( QueryNode v : graph.getVertices() ) {
-						if ( src.base.equals( v ) ) {
-							isconcept = true;
+			switch ( column ) {
+				case 2:
+					ValueEditor editor;
+					if ( RDF.TYPE.equals( src.property ) ) {
+						// figure out if we're a concept or an edge
+						boolean isconcept = false;
+						for ( QueryNode v : graph.getVertices() ) {
+							if ( src.base.equals( v ) ) {
+								isconcept = true;
+							}
 						}
-					}
 
-					if ( isconcept ) {
-						types.setChoices( conceptmap );
+						if ( isconcept ) {
+							types.setChoices( conceptmap );
+						}
+						else {
+							// we have an edge, so figure out the endpoints
+							Pair<QueryNode> verts
+									= graph.getEndpoints( QueryEdge.class.cast( src.base ) );
+							IRI starttype = verts.getFirst().getType();
+							IRI endtype = verts.getSecond().getType();
+
+							Model links = structs.getLinksBetween( starttype, endtype );
+							Map<IRI, String> labels = Utility.getInstanceLabels( links.predicates(), engine );
+							labels.put( Constants.ANYNODE, "<Any>" );
+							types.setChoices( Utility.sortIrisByLabel( labels ) );
+						}
+
+						editor = types;
 					}
 					else {
-						// we have an edge, so figure out the endpoints
-						Pair<QueryNode> verts
-								= graph.getEndpoints( QueryEdge.class.cast( src.base ) );
-						URI starttype = verts.getFirst().getType();
-						URI endtype = verts.getSecond().getType();
-
-						Model links = structs.getLinksBetween( starttype, endtype );
-						Map<URI, String> labels = Utility.getInstanceLabels( links.predicates(), engine );
-						labels.put( Constants.ANYNODE, "<Any>" );
-						types.setChoices( Utility.sortUrisByLabel( labels ) );
+						editor = normal;
 					}
 
-					editor = types;
-				}
-				else {
-					editor = normal;
-				}
-
-				editor.setNode( src.base );
-				editor.setType( src.property );
-				editor.setChecked( src.base.isSelected( src.property ) );
-				return editor;
-			}
-			else if ( 6 == column ) {
-				filterEditor.setPropertyLabel( src.base.getLabel( src.property ) );
-				return filterEditor;
-			}
-			else {
-				return super.getCellEditor( row, column );
+					editor.setNode( src.base );
+					editor.setType( src.property );
+					editor.setChecked( src.base.isSelected( src.property ) );
+					return editor;
+				case 6:
+					filterEditor.setPropertyLabel( src.base.getLabel( src.property ) );
+					return filterEditor;
+				default:
+					return super.getCellEditor( row, column );
 			}
 		}
 	}

@@ -22,7 +22,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import org.eclipse.rdf4j.model.URI;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineUtil2;
@@ -43,6 +42,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  *
@@ -57,13 +57,13 @@ public class ExportSpecificNodesPanel extends JPanel {
 	private JButton exportNodesJButton;
 	private JLabel nodesJLabel;
 	private JScrollPane nodesScrollPane;
-	private JList<URI> nodesJList;
-	private final LabeledPairRenderer<URI> renderer = new LabeledPairRenderer<>();
+	private JList<IRI> nodesJList;
+	private final LabeledPairRenderer<IRI> renderer = new LabeledPairRenderer<>();
 	private final JCheckBox togrid = new JCheckBox( "Export to Grid" );
 	private final JCheckBox dorels = new JCheckBox( "Include Relationships" );
 
 	private File exportFile;
-	private List<URI> selectedNodes;
+	private List<IRI> selectedNodes;
 	private String successMessage = "";
 
 	public ExportSpecificNodesPanel( IEngine eng ) {
@@ -122,25 +122,25 @@ public class ExportSpecificNodesPanel extends JPanel {
 		);
 	}
 
-	private URI[] getAllNodes() {
+	private IRI[] getAllNodes() {
 		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
-		Set<URI> uriconcepts = sm.getTopLevelConcepts();
-		Map<URI, String> labels = Utility.getInstanceLabels( uriconcepts, engine );
+		Set<IRI> uriconcepts = sm.getTopLevelConcepts();
+		Map<IRI, String> labels = Utility.getInstanceLabels( uriconcepts, engine );
 		renderer.cache( labels );
 
 		List<IriLabelPair> pairs = new ArrayList<>();
-		for ( Map.Entry<URI, String> en : labels.entrySet() ) {
+		for ( Map.Entry<IRI, String> en : labels.entrySet() ) {
 			pairs.add(new IriLabelPair( en.getKey(), en.getValue() ) );
 		}
 
 		Collections.sort( pairs );
 
-		List<URI> uris = new ArrayList<>();
+		List<IRI> uris = new ArrayList<>();
 		for ( IriLabelPair lup : pairs ) {
 			uris.add( lup.getUri() );
 		}
 
-		return uris.toArray( new URI[0] );
+		return uris.toArray( new IRI[0] );
 	}
 
 	private void exportButtonActionPerformed( ActionEvent evt ) {

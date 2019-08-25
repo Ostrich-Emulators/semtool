@@ -21,11 +21,9 @@ package com.ostrichemulators.semtool.rdf.engine.impl;
 
 import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.rdf.engine.api.Bindable;
-import info.aduna.iteration.Iterations;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.MalformedQueryException;
@@ -43,13 +41,9 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.impl.StatementImpl;
-import org.eclipse.rdf4j.model.impl.URIImpl;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
-import org.eclipse.rdf4j.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import com.ostrichemulators.semtool.rdf.engine.api.InsightManager;
 import com.ostrichemulators.semtool.rdf.engine.api.MetadataConstants;
@@ -64,19 +58,25 @@ import com.ostrichemulators.semtool.user.User;
 import com.ostrichemulators.semtool.util.UriBuilder;
 import com.ostrichemulators.semtool.util.Utility;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.FilenameUtils;
+import org.eclipse.rdf4j.common.iteration.Iterations;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Namespace;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.GraphQueryResult;
+import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.query.Update;
 import org.eclipse.rdf4j.query.UpdateExecutionException;
-import org.eclipse.rdf4j.query.impl.DatasetImpl;
+import org.eclipse.rdf4j.query.impl.SimpleDataset;
+import org.eclipse.rdf4j.sail.inferencer.fc.SchemaCachingRDFSInferencer;
 
 /**
  * An Abstract Engine that sets up the base constructs needed to create an
@@ -92,10 +92,10 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	}
 
 	protected RepositoryConnection createOwlRc() throws RepositoryException {
-		ForwardChainingRDFSInferencer inferencer
-				= new ForwardChainingRDFSInferencer( new MemoryStore() );
+		SchemaCachingRDFSInferencer inferencer
+				= new SchemaCachingRDFSInferencer( new MemoryStore() );
 		SailRepository owlRepo = new SailRepository( inferencer );
-		owlRepo.initialize();
+		owlRepo.init();
 		return owlRepo.getConnection();
 	}
 
@@ -124,16 +124,14 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 	protected abstract void createRc( Properties props ) throws RepositoryException;
 
 	@Override
-	protected URI setUris( String data, String schema ) throws RepositoryException {
-		URI baseuri = null;
+	protected IRI setUris( String data, String schema ) throws RepositoryException {
+		IRI baseuri = null;
 		if ( data.isEmpty() ) {
 			// if the baseuri isn't already set, then query the kb for void:Dataset
-			RepositoryResult<Statement> rr
-					= getRawConnection().getStatements( null, RDF.TYPE, SEMTOOL.Database, false );
-			List<Statement> stmts = Iterations.asList( rr );
-			for ( Statement s : stmts ) {
-				baseuri = URI.class.cast( s.getSubject() );
-				break;
+			Model m = QueryResults.asModel( getRawConnection().getStatements( null, RDF.TYPE, SEMTOOL.Database, false ) );
+			Optional<Resource> x = m.subjects().stream().findFirst();
+			if( x.isPresent() ){
+				baseuri = IRI.class.cast( x.get() );
 			}
 
 			if ( null == baseuri ) {
@@ -151,7 +149,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			}
 		}
 		else {
-			baseuri = new URIImpl( data );
+			baseuri = SimpleValueFactory.getInstance().createIRI( data );
 		}
 
 		if ( null == baseuri ) {
@@ -163,8 +161,8 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		return baseuri;
 	}
 
-	protected URI silentlyUpgrade( RepositoryConnection rc ) throws RepositoryException {
-		URI baseuri = getNewBaseUri();
+	protected IRI silentlyUpgrade( RepositoryConnection rc ) throws RepositoryException {
+		IRI baseuri = getNewBaseUri();
 		rc.add( baseuri, RDF.TYPE, SEMTOOL.Database );
 
 		// see if we have some old metadata we can move over, too
@@ -172,7 +170,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 
 			@Override
 			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				URI pred = URI.class.cast( set.getValue( "pred" ) );
+				IRI pred = IRI.class.cast( set.getValue( "pred" ) );
 				if ( !( MetadataConstants.OWLIRI.equals( pred ) || RDF.TYPE.equals( pred )
 						|| OWL.VERSIONINFO.equals( pred ) ) ) {
 
@@ -291,7 +289,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		String sparql = processNamespaces( dobindings ? query.getSparql()
 				: query.bindAndGetSparql(), query.getNamespaces() );
 
-		ValueFactory vfac = new ValueFactoryImpl();
+		ValueFactory vfac = SimpleValueFactory.getInstance();
 		Update upd = rc.prepareUpdate( QueryLanguage.SPARQL, sparql );
 
 		if ( dobindings ) {
@@ -310,11 +308,11 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 		String sparql = processNamespaces( dobindings ? query.getSparql()
 				: query.bindAndGetSparql(), query.getNamespaces() );
 
-		ValueFactory vfac = new ValueFactoryImpl();
+		ValueFactory vfac = SimpleValueFactory.getInstance();
 		TupleQuery tq = rc.prepareTupleQuery( QueryLanguage.SPARQL, sparql );
 
 		if ( null != query.getContext() ) {
-			DatasetImpl dataset = new DatasetImpl();
+			SimpleDataset dataset = new SimpleDataset();
 			dataset.addDefaultGraph( query.getContext() );
 			tq.setDataset( dataset );
 		}
@@ -486,7 +484,7 @@ public abstract class AbstractSesameEngine extends AbstractEngine {
 			else {
 				rc.remove( baseuri, MetadataConstants.DCT_MODIFIED, null );
 
-				rc.add( new StatementImpl( baseuri, MetadataConstants.DCT_MODIFIED,
+				rc.add( vf.createStatement( baseuri, MetadataConstants.DCT_MODIFIED,
 						vf.createLiteral( QueryExecutorAdapter.getCal( new Date() ) ) ) );
 			}
 		}

@@ -14,9 +14,9 @@ import com.ostrichemulators.semtool.poi.main.LoadingSheetData;
 import com.ostrichemulators.semtool.rdf.engine.util.QaChecker;
 import com.ostrichemulators.semtool.rdf.engine.util.QaChecker.RelationCacheKey;
 import com.ostrichemulators.semtool.rdf.engine.util.SemtoolStructureManagerImpl;
-import static com.ostrichemulators.semtool.util.RDFDatatypeTools.URISTARTPATTERN;
+import static com.ostrichemulators.semtool.util.RDFDatatypeTools.IRISTARTPATTERN;
+import static com.ostrichemulators.semtool.util.RDFDatatypeTools.getIriFromRawString;
 import static com.ostrichemulators.semtool.util.RDFDatatypeTools.getRDFStringValue;
-import static com.ostrichemulators.semtool.util.RDFDatatypeTools.getUriFromRawString;
 import com.ostrichemulators.semtool.util.UriBuilder;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,7 +27,6 @@ import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -58,7 +57,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 			raw = raw.substring( 1, raw.length() - 1 );
 		}
 
-		Matcher m = URISTARTPATTERN.matcher( raw );
+		Matcher m = IRISTARTPATTERN.matcher( raw );
 		if ( m.matches() ) {
 			return true;
 		}
@@ -87,7 +86,8 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 	}
 
 	/**
-	 * Same as {@link #isValidMetadata(com.ostrichemulators.semtool.poi.main.ImportMetadata)},
+	 * Same as
+	 * {@link #isValidMetadata(com.ostrichemulators.semtool.poi.main.ImportMetadata)},
 	 * but throw an exception if
 	 * {@link #isValidMetadata(gov.va.semoss.poi.main.ImportMetadata)} returns
 	 * <code>false</code>
@@ -120,21 +120,21 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 		boolean nodeIsAlreadyUri = isUri( rawlabel, namespaces );
 
 		if ( nodeIsAlreadyUri ) {
-			IRI subject = getUriFromRawString( rawlabel, namespaces );
+			IRI subject = getIriFromRawString( rawlabel, namespaces );
 			cacheInstance( subject, typename, rawlabel );
 		}
 		else {
 			if ( ( checkCacheFirst && !hasCachedInstance( typename, rawlabel ) )
 					|| !checkCacheFirst ) {
-				URI subject = ( nodeIsAlreadyUri
-						? getUriFromRawString( rawlabel, namespaces )
+				IRI subject = ( nodeIsAlreadyUri
+						? getIriFromRawString( rawlabel, namespaces )
 						: metas.getDataBuilder().add( rawlabel ).build() );
 				subject = ensureUnique( subject );
 				cacheInstance( subject, typename, rawlabel );
 			}
 		}
 
-		URI subject = getCachedInstance( typename, rawlabel );
+		IRI subject = getCachedInstance( typename, rawlabel );
 		myrc.add( subject, RDF.TYPE, qaer.getCachedInstanceClass( typename ) );
 		return subject;
 	}
@@ -142,7 +142,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 	protected IRI ensureUnique( IRI uri ) {
 		if ( duplicates.contains( uri ) ) {
 			UriBuilder dupefixer = UriBuilder.getBuilder( uri.getNamespace() );
-			uri = dupefixer.uniqueUri();
+			uri = dupefixer.uniqueIri();
 			duplicates.add( uri );
 		}
 		return uri;
@@ -156,7 +156,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 		String typename = nap.getSubjectType();
 		String rawlabel = nap.getSubject();
 
-		URI subject = addSimpleNode( typename, rawlabel, namespaces, metas, myrc, true );
+		IRI subject = addSimpleNode( typename, rawlabel, namespaces, metas, myrc, true );
 
 		ValueFactory vf = myrc.getValueFactory();
 		boolean savelabel = metas.isAutocreateMetamodel();
@@ -166,7 +166,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 			Value val = getRDFStringValue( rawlabel, namespaces, vf );
 			// check if we have a prefixed URI
-			IRI u = getUriFromRawString( rawlabel, namespaces );
+			IRI u = getIriFromRawString( rawlabel, namespaces );
 			savelabel = ( savelabel && null == u );
 			rawlabel = val.stringValue();
 		}
@@ -183,14 +183,14 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 	}
 
 	@Override
-	public void addProperties( URI subject, Map<String, Value> properties,
+	public void addProperties( IRI subject, Map<String, Value> properties,
 			Map<String, String> namespaces, LoadingSheetData sheet,
 			ImportMetadata metas, RepositoryConnection myrc )
 			throws RepositoryException {
 
 		for ( Map.Entry<String, Value> entry : properties.entrySet() ) {
 			String propname = entry.getKey();
-			URI predicate = getCachedPropertyClass( propname );
+			IRI predicate = getCachedPropertyClass( propname );
 
 			Value value = entry.getValue();
 			if ( sheet.isLink( propname ) ) {
@@ -217,7 +217,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 		ImportMetadata metas = alldata.getMetadata();
 		UriBuilder schema = metas.getSchemaBuilder();
 
-		Map<String, URI> structurelkp = new HashMap<>();
+		Map<String, IRI> structurelkp = new HashMap<>();
 
 		for ( LoadingSheetData sheet : alldata.getSheets() ) {
 			String stype = sheet.getSubjectType();
@@ -225,7 +225,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 				boolean nodeAlreadyMade = isUri( stype, namespaces );
 
 				IRI subtype = ( nodeAlreadyMade
-						? getUriFromRawString( stype, namespaces )
+						? getIriFromRawString( stype, namespaces )
 						: schema.build( stype ) );
 				cacheInstanceClass( subtype, stype );
 
@@ -242,7 +242,7 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 					boolean nodeAlreadyMade = isUri( otype, namespaces );
 
 					IRI objtype = ( nodeAlreadyMade
-							? getUriFromRawString( otype, namespaces )
+							? getIriFromRawString( otype, namespaces )
 							: schema.build( otype ) );
 
 					cacheInstanceClass( objtype, otype );
@@ -259,8 +259,8 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 				if ( !hasCachedRelationClass( rellabel ) ) {
 					boolean relationAlreadyMade = isUri( rellabel, namespaces );
 
-					URI reltype = ( relationAlreadyMade
-							? getUriFromRawString( rellabel, namespaces )
+					IRI reltype = ( relationAlreadyMade
+							? getIriFromRawString( rellabel, namespaces )
 							: schema.build( rellabel ) );
 					cacheRelationClass( reltype, rellabel );
 
@@ -272,10 +272,10 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 				}
 
 				// save the structure data
-				URI subtype = getCachedInstanceClass( stype );
+				IRI subtype = getCachedInstanceClass( stype );
 				if ( sheet.isRel() ) {
-					URI objtype = getCachedInstanceClass( sheet.getObjectType() );
-					URI edgetype = getCachedRelationClass( sheet.getRelname() );
+					IRI objtype = getCachedInstanceClass( sheet.getObjectType() );
+					IRI edgetype = getCachedRelationClass( sheet.getRelname() );
 
 					Collection<Statement> structures
 							= SemtoolStructureManagerImpl.getEdgeStructure( edgetype,
@@ -287,8 +287,8 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 		}
 
 		for ( LoadingSheetData sheet : alldata.getSheets() ) {
-			URI subtype = getCachedInstanceClass( sheet.getSubjectType() );
-			URI edgetype = ( sheet.isRel()
+			IRI subtype = getCachedInstanceClass( sheet.getSubjectType() );
+			IRI edgetype = ( sheet.isRel()
 					? getCachedRelationClass( sheet.getRelname() )
 					: null );
 
@@ -325,12 +325,12 @@ public abstract class AbstractEdgeModeler implements EdgeModeler {
 
 				if ( !hasCachedPropertyClass( propname ) ) {
 					IRI predicate = ( alreadyMadeProp
-							? getUriFromRawString( propname, namespaces )
+							? getIriFromRawString( propname, namespaces )
 							: schema.build( propname ) );
 					cachePropertyClass( predicate, propname );
 				}
 
-				URI predicate = getCachedPropertyClass( propname );
+				IRI predicate = getCachedPropertyClass( propname );
 
 				// save the ontology info for querying db structure
 				Collection<Statement> stmts;

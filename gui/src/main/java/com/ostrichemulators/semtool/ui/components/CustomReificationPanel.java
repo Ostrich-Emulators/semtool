@@ -20,6 +20,7 @@ import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import org.apache.log4j.Logger;
+import org.eclipse.rdf4j.model.IRI;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -275,7 +276,7 @@ public class CustomReificationPanel extends javax.swing.JPanel {
 		scroller.setVisible( true );
 
 		try {
-			for ( URI u : engine.query( OneVarListQueryAdapter.getUriList( sparql ) ) ) {
+			for ( IRI u : engine.query( OneVarListQueryAdapter.getIriList( sparql ) ) ) {
 				resultsmodel.addElement( u );
 			}
 			splitter.setDividerLocation( 0.67 );

@@ -70,7 +70,7 @@ public class NodeDerivationTools {
           + " }";
 
       return query.replaceAll( "replace-with-binding",
-          engine.getSchemaBuilder().getConceptIRI().build().stringValue() );
+          engine.getSchemaBuilder().getConceptIri().build().stringValue() );
     }
   }
 
@@ -163,7 +163,7 @@ public class NodeDerivationTools {
         + "}";
     OneVarListQueryAdapter<IRI> varq = OneVarListQueryAdapter.getIriList( q );
     varq.useInferred( false );
-    varq.bind( "semrel", engine.getSchemaBuilder().getRelationIRI().build() );
+    varq.bind( "semrel", engine.getSchemaBuilder().getRelationIri().build() );
     varq.bind( "stype", subjectNodeType );
     if ( !objectNodeType.equals( Constants.ANYNODE ) ) {
       varq.bind( "otype", objectNodeType );
@@ -192,7 +192,7 @@ public class NodeDerivationTools {
         + "}";
 
     OneVarListQueryAdapter<IRI> lqa = OneVarListQueryAdapter.getIriList( query );
-    lqa.bind( "concept", engine.getSchemaBuilder().getConceptIRI().build() );
+    lqa.bind( "concept", engine.getSchemaBuilder().getConceptIri().build() );
     lqa.bind( "skos", SKOS.CONCEPT );
 
     if ( instanceIsSubject ) {
@@ -228,8 +228,8 @@ public class NodeDerivationTools {
         + "  FILTER( ?objtype != ?concept && ?objtype != ?skos ) .\n"
         + "}";
     ListQueryAdapter<IRI> lqa = OneVarListQueryAdapter.getIriList( query );
-    lqa.bind( "semrel", engine.getSchemaBuilder().getRelationIRI().build() );
-    lqa.bind( "concept", engine.getSchemaBuilder().getConceptIRI().build() );
+    lqa.bind( "semrel", engine.getSchemaBuilder().getRelationIri().build() );
+    lqa.bind( "concept", engine.getSchemaBuilder().getConceptIri().build() );
     lqa.bind( "skos", SKOS.CONCEPT );
     lqa.bind( "subtype", subtype );
     lqa.bind( "objtype", objtype );
@@ -266,7 +266,7 @@ public class NodeDerivationTools {
     OneVarListQueryAdapter<IRI> lqa
         = OneVarListQueryAdapter.getIriList( query.toString() );
     lqa.bind( "skos", SKOS.CONCEPT );
-    lqa.bind( "concept", engine.getSchemaBuilder().getConceptIRI().build() );
+    lqa.bind( "concept", engine.getSchemaBuilder().getConceptIri().build() );
     if ( instanceIsSubject ) {
       lqa.setVariableName( "objtype" );
     }
@@ -315,7 +315,7 @@ public class NodeDerivationTools {
       }
 
     };
-    mqa.bind( "semrel", engine.getSchemaBuilder().getRelationIRI().toIRI() );
+    mqa.bind( "semrel", engine.getSchemaBuilder().getRelationIri().toIRI() );
 
     mqa.useInferred( false );
     Map<IRI, IRI> inputOutput = engine.queryNoEx( mqa );

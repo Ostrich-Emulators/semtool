@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.ButtonModel;
 import javax.swing.DefaultComboBoxModel;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  *
@@ -26,9 +26,9 @@ public class GraphCondensePanel extends javax.swing.JPanel {
 
 		NODE, INEDGE, OUTEDGE
 	};
-	private final DefaultComboBoxModel<URI> removermodel
+	private final DefaultComboBoxModel<IRI> removermodel
 			= new DefaultComboBoxModel<>();
-	private final DefaultComboBoxModel<URI> endpointmodel
+	private final DefaultComboBoxModel<IRI> endpointmodel
 			= new DefaultComboBoxModel<>();
 
 	/**
@@ -37,23 +37,23 @@ public class GraphCondensePanel extends javax.swing.JPanel {
 	public GraphCondensePanel( GraphPlaySheet gps ) {
 		initComponents();
 
-		Set<URI> seen = new HashSet<>();
+		Set<IRI> seen = new HashSet<>();
 		for ( SEMOSSVertex v : gps.getVisibleGraph().getVertices() ) {
-			URI type = v.getType();
+			IRI type = v.getType();
 			if ( !seen.contains( type ) ) {
 				seen.add( type );
 			}
 		}
 
-		Map<URI, String> labels = Utility.getInstanceLabels( seen, gps.getEngine() );
-		labels = Utility.sortUrisByLabel( labels );
+		Map<IRI, String> labels = Utility.getInstanceLabels( seen, gps.getEngine() );
+		labels = Utility.sortIrisByLabel( labels );
 
-		for ( URI t : labels.keySet() ) {
+		for ( IRI t : labels.keySet() ) {
 			removermodel.addElement( t );
 			endpointmodel.addElement( t );
 		}
 
-		LabeledPairRenderer<URI> renderer = LabeledPairRenderer.getUriPairRenderer();
+		LabeledPairRenderer<IRI> renderer = LabeledPairRenderer.getUriPairRenderer();
 		renderer.cache( labels );
 		intermediateType.setRenderer( renderer );
 		endpointType.setRenderer( renderer );
@@ -63,11 +63,11 @@ public class GraphCondensePanel extends javax.swing.JPanel {
 		nodeprop.setActionCommand( EdgePropertySource.NODE.toString() );
 	}
 
-	public URI getEdgeTypeToRemove() {
+	public IRI getEdgeTypeToRemove() {
 		return intermediateType.getItemAt( intermediateType.getSelectedIndex() );
 	}
 
-	public URI getEdgeEndpointType() {
+	public IRI getEdgeEndpointType() {
 		return endpointType.getItemAt( endpointType.getSelectedIndex() );
 	}
 
@@ -88,13 +88,13 @@ public class GraphCondensePanel extends javax.swing.JPanel {
 
     edgegroup = new javax.swing.ButtonGroup();
     jLabel1 = new javax.swing.JLabel();
-    intermediateType = new javax.swing.JComboBox<URI>();
+    intermediateType = new javax.swing.JComboBox<>();
     jPanel1 = new javax.swing.JPanel();
     nodeprop = new javax.swing.JRadioButton();
     inprop = new javax.swing.JRadioButton();
     outprop = new javax.swing.JRadioButton();
     jLabel2 = new javax.swing.JLabel();
-    endpointType = new javax.swing.JComboBox<URI>();
+    endpointType = new javax.swing.JComboBox<>();
 
     jLabel1.setText("Condense Nodes of Type");
     jLabel1.setToolTipText("Intermediate nodes of this type will be removed");
@@ -173,9 +173,9 @@ public class GraphCondensePanel extends javax.swing.JPanel {
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.ButtonGroup edgegroup;
-  private javax.swing.JComboBox<URI> endpointType;
+  private javax.swing.JComboBox<IRI> endpointType;
   private javax.swing.JRadioButton inprop;
-  private javax.swing.JComboBox<URI> intermediateType;
+  private javax.swing.JComboBox<IRI> intermediateType;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JPanel jPanel1;

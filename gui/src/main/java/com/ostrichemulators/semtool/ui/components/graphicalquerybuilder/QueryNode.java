@@ -7,6 +7,7 @@ package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 
 import com.ostrichemulators.semtool.om.SEMOSSVertex;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.URI;
 
 /**
@@ -16,11 +17,11 @@ import org.eclipse.rdf4j.model.URI;
  */
 public class QueryNode extends AbstractQueryGraphElement implements SEMOSSVertex {
 
-	public QueryNode( URI id ) {
+	public QueryNode( IRI id ) {
 		this( id, null, id.getLocalName() );
 	}
 
-	public QueryNode( URI id, URI type, String label ) {
+	public QueryNode( IRI id, IRI type, String label ) {
 		super( id, type, label );
 	}
 

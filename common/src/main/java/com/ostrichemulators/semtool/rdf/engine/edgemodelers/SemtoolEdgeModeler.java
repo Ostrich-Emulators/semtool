@@ -10,10 +10,10 @@ import com.ostrichemulators.semtool.poi.main.LoadingSheetData;
 import com.ostrichemulators.semtool.poi.main.LoadingSheetData.LoadingNodeAndPropertyValues;
 import com.ostrichemulators.semtool.rdf.engine.util.QaChecker;
 import com.ostrichemulators.semtool.rdf.engine.util.QaChecker.RelationCacheKey;
-import static com.ostrichemulators.semtool.util.RDFDatatypeTools.getUriFromRawString;
+import static com.ostrichemulators.semtool.util.RDFDatatypeTools.getIriFromRawString;
 import java.util.Map;
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -28,14 +28,14 @@ public class SemtoolEdgeModeler extends AbstractEdgeModeler {
 	private static final Logger log = Logger.getLogger( SemtoolEdgeModeler.class );
 
 	// relations that don't have properties should re-use the same edge
-	// map is relname->URI
-	// private final Map<String, URI> propertylessRelations = new HashMap<>();
+	// map is relname->IRI
+	// private final Map<String, IRI> propertylessRelations = new HashMap<>();
 	public SemtoolEdgeModeler( QaChecker qa ) {
 		super( qa );
 	}
 
 	@Override
-	public URI addRel( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
+	public IRI addRel( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
 			LoadingSheetData sheet, ImportMetadata metas, RepositoryConnection myrc )
 			throws RepositoryException {
 
@@ -46,7 +46,7 @@ public class SemtoolEdgeModeler extends AbstractEdgeModeler {
 		final String orawlabel = nap.getObject();
 
 		final String relname = sheet.getRelname();
-		URI relclass = getCachedRelationClass( relname );
+		IRI relclass = getCachedRelationClass( relname );
 
 		// get both ends of the relationship...
 		if ( !hasCachedInstance( stype, srawlabel ) ) {
@@ -54,14 +54,14 @@ public class SemtoolEdgeModeler extends AbstractEdgeModeler {
 					= sheet.new LoadingNodeAndPropertyValues( srawlabel );
 			addNode( filler, namespaces, sheet, metas, myrc );
 		}
-		URI subject = getCachedInstance( stype, srawlabel );
+		IRI subject = getCachedInstance( stype, srawlabel );
 
 		if ( !hasCachedInstance( otype, orawlabel ) ) {
 			LoadingSheetData lsd = LoadingSheetData.nodesheet( sheet.getName(), otype );
 			LoadingNodeAndPropertyValues filler = lsd.add( orawlabel );
 			addNode( filler, namespaces, lsd, metas, myrc );
 		}
-		URI object = getCachedInstance( otype, orawlabel );
+		IRI object = getCachedInstance( otype, orawlabel );
 
 		boolean relIsAlreadyUri = isUri( relname, namespaces );
 
@@ -69,9 +69,9 @@ public class SemtoolEdgeModeler extends AbstractEdgeModeler {
 		RelationCacheKey connectorkey = new RelationCacheKey( nap.getSubjectType(),
 				nap.getObjectType(), relname, nap.getSubject(), nap.getObject() );
 
-		URI connector = null;
+		IRI connector = null;
 		if ( relIsAlreadyUri ) {
-			connector = getUriFromRawString( relname, namespaces );
+			connector = getIriFromRawString( relname, namespaces );
 			cacheRelationClass( connector, relname );
 		}
 
@@ -106,7 +106,7 @@ public class SemtoolEdgeModeler extends AbstractEdgeModeler {
 
 			String specificName = relname;
 			if ( isUri( relname, namespaces ) ) {
-				URI uri = getUriFromRawString( relname, namespaces );
+				IRI uri = getIriFromRawString( relname, namespaces );
 				specificName = uri.getLocalName();
 			}
 			myrc.add( connector, RDFS.LABEL, vf.createLiteral( specificName ) );

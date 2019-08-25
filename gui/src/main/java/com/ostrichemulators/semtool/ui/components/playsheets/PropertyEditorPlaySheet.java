@@ -41,12 +41,13 @@ import javax.swing.JTable;
 import javax.swing.JToolBar;
 
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 /**
  */
 public class PropertyEditorPlaySheet extends PlaySheetCentralComponent {
+
 	private static final long serialVersionUID = -8685007953734205297L;
 	private static final Logger log = Logger.getLogger( GridPlaySheet.class );
 
@@ -56,29 +57,29 @@ public class PropertyEditorPlaySheet extends PlaySheetCentralComponent {
 	public PropertyEditorPlaySheet( Collection<? extends GraphElement> pickedVertices,
 			String title, IEngine engine ) {
 		setLayout( new BorderLayout() );
-		setTitle( title );	
+		setTitle( title );
 
 		model = new PropertyEditorTableModel( pickedVertices, engine );
 		table = new JTable( model );
 
 		LabeledPairTableCellRenderer renderer
 				= LabeledPairTableCellRenderer.getUriPairRenderer();
-		Set<URI> labels = getUrisThatNeedLabels( pickedVertices );
+		Set<IRI> labels = getUrisThatNeedLabels( pickedVertices );
 		renderer.cache( Utility.getInstanceLabels( labels, engine ) );
-		
-		Map<URI, String> displayNames = NodeEdgeNumberedPropertyUtility.getDisplayNameMap();
-		for (URI key:displayNames.keySet()) {
-			renderer.cache( key, displayNames.get(key) );
+
+		Map<IRI, String> displayNames = NodeEdgeNumberedPropertyUtility.getDisplayNameMap();
+		for ( IRI key : displayNames.keySet() ) {
+			renderer.cache( key, displayNames.get( key ) );
 		}
 
 		LabeledPairTableCellRenderer trenderer
 				= LabeledPairTableCellRenderer.getValuePairRenderer( engine );
 
-		table.setDefaultRenderer( URI.class, renderer );
+		table.setDefaultRenderer( IRI.class, renderer );
 		table.setDefaultRenderer( Value.class, trenderer );
 
 		table.setDefaultEditor( Value.class, new SimpleValueEditor() );
-		
+
 		table.setAutoCreateRowSorter( true );
 		table.setCellSelectionEnabled( true );
 
@@ -87,13 +88,13 @@ public class PropertyEditorPlaySheet extends PlaySheetCentralComponent {
 		add( jsp, BorderLayout.CENTER );
 	}
 
-	private Set<URI> getUrisThatNeedLabels( Collection<? extends GraphElement> verts ) {
-		Set<URI> needs = new HashSet<>();
+	private Set<IRI> getUrisThatNeedLabels( Collection<? extends GraphElement> verts ) {
+		Set<IRI> needs = new HashSet<>();
 		for ( GraphElement v : verts ) {
-			for ( Map.Entry<URI, Value> en : v.getValues().entrySet() ) {
+			for ( Map.Entry<IRI, Value> en : v.getValues().entrySet() ) {
 				needs.add( en.getKey() );
-				if ( en.getValue() instanceof URI ) {
-					needs.add( URI.class.cast( en.getValue() ) );
+				if ( en.getValue() instanceof IRI ) {
+					needs.add( IRI.class.cast( en.getValue() ) );
 				}
 			}
 		}

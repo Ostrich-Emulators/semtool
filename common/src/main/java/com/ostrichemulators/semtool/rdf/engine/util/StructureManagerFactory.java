@@ -9,8 +9,7 @@ import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.query.util.MetadataQuery;
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  *
@@ -27,7 +26,7 @@ public class StructureManagerFactory {
 	public static StructureManager getStructureManager( IEngine engine ) {
 		MetadataQuery mq = new MetadataQuery( SEMTOOL.ReificationModel );
 		engine.queryNoEx( mq );
-		URI reif = URI.class.cast( mq.getOne() );
+		IRI reif = IRI.class.cast( mq.getOne() );
 
 		if ( SEMTOOL.Custom_Reification.equals( reif ) ) {
 			throw new IllegalArgumentException( "Custom reification is not (yet) supported" );

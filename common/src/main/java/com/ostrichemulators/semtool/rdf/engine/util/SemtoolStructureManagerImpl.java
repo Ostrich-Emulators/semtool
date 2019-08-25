@@ -24,10 +24,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Logger;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -54,7 +54,7 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 	private static final Logger log = Logger.getLogger( SemtoolStructureManagerImpl.class );
 
 	private final IEngine engine;
-	private final ListQueryAdapter<URI> propqa = OneVarListQueryAdapter.getUriList(
+	private final ListQueryAdapter<IRI> propqa = OneVarListQueryAdapter.getIriList(
 			"SELECT ?prop WHERE {\n"
 			+ "  ?s a semtool:StructureData ;"
 			+ "    rdfs:domain ?domain ;"
@@ -68,9 +68,9 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 	}
 
 	@Override
-	public Set<URI> getPropertiesOf( URI type ) {
+	public Set<IRI> getPropertiesOf( IRI type ) {
 		propqa.bind( "dom", type );
-		Set<URI> set = new HashSet<>( engine.queryNoEx( propqa ) );
+		Set<IRI> set = new HashSet<>( engine.queryNoEx( propqa ) );
 		if ( set.isEmpty() ) {
 			// check to see if type is actually a relation
 			set.addAll( getPropertiesOf( null, type, null ) );
@@ -80,7 +80,7 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 	}
 
 	@Override
-	public Set<URI> getPropertiesOf( URI subtype, URI predtype, URI objtype ) {
+	public Set<IRI> getPropertiesOf( IRI subtype, IRI predtype, IRI objtype ) {
 		Map<String, Value> bindings = new HashMap<>();
 		bindings.put( "pred", predtype );
 
@@ -101,14 +101,14 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 		}
 		query += "}";
 
-		OneVarListQueryAdapter<URI> qa = OneVarListQueryAdapter.getUriList( query );
+		OneVarListQueryAdapter<IRI> qa = OneVarListQueryAdapter.getIriList( query );
 		qa.setBindings( bindings );
 		return new HashSet<>( engine.queryNoEx( qa ) );
 
 	}
 
 	@Override
-	public Model getLinksBetween( URI subtype, URI objtype ) {
+	public Model getLinksBetween( IRI subtype, IRI objtype ) {
 		String query = "CONSTRUCT{ ?s ?p ?o } WHERE { \n"
 				+ "  ?mm a semtool:StructureData ;\n"
 				+ "    rdf:predicate ?p ;\n"
@@ -134,7 +134,7 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 	}
 
 	@Override
-	public Model getEndpoints( URI reltype ) {
+	public Model getEndpoints( IRI reltype ) {
 		String query = "CONSTRUCT{ ?s ?p ?o } WHERE { \n"
 				+ "  ?mm a semtool:StructureData ;\n"
 				+ "    rdf:predicate ?p ;\n"
@@ -150,9 +150,9 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 	}
 
 	@Override
-	public Set<URI> getTopLevelRelations( Collection<URI> instances ) {
+	public Set<IRI> getTopLevelRelations( Collection<IRI> instances ) {
 		if ( null == instances ) {
-			ListQueryAdapter<URI> lqa = OneVarListQueryAdapter.getUriList(
+			ListQueryAdapter<IRI> lqa = OneVarListQueryAdapter.getIriList(
 					"SELECT ?p WHERE { ?mm a semtool:StructureData ; rdf:predicate ?p . }" );
 			return new HashSet<>( engine.queryNoEx( lqa ) );
 		}
@@ -162,7 +162,7 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 		}
 
 		String implosion = Utility.implode( instances );
-		ListQueryAdapter<URI> lqa = OneVarListQueryAdapter.getUriList(
+		ListQueryAdapter<IRI> lqa = OneVarListQueryAdapter.getIriList(
 				"SELECT ?p WHERE { ?mm a semtool:StructureData ; rdf:predicate ?p . "
 				+ "?reltype a|rdfs:subPropertyOf* ?p . "
 				+ "VALUES ?reltype {" + implosion + "} }" );
@@ -170,8 +170,8 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 	}
 
 	@Override
-	public Set<URI> getTopLevelConcepts() {
-		ListQueryAdapter<URI> lqa = OneVarListQueryAdapter.getUriList(
+	public Set<IRI> getTopLevelConcepts() {
+		ListQueryAdapter<IRI> lqa = OneVarListQueryAdapter.getIriList(
 				"SELECT ?s WHERE { ?s rdfs:subClassOf ?concept }" );
 		lqa.bind( "concept", engine.getSchemaBuilder().getConceptIri().build() );
 		lqa.useInferred( false );
@@ -179,7 +179,7 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 	}
 
 	@Override
-	public Model getConnectedConceptTypes( Collection<URI> instances ) {
+	public Model getConnectedConceptTypes( Collection<IRI> instances ) {
 		final String query = "CONSTRUCT{ ?s ?p ?o } WHERE { \n"
 				+ "  ?mm a semtool:StructureData ;\n"
 				+ "    rdf:predicate ?p ;\n"
@@ -207,23 +207,23 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 		return engine.constructNoEx( qa );
 	}
 
-	private Model doRebuild( Collection<URI> uris ) {
+	private Model doRebuild( Collection<IRI> uris ) {
 		// get all concepts
 		String cquery = "SELECT DISTINCT ?instance WHERE { ?instance rdfs:subClassOf ?concept }";
-		ListQueryAdapter<URI> cqa = OneVarListQueryAdapter.getUriList( cquery );
+		ListQueryAdapter<IRI> cqa = OneVarListQueryAdapter.getIriList( cquery );
 		cqa.bind( "concept", engine.getSchemaBuilder().getConceptIri().build() );
 		cqa.useInferred( false );
-		List<URI> concepts = engine.queryNoEx( cqa );
+		List<IRI> concepts = engine.queryNoEx( cqa );
 		if ( null != uris ) {
 			concepts.retainAll( uris );
 		}
 
 		// get all edge types
 		String equery = "SELECT DISTINCT ?instance WHERE { ?instance rdfs:subPropertyOf ?semrel }";
-		ListQueryAdapter<URI> eqa = OneVarListQueryAdapter.getUriList( equery );
+		ListQueryAdapter<IRI> eqa = OneVarListQueryAdapter.getIriList( equery );
 		eqa.bind( "semrel", engine.getSchemaBuilder().getRelationIri().build() );
 		eqa.useInferred( false );
-		List<URI> edges = engine.queryNoEx( eqa );
+		List<IRI> edges = engine.queryNoEx( eqa );
 		if ( null != uris ) {
 			edges.retainAll( uris );
 		}
@@ -233,17 +233,17 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 		Set<Resource> needlabels = new HashSet<>();
 
 		for ( Statement s : edgemodel ) {
-			needlabels.add( URI.class.cast( s.getSubject() ) );
+			needlabels.add( IRI.class.cast( s.getSubject() ) );
 			needlabels.add( s.getPredicate() );
-			needlabels.add( URI.class.cast( s.getObject() ) );
+			needlabels.add( IRI.class.cast( s.getObject() ) );
 		}
 		for ( Statement s : propmodel ) {
-			needlabels.add( URI.class.cast( s.getSubject() ) );
+			needlabels.add( IRI.class.cast( s.getSubject() ) );
 			needlabels.add( s.getPredicate() );
 		}
 
 		Map<Resource, String> labels = Utility.getInstanceLabels( needlabels, engine );
-		Map<String, URI> structurelkp = new HashMap<>();
+		Map<String, IRI> structurelkp = new HashMap<>();
 		UriBuilder schema = engine.getSchemaBuilder();
 
 		LinkedHashModel model = new LinkedHashModel();
@@ -255,7 +255,7 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 			String name = sub + "_" + rel + "_" + obj;
 
 			model.addAll( getEdgeStructure( s.getPredicate(),
-					URI.class.cast( s.getSubject() ), URI.class.cast( s.getObject() ),
+					IRI.class.cast( s.getSubject() ), IRI.class.cast( s.getObject() ),
 					schema, structurelkp, name ) );
 		}
 
@@ -267,14 +267,14 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 			String name = sub + "_" + rel;
 
 			model.addAll( getPropStructure( s.getPredicate(),
-					URI.class.cast( s.getSubject() ), schema, structurelkp, name ) );
+					IRI.class.cast( s.getSubject() ), schema, structurelkp, name ) );
 		}
 
 		return model;
 	}
 
 	@Override
-	public Model rebuild( Collection<URI> uris ) {
+	public Model rebuild( Collection<IRI> uris ) {
 		return doRebuild( uris );
 	}
 
@@ -289,7 +289,7 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 		return model;
 	}
 
-	private Model rebuildConceptProps( List<URI> concepts ) {
+	private Model rebuildConceptProps( List<IRI> concepts ) {
 		String cimplosion = Utility.implode( concepts );
 
 		// now see what properties are on concepts and edges
@@ -303,8 +303,8 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 
 			@Override
 			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				URI type = URI.class.cast( set.getValue( "type" ) );
-				URI prop = URI.class.cast( set.getValue( "prop" ) );
+				IRI type = IRI.class.cast( set.getValue( "type" ) );
+				IRI prop = IRI.class.cast( set.getValue( "prop" ) );
 				result.add( type, prop, Constants.ANYNODE );
 			}
 		};
@@ -312,7 +312,7 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 		return engine.queryNoEx( mqa );
 	}
 
-	private Model rebuildEdges( List<URI> concepts, List<URI> edges ) {
+	private Model rebuildEdges( List<IRI> concepts, List<IRI> edges ) {
 		String cimplosion = Utility.implode( concepts );
 		String eimplosion = Utility.implode( edges );
 
@@ -331,8 +331,8 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 		return model;
 	}
 
-	private Model createEdgeProps( List<URI> concepts, List<URI> edges,
-			Map<String, URI> structurelkp, UriBuilder schema,
+	private Model createEdgeProps( List<IRI> concepts, List<IRI> edges,
+			Map<String, IRI> structurelkp, UriBuilder schema,
 			Map<Resource, String> labels ) {
 		String cimplosion = Utility.implode( concepts );
 		String eimplosion = Utility.implode( edges );
@@ -353,10 +353,10 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 		VoidQueryAdapter vqa = new VoidQueryAdapter( propq ) {
 			@Override
 			public void handleTuple( BindingSet set, ValueFactory fac ) {
-				URI domain = URI.class.cast( set.getValue( "stype" ) );
-				URI pred = URI.class.cast( set.getValue( "rtype" ) );
-				URI range = URI.class.cast( set.getValue( "otype" ) );
-				URI prop = URI.class.cast( set.getValue( "prop" ) );
+				IRI domain = IRI.class.cast( set.getValue( "stype" ) );
+				IRI pred = IRI.class.cast( set.getValue( "rtype" ) );
+				IRI range = IRI.class.cast( set.getValue( "otype" ) );
+				IRI prop = IRI.class.cast( set.getValue( "prop" ) );
 
 				String sub = labels.get( domain );
 				String rel = labels.get( pred );
@@ -395,18 +395,18 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 		}
 	}
 
-	public static Collection<Statement> getEdgeStructure( URI predicate, URI domain,
-			URI range, UriBuilder schema, Map<String, URI> structurelkp, String name ) {
+	public static Collection<Statement> getEdgeStructure( IRI predicate, IRI domain,
+			IRI range, UriBuilder schema, Map<String, IRI> structurelkp, String name ) {
 
 		Model stmts = new LinkedHashModel();
 
 		String key = predicate.stringValue() + domain + range;
 		if ( !structurelkp.containsKey( key ) ) {
-			URI structure = schema.build( name );
+			IRI structure = schema.build( name );
 			structurelkp.put( key, structure );
 		}
 
-		URI structure = structurelkp.get( key );
+		IRI structure = structurelkp.get( key );
 
 		stmts.add( structure, RDF.TYPE, SEMTOOL.Structure );
 		stmts.add( structure, RDF.PREDICATE, predicate );
@@ -416,18 +416,18 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 		return stmts;
 	}
 
-	public static Collection<Statement> getPropStructure( URI prop, URI domain,
-			UriBuilder schema, Map<String, URI> structurelkp, String title ) {
+	public static Collection<Statement> getPropStructure( IRI prop, IRI domain,
+			UriBuilder schema, Map<String, IRI> structurelkp, String title ) {
 
 		Model stmts = new LinkedHashModel();
 
 		String key = prop.stringValue() + domain;
 		if ( !structurelkp.containsKey( key ) ) {
-			URI structure = schema.build( title );
+			IRI structure = schema.build( title );
 			structurelkp.put( key, structure );
 		}
 
-		URI structure = structurelkp.get( key );
+		IRI structure = structurelkp.get( key );
 
 		stmts.add( structure, RDF.TYPE, SEMTOOL.Structure );
 		stmts.add( structure, OWL.DATATYPEPROPERTY, prop );
@@ -436,19 +436,19 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 		return stmts;
 	}
 
-	public static Collection<Statement> getPropStructure( URI predicate, URI domain,
-			URI range, URI prop, UriBuilder schema, Map<String, URI> structurelkp,
+	public static Collection<Statement> getPropStructure( IRI predicate, IRI domain,
+			IRI range, IRI prop, UriBuilder schema, Map<String, IRI> structurelkp,
 			String title ) {
 
 		Model stmts = new LinkedHashModel();
 
 		String key = prop.stringValue() + domain + range;
 		if ( !structurelkp.containsKey( key ) ) {
-			URI structure = schema.build( title );
+			IRI structure = schema.build( title );
 			structurelkp.put( key, structure );
 		}
 
-		URI structure = structurelkp.get( key );
+		IRI structure = structurelkp.get( key );
 
 		stmts.add( structure, RDF.TYPE, SEMTOOL.Structure );
 		stmts.add( structure, RDF.PREDICATE, predicate );
@@ -460,11 +460,11 @@ public final class SemtoolStructureManagerImpl implements StructureManager {
 	}
 
 	@Override
-	public URI getTopLevelType( URI instance ) {
+	public IRI getTopLevelType( IRI instance ) {
 		String query = "SELECT ?type WHERE { "
 				+ "  ?subject a|rdfs:subClassOf|rdfs:subPropertyOf ?type "
 				+ "}";
-		OneValueQueryAdapter<URI> qa = OneValueQueryAdapter.getUri( query );
+		OneValueQueryAdapter<IRI> qa = OneValueQueryAdapter.getUri( query );
 		qa.bind( "subject", instance );
 		qa.useInferred( false );
 		String q = qa.bindAndGetSparql();

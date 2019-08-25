@@ -29,7 +29,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JOptionPane;
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 /**
@@ -94,7 +94,7 @@ public class CondenseGraph extends AbstractAction {
 
 	public static DirectedGraph<SEMOSSVertex, SEMOSSEdge>
 			condense( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-					URI toremove, URI endpoint, EdgePropertySource strat ) {
+					IRI toremove, IRI endpoint, EdgePropertySource strat ) {
 
 		MultiMap<SEMOSSVertex, CondenserTuple> triples
 				= findNodesToCondense( graph, toremove, endpoint );
@@ -121,7 +121,7 @@ public class CondenseGraph extends AbstractAction {
 
 				SEMOSSEdge edge = new SEMOSSEdgeImpl( middle.getIRI() );
 
-				Map<URI, Value> props;
+				Map<IRI, Value> props;
 				switch ( strat ) {
 					case NODE:
 						props = middle.getValues();
@@ -136,7 +136,7 @@ public class CondenseGraph extends AbstractAction {
 						throw new IllegalArgumentException( "no edge property source provided!" );
 				}
 
-				for ( Map.Entry<URI, Value> prop : props.entrySet() ) {
+				for ( Map.Entry<IRI, Value> prop : props.entrySet() ) {
 					edge.setValue( prop.getKey(), prop.getValue() );
 				}
 				edge.setType( middle.getType() );
@@ -158,7 +158,7 @@ public class CondenseGraph extends AbstractAction {
 	 */
 	public static MultiMap<SEMOSSVertex, CondenserTuple>
 			findNodesToCondense( DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph,
-					URI type, URI endpoint ) {
+					IRI type, IRI endpoint ) {
 		MultiMap<SEMOSSVertex, CondenserTuple> removers = new MultiMap<>();
 		for ( SEMOSSVertex middle : graph.getVertices() ) {
 			if ( type.equals( middle.getType() ) ) {
@@ -181,7 +181,7 @@ public class CondenseGraph extends AbstractAction {
 		return removers;
 	}
 
-	private static SEMOSSEdge getEdge( URI endpoint, SEMOSSVertex middle,
+	private static SEMOSSEdge getEdge( IRI endpoint, SEMOSSVertex middle,
 			DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph, boolean upstream ) {
 		Collection<SEMOSSEdge> edges = ( upstream ? graph.getInEdges( middle )
 				: graph.getOutEdges( middle ) );

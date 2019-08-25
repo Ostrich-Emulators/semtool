@@ -22,7 +22,6 @@ package com.ostrichemulators.semtool.ui.components.playsheets;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
@@ -43,6 +42,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -62,8 +62,8 @@ public class MetamodelPlaySheet extends GraphPlaySheet implements PropertyChange
 	}
 
 	@Override
-	public MultiMap<URI, SEMOSSVertex> getVerticesByType() {
-		MultiMap<URI, SEMOSSVertex> typeToInstances = new MultiMap<>();
+	public MultiMap<IRI, SEMOSSVertex> getVerticesByType() {
+		MultiMap<IRI, SEMOSSVertex> typeToInstances = new MultiMap<>();
 		for ( SEMOSSVertex v : getVisibleGraph().getVertices() ) {
 			typeToInstances.add( v.getType(), v );
 		}
@@ -71,8 +71,8 @@ public class MetamodelPlaySheet extends GraphPlaySheet implements PropertyChange
 	}
 
 	@Override
-	public MultiMap<URI, SEMOSSEdge> getEdgesByType() {
-		MultiMap<URI, SEMOSSEdge> typeToInstances = new MultiMap<>();
+	public MultiMap<IRI, SEMOSSEdge> getEdgesByType() {
+		MultiMap<IRI, SEMOSSEdge> typeToInstances = new MultiMap<>();
 		for ( SEMOSSEdge v : getVisibleGraph().getEdges() ) {
 			typeToInstances.add( v.getType(), v );
 		}
@@ -94,14 +94,14 @@ public class MetamodelPlaySheet extends GraphPlaySheet implements PropertyChange
 
 		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
 
-		Collection<URI> concepts = sm.getTopLevelConcepts();
+		Collection<IRI> concepts = sm.getTopLevelConcepts();
 		// make sure we can add nodes for concepts that don't have any edges
-		Set<URI> conceptsNoEdges = new HashSet<>( concepts );
+		Set<IRI> conceptsNoEdges = new HashSet<>( concepts );
 
-		for ( URI stype : concepts ) {
-			for ( URI otype : concepts ) {
+		for ( IRI stype : concepts ) {
+			for ( IRI otype : concepts ) {
 				Model m = sm.getLinksBetween( stype, otype );
-				for ( URI edge : m.predicates() ) {
+				for ( IRI edge : m.predicates() ) {
 					model.add( stype, edge, otype );
 
 					conceptsNoEdges.remove( stype );
@@ -131,9 +131,9 @@ public class MetamodelPlaySheet extends GraphPlaySheet implements PropertyChange
 			DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = super.getGraph();
 
 			for ( Statement s : model ) {
-				URI sub = URI.class.cast( s.getSubject() );
-				URI obj = URI.class.cast( s.getObject() );
-				URI rel = s.getPredicate();
+				IRI sub = IRI.class.cast( s.getSubject() );
+				IRI obj = IRI.class.cast( s.getObject() );
+				IRI rel = s.getPredicate();
 
 				SEMOSSVertex src = super.createOrRetrieveVertex( sub, overlayLevel );
 				SEMOSSVertex dst = super.createOrRetrieveVertex( obj, overlayLevel );
@@ -146,7 +146,7 @@ public class MetamodelPlaySheet extends GraphPlaySheet implements PropertyChange
 			}
 
 
-			Map<URI, String> edgelabels
+			Map<IRI, String> edgelabels
 					= Utility.getInstanceLabels( model.predicates(), engine );
 			for ( Statement s : model ) {
 
@@ -163,11 +163,11 @@ public class MetamodelPlaySheet extends GraphPlaySheet implements PropertyChange
 		}
 
 		@Override
-		public Collection<GraphElement> addGraphLevel( Collection<URI> nodes,
+		public Collection<GraphElement> addGraphLevel( Collection<IRI> nodes,
 				IEngine engine, int overlayLevel ) {
 			DirectedGraph<SEMOSSVertex, SEMOSSEdge> graph = super.getGraph();
 
-			for ( URI u : nodes ) {
+			for ( IRI u : nodes ) {
 				SEMOSSVertex src = super.createOrRetrieveVertex( u, overlayLevel );
 				src.setType( RDFS.CLASS );
 				graph.addVertex( src );

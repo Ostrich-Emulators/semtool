@@ -5,22 +5,21 @@
  */
 package com.ostrichemulators.semtool.rdf.engine.util;
 
-import info.aduna.iteration.Iterations;
+import org.eclipse.rdf4j.model.Model;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.impl.LiteralImpl;
-import org.eclipse.rdf4j.model.impl.StatementImpl;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -47,17 +46,18 @@ public class RepositoryCopierTest {
 		Repository fromrepo = new SailRepository( new MemoryStore() );
 		Repository torepo = new SailRepository( new MemoryStore() );
 
-		fromrepo.initialize();
-		torepo.initialize();
+		fromrepo.init();
+		torepo.init();
 
 		from = fromrepo.getConnection();
 		to = torepo.getConnection();
 
-		from.add( new StatementImpl( RDFS.DOMAIN, RDFS.LABEL,
-				new LiteralImpl( "test" ) ) );
-		from.add( new StatementImpl( RDFS.DOMAIN, RDFS.LABEL,
-				new LiteralImpl( "test2" ) ) );
+		from.add( fromrepo.getValueFactory().createStatement( RDFS.DOMAIN, RDFS.LABEL,
+				fromrepo.getValueFactory().createLiteral( "test" ) ) );
+		from.add( fromrepo.getValueFactory().createStatement( RDFS.DOMAIN, RDFS.LABEL,
+				fromrepo.getValueFactory().createLiteral( "test2" ) ) );
 		from.setNamespace( OWL.PREFIX, OWL.NAMESPACE );
+		from.commit();
 	}
 
 	@After
@@ -78,9 +78,8 @@ public class RepositoryCopierTest {
 
 		assertEquals( 2, to.size() );
 
-		Statement s = Iterations.asList( to.getStatements( RDFS.DOMAIN, null, null,
-				true ) ).get( 0 );
-		assertEquals( RDFS.LABEL, s.getPredicate() );
-	}
 
+		Model m = QueryResults.asModel( to.getStatements( RDFS.DOMAIN, null, null, true ));
+		assertTrue( m.contains( null, RDFS.LABEL, null ) );
+	}
 }

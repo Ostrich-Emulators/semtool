@@ -231,14 +231,14 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 				jgen.writeStringField( "value", val.stringValue() );
 				if ( val instanceof Literal ) {
 					Literal l = Literal.class.cast( val );
-					if ( null == l.getLanguage() ) {
+					if ( l.getLanguage().isPresent() ) {
+						jgen.writeStringField( "lang", l.getLanguage().get() );
+					}
+					else{
 						IRI dt = l.getDatatype();
 						if ( null != dt ) {
 							jgen.writeStringField( "dt", dt.stringValue() );
 						}
-					}
-					else {
-						jgen.writeStringField( "lang", l.getLanguage().get() );
 					}
 				}
 				jgen.writeEndObject();
@@ -279,7 +279,7 @@ public class DiskBackedLoadingSheetData extends LoadingSheetData {
 						nap.put( prop, RDFDatatypeTools.getRDFStringValue( valstr, null, vf ) );
 					}
 					else {
-						nap.put( prop, vf.createLiteral( valstr, vf.createURI( dt.asText() ) ) );
+						nap.put( prop, vf.createLiteral( valstr, vf.createIRI( dt.asText() ) ) );
 					}
 				}
 				else {

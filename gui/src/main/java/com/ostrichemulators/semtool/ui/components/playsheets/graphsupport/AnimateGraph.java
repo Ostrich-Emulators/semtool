@@ -34,7 +34,7 @@ import javax.swing.Action;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 /**
@@ -84,7 +84,7 @@ public class AnimateGraph extends AbstractAction {
 		elements.addAll( alledges );
 		elements.addAll( allverts );
 
-		final Map<URI, URI> map = GraphAnimationPanel.getAnimationInput(
+		final Map<IRI, IRI> map = GraphAnimationPanel.getAnimationInput(
 				JOptionPane.getRootFrame(), gps.getLabelCache(),
 				gps.getEngine(), elements );
 
@@ -92,9 +92,9 @@ public class AnimateGraph extends AbstractAction {
 		final MultiMap<Value, GraphElement> iterations = new MultiMap<>();
 
 		// we only support one element in this map (for now, at least)
-		URI pred = null;
-		for ( Map.Entry<URI, URI> ee : map.entrySet() ) {
-			URI key = ee.getKey();
+		IRI pred = null;
+		for ( Map.Entry<IRI, IRI> ee : map.entrySet() ) {
+			IRI key = ee.getKey();
 			pred = ee.getValue();
 
 			for ( GraphElement graphel : elements ) {

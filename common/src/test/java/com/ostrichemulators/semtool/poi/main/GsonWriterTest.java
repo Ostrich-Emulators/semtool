@@ -5,9 +5,6 @@
  */
 package com.ostrichemulators.semtool.poi.main;
 
-import com.ostrichemulators.semtool.poi.main.GsonWriter;
-import com.ostrichemulators.semtool.poi.main.ImportData;
-import com.ostrichemulators.semtool.poi.main.LoadingSheetData;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
@@ -22,7 +19,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  *
@@ -56,7 +53,7 @@ public class GsonWriterTest {
 		data.add( rels );
 		data.add( nodes );
 
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		Map<String, Value> props = new HashMap<>();
 		props.put( "Price", vf.createLiteral( "3000 USD" ) );
 		rels.add( "Yuri", "Yugo", props );
@@ -94,7 +91,7 @@ public class GsonWriterTest {
 		LoadingSheetData rels
 				= LoadingSheetData.relsheet( "Human Being", "Car", "Purchased" );
 		rels.addProperties( Arrays.asList( "Price", "Date" ) );
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		Map<String, Value> props = new HashMap<>();
 		props.put( "Price", vf.createLiteral( "3000 USD" ) );
 		rels.add( "Yuri", "Yugo", props );

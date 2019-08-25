@@ -39,7 +39,6 @@ import com.ostrichemulators.semtool.ui.components.SemtoolFileView;
 import com.ostrichemulators.semtool.user.Security;
 import com.ostrichemulators.semtool.user.User;
 import com.ostrichemulators.semtool.util.Utility;
-import info.aduna.iteration.Iterations;
 
 import java.io.FileWriter;
 
@@ -47,6 +46,7 @@ import javax.swing.JOptionPane;
 
 import org.apache.commons.io.FilenameUtils;
 import org.eclipse.rdf4j.model.Namespace;
+import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.rio.ntriples.NTriplesWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
@@ -139,7 +139,7 @@ public class ExportInsightsAction extends DbAction {
 
 								@Override
 								public void exec( RepositoryConnection conn ) throws RepositoryException {
-									for ( Namespace ns : Iterations.asList( conn.getNamespaces() ) ) {
+									for ( Namespace ns : QueryResults.asList( conn.getNamespaces() ) ) {
 										rc.setNamespace( ns.getPrefix(), ns.getName() );
 									}
 								}
@@ -160,13 +160,13 @@ public class ExportInsightsAction extends DbAction {
 								try {
 									rc.close();
 								}
-								catch ( Exception e ) {
+								catch ( RepositoryException e ) {
 									log.warn( e, e );
 								}
 								try {
 									repo.shutDown();
 								}
-								catch ( Exception e ) {
+								catch ( RepositoryException e ) {
 									log.warn( e, e );
 								}
 							}

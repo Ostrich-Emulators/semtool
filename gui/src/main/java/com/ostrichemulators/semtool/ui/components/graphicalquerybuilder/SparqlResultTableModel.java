@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import javax.swing.table.AbstractTableModel;
 import org.apache.log4j.Logger;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -37,7 +38,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 		list.addAll( ordering );
 
 		for( QueryGraphElement element : elements ){
-			for ( URI prop : element.getAllValues().keySet() ) {
+			for ( IRI prop : element.getAllValues().keySet() ) {
 				if ( !RDF.SUBJECT.equals( prop ) ) {
 					QueryOrder qo = new QueryOrder( element, prop );
 					if( !seen.contains( qo )){
@@ -80,7 +81,7 @@ public class SparqlResultTableModel extends AbstractTableModel {
 	@Override
 	public Object getValueAt( int row, int col ) {
 		QueryOrder src = list.get( row );
-		URI property = src.property;
+		IRI property = src.property;
 		QueryGraphElement base = src.base;
 
 		switch ( col ) {

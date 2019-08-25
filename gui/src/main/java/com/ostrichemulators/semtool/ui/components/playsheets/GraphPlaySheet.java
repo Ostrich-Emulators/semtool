@@ -33,7 +33,6 @@ import org.apache.log4j.Logger;
 import org.jgrapht.graph.SimpleGraph;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 
@@ -78,6 +77,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.border.BevelBorder;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  */
@@ -403,14 +403,14 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 			log.debug( "GRAPH UPDATE!" );
 			for ( SEMOSSVertex v : gdm.getGraph().getVertices() ) {
 				log.debug( "vertex: " + v );
-				for ( Map.Entry<URI, Value> en : v.getValues().entrySet() ) {
+				for ( Map.Entry<IRI, Value> en : v.getValues().entrySet() ) {
 					log.debug( "\t" + en.getKey().getLocalName() + " -> " + en.getValue().stringValue() );
 				}
 			}
 
 			for ( SEMOSSEdge v : gdm.getGraph().getEdges() ) {
 				log.debug( "edge: " + v );
-				for ( Map.Entry<URI, Value> en : v.getValues().entrySet() ) {
+				for ( Map.Entry<IRI, Value> en : v.getValues().entrySet() ) {
 					log.debug( "\t" + en.getKey().getLocalName() + " -> " + en.getValue().stringValue() );
 				}
 			}
@@ -461,16 +461,16 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		view.setOverlayLevel( overlayLevel );
 	}
 
-	public MultiMap<URI, SEMOSSVertex> getVerticesByType() {
-		MultiMap<URI, SEMOSSVertex> typeToInstances = new MultiMap<>();
+	public MultiMap<IRI, SEMOSSVertex> getVerticesByType() {
+		MultiMap<IRI, SEMOSSVertex> typeToInstances = new MultiMap<>();
 		for ( SEMOSSVertex v : getVisibleGraph().getVertices() ) {
 			typeToInstances.add( v.getType(), v );
 		}
 		return typeToInstances;
 	}
 
-	public MultiMap<URI, SEMOSSEdge> getEdgesByType() {
-		MultiMap<URI, SEMOSSEdge> typeToInstances = new MultiMap<>();
+	public MultiMap<IRI, SEMOSSEdge> getEdgesByType() {
+		MultiMap<IRI, SEMOSSEdge> typeToInstances = new MultiMap<>();
 		for ( SEMOSSEdge v : getVisibleGraph().getEdges() ) {
 			typeToInstances.add( v.getType(), v );
 		}
@@ -533,15 +533,15 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 	 */
 	@Override
 	public void create( List<Value[]> data, List<String> headers, IEngine engine ) {
-		List<URI> nodes = new ArrayList<>();
+		List<IRI> nodes = new ArrayList<>();
 		Model model = new LinkedHashModel();
 		for ( Value[] row : data ) {
-			URI s = URI.class.cast( row[0] );
+			IRI s = IRI.class.cast( row[0] );
 			if ( 1 == row.length ) {
 				nodes.add( s );
 			}
 			else if ( 3 == row.length ) {
-				URI p = URI.class.cast( row[1] );
+				IRI p = IRI.class.cast( row[1] );
 				Value o = row[2];
 
 				model.add( s, p, o );
@@ -572,7 +572,7 @@ public class GraphPlaySheet extends ImageExportingPlaySheet implements PropertyC
 		create( data, headers, eng );
 	}
 
-	protected void add( Model m, List<URI> nodes, IEngine engine ) {
+	protected void add( Model m, List<IRI> nodes, IEngine engine ) {
 		getLabelCache().setEngine( engine );
 		setHeaders( Arrays.asList( "Subject", "Predicate", "Object" ) );
 		if ( null == nodes ) {

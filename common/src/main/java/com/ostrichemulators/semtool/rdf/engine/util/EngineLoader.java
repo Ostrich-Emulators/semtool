@@ -18,8 +18,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
-import org.eclipse.rdf4j.model.impl.StatementImpl;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -88,7 +86,7 @@ public class EngineLoader {
   private boolean forceBaseUri;
   private RepositoryConnection myrc;
   private File stagingdir;
-  private URI defaultBaseUri;
+  private IRI defaultBaseUri;
   private QaChecker qaer = new QaChecker();
   private final Model metamodel = new TreeModel();
 
@@ -128,7 +126,7 @@ public class EngineLoader {
    * @param overrideFile if true, use <code>base</code> instead of anything
    * specified in the loading files
    */
-  public void setDefaultBaseUri( URI base, boolean overrideFile ) {
+  public void setDefaultBaseUri( IRI base, boolean overrideFile ) {
     defaultBaseUri = base;
     forceBaseUri = overrideFile;
   }
@@ -155,7 +153,7 @@ public class EngineLoader {
     }
 
     repo = new SailRepository( store );
-    repo.initialize();
+    repo.init();
     RepositoryConnection rc = repo.getConnection();
     initNamespaces( rc );
     return rc;
@@ -283,7 +281,7 @@ public class EngineLoader {
               "Could not create metadata statement" + Arrays.toString( stmt ) );
         }
 
-        Statement st = new StatementImpl( s, p, o );
+        Statement st = vf.createStatement( s, p, o );
         stmts.add( st );
       }
 
@@ -310,7 +308,7 @@ public class EngineLoader {
       data.release();
 
       myrc.begin();
-      URI ebase = engine.getBaseIri();
+      IRI ebase = engine.getBaseIri();
       myrc.add( ebase, MetadataConstants.VOID_SUBSET, im.getBase() );
       myrc.add( ebase, OWL.IMPORTS, im.getBase() );
 
@@ -511,12 +509,12 @@ public class EngineLoader {
   public static Statement cleanStatement( Statement stmt, ValueFactory vf ) {
     // URI s = URI.class.cast( cleanValue( stmt.getSubject(), vf ) );
     Value sv = cleanValue( stmt.getSubject(), vf );
-    URI p = URI.class.cast( cleanValue( stmt.getPredicate(), vf ) );
+    IRI p = IRI.class.cast( cleanValue( stmt.getPredicate(), vf ) );
     Value v = cleanValue( stmt.getObject(), vf );
 
     return ( sv instanceof BNode )
-        ? new StatementImpl( BNode.class.cast( sv ), p, v )
-        : new StatementImpl( URI.class.cast( sv ), p, v );
+        ? vf.createStatement( BNode.class.cast( sv ), p, v )
+        : vf.createStatement( IRI.class.cast( sv ), p, v );
   }
 
   /**
@@ -536,7 +534,7 @@ public class EngineLoader {
     }
     else {
       Literal oldv = Literal.class.cast( v );
-      if ( null != oldv.getLanguage() ) {
+      if ( oldv.getLanguage().isPresent() ) {
         newv = vf.createLiteral( oldv.stringValue(), oldv.getLanguage().get() );
       }
       else {

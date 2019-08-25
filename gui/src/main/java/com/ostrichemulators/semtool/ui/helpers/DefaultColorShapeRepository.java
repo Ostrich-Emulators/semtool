@@ -19,7 +19,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.impl.URIImpl;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -38,9 +39,9 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	private static final double DEFAULT_ICON_SIZE = 16;
 
 	private final Random random = new Random();
-	private final Map<URI, NamedShape> shapelkp = new HashMap<>();
-	private final Map<URI, Color> colorlkp = new HashMap<>();
-	private final Map<URI, URL> imglkp = new HashMap<>();
+	private final Map<IRI, NamedShape> shapelkp = new HashMap<>();
+	private final Map<IRI, Color> colorlkp = new HashMap<>();
+	private final Map<IRI, URL> imglkp = new HashMap<>();
 	private final List<GraphColorShapeRepositoryListener> listenees = new ArrayList<>();
 	private boolean saveOnChange = false;
 	private double iconsize = DEFAULT_ICON_SIZE;
@@ -53,25 +54,25 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 		colorlkp.put( OWL.CLASS, Color.PINK );
 	}
 
-	public void saveTo( URI database, StoredMetadata pers ) {
+	public void saveTo( IRI database, StoredMetadata pers ) {
 		persistance = pers;
 		saveOnChange = ( null != persistance );
 	}
 
-	private void trysave( URI... uris ) {
+	private void trysave( IRI... uris ) {
 		if ( saveOnChange ) {
-			Set<URI> tosave = new HashSet<>( Arrays.asList( uris ) );
+			Set<IRI> tosave = new HashSet<>( Arrays.asList( uris ) );
 			if ( 0 == uris.length ) {
 				tosave.addAll( imglkp.keySet() );
 				tosave.addAll( shapelkp.keySet() );
 				tosave.addAll( imglkp.keySet() );
 			}
 
-			for ( URI uri : tosave ) {
+			for ( IRI uri : tosave ) {
 				try {
 					if ( imglkp.containsKey( uri ) ) {
 						persistance.set( null, uri, StoredMetadata.GRAPH_ICON,
-								new URIImpl( imglkp.get( uri ).toExternalForm() ) );
+								SimpleValueFactory.getInstance().createIRI( imglkp.get( uri ).toExternalForm() ) );
 					}
 					else {
 						try {
@@ -113,7 +114,7 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	}
 
 	@Override
-	public void set( URI ge, Color color, NamedShape shape ) {
+	public void set( IRI ge, Color color, NamedShape shape ) {
 		shapelkp.put( ge, shape );
 		colorlkp.put( ge, color );
 		trysave( ge );
@@ -125,7 +126,7 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	}
 
 	@Override
-	public void set( URI ge, URL imageloc ) {
+	public void set( IRI ge, URL imageloc ) {
 		imglkp.put( ge, imageloc );
 		trysave( ge );
 	}
@@ -136,7 +137,7 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	}
 
 	@Override
-	public NamedShape getShape( URI type, URI instance ) {
+	public NamedShape getShape( IRI type, IRI instance ) {
 		if ( shapelkp.containsKey( instance ) ) {
 			return shapelkp.get( instance );
 		}
@@ -152,7 +153,7 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	}
 
 	@Override
-	public NamedShape getShape( URI ge ) {
+	public NamedShape getShape( IRI ge ) {
 		if ( !shapelkp.containsKey( ge ) ) {
 			NamedShape[] shapes = NamedShape.values();
 			NamedShape shape = shapes[random.nextInt( shapes.length )];
@@ -163,7 +164,7 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	}
 
 	@Override
-	public Color getColor( URI ge ) {
+	public Color getColor( IRI ge ) {
 		if ( !colorlkp.containsKey( ge ) ) {
 			Color col = COLORS[random.nextInt( COLORS.length )];
 			colorlkp.put( ge, col );
@@ -174,30 +175,30 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	}
 
 	@Override
-	public Map<URI, Color> getColors() {
+	public Map<IRI, Color> getColors() {
 		return new HashMap<>( colorlkp );
 	}
 
 	@Override
-	public Map<URI, NamedShape> getShapes() {
+	public Map<IRI, NamedShape> getShapes() {
 		return new HashMap<>( shapelkp );
 	}
 
 	@Override
-	public Map<URI, URL> getIcons() {
+	public Map<IRI, URL> getIcons() {
 		return new HashMap<>( imglkp );
 	}
 
 	@Override
 	public void set( Collection<GraphElement> ges, Color color, NamedShape shape ) {
-		List<URI> saves = new ArrayList<>();
+		List<IRI> saves = new ArrayList<>();
 		for ( GraphElement ge : ges ) {
-			URI u = ge.getIRI();
+			IRI u = ge.getIRI();
 			saves.add( u );
 			shapelkp.put( u, shape );
 			colorlkp.put( u, color );
 		}
-		trysave( saves.toArray( new URI[0] ) );
+		trysave( saves.toArray( new IRI[0] ) );
 	}
 
 	@Override
@@ -221,17 +222,17 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	}
 
 	@Override
-	public void set( URI ge, NamedShape s ) {
+	public void set( IRI ge, NamedShape s ) {
 		shapelkp.put( ge, s );
 	}
 
 	@Override
-	public void set( URI ge, Color c ) {
+	public void set( IRI ge, Color c ) {
 		colorlkp.put( ge, c );
 	}
 
 	@Override
-	public Color getColor( URI type, URI instance ) {
+	public Color getColor( IRI type, IRI instance ) {
 		if ( colorlkp.containsKey( instance ) ) {
 			return colorlkp.get( instance );
 		}
@@ -240,12 +241,12 @@ public class DefaultColorShapeRepository implements GraphColorShapeRepository {
 	}
 
 	@Override
-	public URL getUrl( URI ge ) {
+	public URL getUrl( IRI ge ) {
 		return imglkp.get( ge );
 	}
 
 	@Override
-	public URL getUrl( URI type, URI instance ) {
+	public URL getUrl( IRI type, IRI instance ) {
 		if ( imglkp.containsKey( type ) ) {
 			return imglkp.get( type );
 		}

@@ -29,7 +29,6 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="dbname" max="32767" attributes="0"/>
                           <Component id="title" alignment="0" max="32767" attributes="0"/>
-                          <Component id="dbdir" alignment="1" pref="300" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                   <Group type="102" attributes="0">
@@ -37,7 +36,7 @@
                           <Component id="insights" min="-2" max="-2" attributes="0"/>
                           <Component id="data" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      <EmptySpace min="0" pref="294" max="32767" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -48,10 +47,7 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="dbdir" min="-2" max="-2" attributes="0"/>
-                  <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
-              </Group>
+              <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -76,8 +72,6 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Location"/>
       </Properties>
-    </Component>
-    <Component class="com.ostrichemulators.semtool.ui.components.FileBrowsePanel" name="dbdir">
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel2">
       <Properties>

@@ -1,6 +1,5 @@
 package com.ostrichemulators.semtool.om;
 
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,14 +8,14 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 public class Insight implements Serializable {
 
 	private static final long serialVersionUID = 5192674160082789840L;
 	private static final Logger log = Logger.getLogger( Insight.class );
 	//ID of the question:
-	private URI id = null;
+	private IRI id = null;
 	//Name of the question:
 	private String label = "";
 	//Sparql for the question:
@@ -54,7 +53,7 @@ public class Insight implements Serializable {
 		this.label = label;
 	}
 
-	public Insight( URI id, String label ) {
+	public Insight( IRI id, String label ) {
 		this.id = id;
 		this.label = label;
 	}
@@ -77,7 +76,7 @@ public class Insight implements Serializable {
 		}
 	}
 
-	public URI getId() {
+	public IRI getId() {
 		return id;
 	}
 
@@ -85,7 +84,7 @@ public class Insight implements Serializable {
 		return id.toString();
 	}
 
-	public void setId( URI id ) {
+	public void setId( IRI id ) {
 		this.id = id;
 	}
 
@@ -122,10 +121,10 @@ public class Insight implements Serializable {
 		parameters.addAll( params );
 	}
 
-	public boolean hasParameters(){
+	public boolean hasParameters() {
 		return !parameters.isEmpty();
 	}
-	
+
 	public void setDefaultValueIsQuery( boolean defaultValueIsQuery ) {
 		this.defautlValueIsQuery = defaultValueIsQuery;
 	}

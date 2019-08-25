@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -21,6 +22,7 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
+import org.eclipse.rdf4j.model.IRI;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -29,9 +31,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.URI;
-import org.eclipse.rdf4j.model.impl.LiteralImpl;
-import org.eclipse.rdf4j.model.impl.StatementImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.ntriples.NTriplesWriter;
@@ -65,12 +65,12 @@ public class UtilityTest {
 
 	@Test
 	public void testSortUrisByLabel() {
-		Map<URI, String> input = new HashMap<>();
+		Map<IRI, String> input = new HashMap<>();
 		input.put( RDFS.CLASS, "Z" );
 		input.put( RDFS.DOMAIN, "A" );
 
-		Map<URI, String> sorted = Utility.sortUrisByLabel( input );
-		List<URI> uris = Arrays.asList( RDFS.DOMAIN, RDFS.CLASS );
+		Map<IRI, String> sorted = Utility.sortIrisByLabel( input );
+		List<IRI> uris = Arrays.asList( RDFS.DOMAIN, RDFS.CLASS );
 		assertEquals( uris, new ArrayList<>( sorted.keySet() ) );
 	}
 
@@ -104,10 +104,10 @@ public class UtilityTest {
 	public void testGetLabels() throws Exception {
 		InMemorySesameEngine eng = InMemorySesameEngine.open();
 		eng.getRawConnection().begin();
-		eng.getRawConnection().add( new StatementImpl( RDFS.ISDEFINEDBY,
-				RDFS.LABEL, new LiteralImpl( "my label" ) ) );
-		eng.getRawConnection().add( new StatementImpl( RDFS.MEMBER,
-				RDFS.LABEL, new LiteralImpl( "my label 2" ) ) );
+		eng.getRawConnection().add( SimpleValueFactory.getInstance().createStatement( RDFS.ISDEFINEDBY,
+				RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "my label" ) ) );
+		eng.getRawConnection().add( SimpleValueFactory.getInstance().createStatement( RDFS.MEMBER,
+				RDFS.LABEL, SimpleValueFactory.getInstance().createLiteral( "my label 2" ) ) );
 		eng.getRawConnection().commit();
 
 		String label = Utility.getInstanceLabel( RDFS.ISDEFINEDBY, eng );
@@ -150,7 +150,7 @@ public class UtilityTest {
 		Utility.unzip( file.getPath(), outdir.getPath() );
 		File[] firstdirs = outdir.listFiles();
 		File[] datas = new File( outdir, "testdir-2" ).listFiles();
-		String data = FileUtils.readFileToString( datas[0] );
+		String data = FileUtils.readFileToString( datas[0], Charset.defaultCharset() );
 
 		FileUtils.deleteQuietly( outdir );
 		FileUtils.deleteQuietly( file );

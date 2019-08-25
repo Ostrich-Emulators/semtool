@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  * A class for managing a collection of {@link Insight}.
@@ -18,7 +18,7 @@ import org.eclipse.rdf4j.model.URI;
  */
 public class Perspective {
 
-	private URI id = null;
+	private IRI id = null;
 	private String label = "";
 	private String description = "";
 	private final List<Insight> insights = new ArrayList<>();
@@ -29,7 +29,7 @@ public class Perspective {
 
 	}
 
-	public Perspective( URI id ) {
+	public Perspective( IRI id ) {
 		this.id = id;
 	}
 
@@ -37,7 +37,7 @@ public class Perspective {
 		this.label = label;
 	}
 
-	public Perspective( URI id, String label, String description ) {
+	public Perspective( IRI id, String label, String description ) {
 		this( id );
 		this.label = label;
 		this.description = description;
@@ -45,11 +45,11 @@ public class Perspective {
 
 	//URI getter/setter:
 	//------------------
-	public URI getId() {
+	public IRI getId() {
 		return id;
 	}
 
-	public void setId( URI u ) {
+	public void setId( IRI u ) {
 		id = u;
 	}
 

@@ -1,44 +1,44 @@
 package com.ostrichemulators.semtool.model.vocabulary;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Namespace;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.NamespaceImpl;
-import org.eclipse.rdf4j.model.impl.URIImpl;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleNamespace;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 public class SEMPERS {
 //	public static final String VA_INSIGHTS_PREFIX = "insights";
 //	public static final String VA_INSIGHTS_NS = "http://os-em.com/dataset/insights#";
 //	public static final URI VA_INSIGHTS = new URIImpl( "http://os-em.com/dataset/insights" );
 
-	public static final URI INSIGHT_CORE_TYPE
-			= new URIImpl( "http://os-em.com/ontologies/semtool/core#InsightDataset" );
+	public static final IRI INSIGHT_CORE_TYPE;
 
 	public final static String BASE_URI = "http://os-em.com/ontologies/semtool/insights";
-	public static final URI INSIGHT_DB = new URIImpl( BASE_URI );
+	public static final IRI INSIGHT_DB;
 
 	public final static String NAMESPACE = BASE_URI + "#";
 
 	public final static String PREFIX = "sempers";
 
-	public static final Namespace NS = new NamespaceImpl( PREFIX, NAMESPACE );
+	public static final Namespace NS = new SimpleNamespace( PREFIX, NAMESPACE );
 
-	public final static URI InsightProperties;
+	public final static IRI InsightProperties;
 
-	public final static URI Perspective;
+	public final static IRI Perspective;
 
-	public final static URI INSIGHT_OUTPUT_TYPE;
+	public final static IRI INSIGHT_OUTPUT_TYPE;
 
-	public static final URI insight;
+	public static final IRI insight;
 
 	static {
-		ValueFactory factory = new ValueFactoryImpl();
+		ValueFactory factory = SimpleValueFactory.getInstance();
+		INSIGHT_DB = factory.createIRI( BASE_URI );
+		INSIGHT_CORE_TYPE = factory.createIRI( "http://os-em.com/ontologies/semtool/core#InsightDataset" );
 
-		InsightProperties = factory.createURI( NAMESPACE, "InsightProperties" );
-		Perspective = factory.createURI( NAMESPACE, "Perspective" );
-		insight = factory.createURI( NAMESPACE, "insight" );
-		INSIGHT_OUTPUT_TYPE = factory.createURI( NAMESPACE, "outputType" );
+		InsightProperties = factory.createIRI( NAMESPACE, "InsightProperties" );
+		Perspective = factory.createIRI( NAMESPACE, "Perspective" );
+		insight = factory.createIRI( NAMESPACE, "insight" );
+		INSIGHT_OUTPUT_TYPE = factory.createIRI( NAMESPACE, "outputType" );
 	}
 
 }

@@ -8,6 +8,7 @@ package com.ostrichemulators.semtool.rdf.engine.util;
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 
@@ -43,7 +44,7 @@ public class RepositoryCopier implements RDFHandler {
 		try {
 			conn.begin();
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException e ) {
 			throw new RDFHandlerException( e );
 		}
 	}
@@ -54,7 +55,7 @@ public class RepositoryCopier implements RDFHandler {
  			log.debug( "committing " + totalAdds + " statements..." );
 			conn.commit();
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException e ) {
 			throw new RDFHandlerException( e );
 		}
 	}
@@ -64,7 +65,7 @@ public class RepositoryCopier implements RDFHandler {
 		try {
 			conn.setNamespace( string, string1 );
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException e ) {
 			throw new RDFHandlerException( e );
 		}
 	}
@@ -84,11 +85,11 @@ public class RepositoryCopier implements RDFHandler {
 				adds = 0;
 			}
 		}
-		catch ( Exception e ) {
+		catch ( RepositoryException e ) {
 			try {
 				conn.rollback();
 			}
-			catch ( Exception ex ) {
+			catch ( RepositoryException ex ) {
 				throw new RDFHandlerException( ex );
 			}
 			throw new RDFHandlerException( e );

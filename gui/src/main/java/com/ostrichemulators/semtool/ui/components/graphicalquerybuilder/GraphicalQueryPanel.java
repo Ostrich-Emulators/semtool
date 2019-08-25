@@ -67,7 +67,9 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Logger;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.impl.URIImpl;
 
 /**
@@ -116,7 +118,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				URI concept = new URIImpl( e.getActionCommand() );
+				IRI concept = SimpleValueFactory.getInstance().createIRI( e.getActionCommand() );
 				vfac.setType( concept );
 			}
 		};
@@ -201,20 +203,20 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 						GridLayout gl = GridLayout.class.cast( typearea.getLayout() );
 						StructureManager sm = StructureManagerFactory.getStructureManager( engine );
 
-						Set<URI> concepts = sm.getTopLevelConcepts();
-						Map<URI, String> conceptlabels
+						Set<IRI> concepts = sm.getTopLevelConcepts();
+						Map<IRI, String> conceptlabels
 								= Utility.getInstanceLabels( concepts, engine );
 						conceptlabels.put( Constants.ANYNODE, "<Any>" );
 						gl.setRows( conceptlabels.size() );
 
 						buttongroup = new ButtonGroup();
 
-						Map<URI, String> sorted = Utility.sortUrisByLabel( conceptlabels );
-						for ( Map.Entry<URI, String> en : sorted.entrySet() ) {
+						Map<IRI, String> sorted = Utility.sortIrisByLabel( conceptlabels );
+						for ( Map.Entry<IRI, String> en : sorted.entrySet() ) {
 							JToggleButton button = new JToggleButton( addConceptNodeAction );
 							button.setText( en.getValue() );
 							button.setActionCommand( en.getKey().stringValue() );
-							QueryNode v = new QueryNode( uribuilder.uniqueUri(),
+							QueryNode v = new QueryNode( uribuilder.uniqueIri(),
 									en.getKey(), en.getValue() );
 							button.setIcon( new IconBuilder( csfac.getShape( v ),
 									csfac.getColor( v ) ).setIconSize( csfac.getIconSize() ).build() );
@@ -425,7 +427,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 		Pattern pat = Pattern.compile( base + "([0-9]+)$" );
 
 		for ( QueryGraphElement qn : nodesAndEdges ) {
-			for ( URI prop : qn.getAllValues().keySet() ) {
+			for ( IRI prop : qn.getAllValues().keySet() ) {
 				String usedlabel = qn.getLabel( prop );
 
 				if ( null != usedlabel ) {
@@ -475,7 +477,7 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 				v.setQueryId( createQueryId( v, todo ) );
 			}
 
-			for ( URI uri : v.getAllValues().keySet() ) {
+			for ( IRI uri : v.getAllValues().keySet() ) {
 				if ( null == v.getLabel( uri ) ) {
 					// come up with a variable name
 					v.setLabel( uri, createVariableId( v, uri, todo ) );
@@ -542,9 +544,9 @@ public class GraphicalQueryPanel extends javax.swing.JPanel {
 	public static class QueryOrder {
 
 		public final QueryGraphElement base;
-		public final URI property;
+		public final IRI property;
 
-		public QueryOrder( QueryGraphElement base, URI property ) {
+		public QueryOrder( QueryGraphElement base, IRI property ) {
 			this.base = base;
 			this.property = property;
 		}

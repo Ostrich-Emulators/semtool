@@ -9,7 +9,7 @@ import java.awt.Color;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  * A repository to hold colors and shapes (and icons, too!) for graph elements.
@@ -42,15 +42,15 @@ public interface GraphColorShapeRepository {
 
 	public void set( Collection<GraphElement> ge, Color color, NamedShape shape );
 
-	public void set( URI ge, Color color, NamedShape shape );
+	public void set( IRI ge, Color color, NamedShape shape );
 
 	public void set( GraphElement ge, URL imageloc );
 
-	public void set( URI ge, URL imageloc );
+	public void set( IRI ge, URL imageloc );
 
-	public void set( URI ge, NamedShape s );
+	public void set( IRI ge, NamedShape s );
 
-	public void set( URI ge, Color c );
+	public void set( IRI ge, Color c );
 
 	/**
 	 *
@@ -77,7 +77,7 @@ public interface GraphColorShapeRepository {
 	 * @param ge
 	 * @return
 	 */
-	public NamedShape getShape( URI ge );
+	public NamedShape getShape( IRI ge );
 
 	/**
 	 * Gets the shape for this instance, or if none is set, the shape for this
@@ -87,7 +87,7 @@ public interface GraphColorShapeRepository {
 	 * @param instance
 	 * @return
 	 */
-	public NamedShape getShape( URI type, URI instance );
+	public NamedShape getShape( IRI type, IRI instance );
 
 	/**
 	 * Gets the previously-saved or newly-generated color for this URI
@@ -95,19 +95,19 @@ public interface GraphColorShapeRepository {
 	 * @param ge
 	 * @return
 	 */
-	public Color getColor( URI ge );
+	public Color getColor( IRI ge );
 
-	public Color getColor( URI type, URI instance );
+	public Color getColor( IRI type, IRI instance );
 
-	public URL getUrl( URI ge );
+	public URL getUrl( IRI ge );
 
-	public URL getUrl( URI ge, URI instance );
+	public URL getUrl( IRI ge, IRI instance );
 
-	public Map<URI, Color> getColors();
+	public Map<IRI, Color> getColors();
 
-	public Map<URI, NamedShape> getShapes();
+	public Map<IRI, NamedShape> getShapes();
 
-	public Map<URI, URL> getIcons();
+	public Map<IRI, URL> getIcons();
 
 	public double getIconSize();
 

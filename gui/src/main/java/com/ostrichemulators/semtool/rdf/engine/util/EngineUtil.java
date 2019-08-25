@@ -26,7 +26,6 @@ import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.StatementImpl;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
@@ -51,8 +50,9 @@ import com.ostrichemulators.semtool.user.LocalUserImpl;
 import com.ostrichemulators.semtool.user.User;
 import com.ostrichemulators.semtool.user.Security;
 import com.ostrichemulators.semtool.util.Utility;
-import javax.swing.JOptionPane;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 
 /**
@@ -68,9 +68,9 @@ public class EngineUtil implements Runnable {
 
 	private static EngineUtil instance;
 
-	private final Map<String, Boolean> toopen = Collections.synchronizedMap( new HashMap<String, Boolean>() );
-	private final Map<String, User> openusers = Collections.synchronizedMap( new HashMap<String, User>() );
-	private final List<IEngine> toclose = Collections.synchronizedList( new ArrayList<IEngine>() );
+	private final Map<String, Boolean> toopen = Collections.synchronizedMap( new HashMap<>() );
+	private final Map<String, User> openusers = Collections.synchronizedMap( new HashMap<>() );
+	private final List<IEngine> toclose = Collections.synchronizedList( new ArrayList<>() );
 	private final List<EngineOperationListener> listeners = new ArrayList<>();
 	private final Map<IEngine, InsightsImportConfig> insightqueue = new HashMap<>();
 	private boolean stopping = false;
@@ -317,7 +317,7 @@ public class EngineUtil implements Runnable {
 			throws RepositoryException, IOException, EngineManagementException {
 
 		MetadataQuery mq = new MetadataQuery();
-		Map<URI, Value> oldmetadata = new HashMap<>();
+		Map<IRI, Value> oldmetadata = new HashMap<>();
 		try {
 			oldmetadata = from.query( mq );
 		}
@@ -326,8 +326,8 @@ public class EngineUtil implements Runnable {
 
 		}
 
-		URI reification = ( oldmetadata.containsKey( SEMTOOL.ReificationModel )
-				? URI.class
+		IRI reification = ( oldmetadata.containsKey( SEMTOOL.ReificationModel )
+				? IRI.class
 				.cast( oldmetadata.get( SEMTOOL.ReificationModel ) )
 				: SEMTOOL.SEMTOOL_Reification );
 
@@ -573,8 +573,8 @@ public class EngineUtil implements Runnable {
 			String title ) throws RepositoryException {
 		try {
 			final ValueFactory vf = new ValueFactoryImpl();
-			final Map<URI, Value> oldmetas = from.query( new MetadataQuery() );
-			final URI newbase = to.getBaseIri();
+			final Map<IRI, Value> oldmetas = from.query( new MetadataQuery() );
+			final IRI newbase = to.getBaseIri();
 			Date now = new Date();
 			Properties props = GuiUtility.getBuildProperties();
 			oldmetas.put( SEMCORE.SOFTWARE_AGENT,
@@ -588,8 +588,8 @@ public class EngineUtil implements Runnable {
 
 				@Override
 				public void exec( RepositoryConnection conn ) throws RepositoryException {
-					for ( Map.Entry<URI, Value> en : oldmetas.entrySet() ) {
-						Statement s = new StatementImpl( newbase, en.getKey(), en.getValue() );
+					for ( Map.Entry<IRI, Value> en : oldmetas.entrySet() ) {
+						Statement s = SimpleValueFactory.getInstance().createStatement( newbase, en.getKey(), en.getValue() );
 						conn.add( EngineLoader.cleanStatement( s, vf ) );
 					}
 				}

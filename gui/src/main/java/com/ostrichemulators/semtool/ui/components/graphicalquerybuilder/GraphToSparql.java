@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Logger;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
@@ -55,7 +56,7 @@ public class GraphToSparql {
 
 		Set<QueryOrder> linkedOrderSet = new LinkedHashSet<>( ordering );
 		for ( QueryGraphElement v : todo ) {
-			for ( URI prop : v.getAllValues().keySet() ) {
+			for ( IRI prop : v.getAllValues().keySet() ) {
 				QueryOrder qo = new QueryOrder( v, prop );
 				if ( !linkedOrderSet.contains( qo ) ) {
 					linkedOrderSet.add( qo );
@@ -73,7 +74,7 @@ public class GraphToSparql {
 		boolean hasone = false;
 		for ( QueryOrder qo : ordering ) {
 			QueryGraphElement v = qo.base;
-			URI prop = qo.property;
+			IRI prop = qo.property;
 
 			boolean issubj = RDF.SUBJECT.equals( prop );
 
@@ -91,15 +92,15 @@ public class GraphToSparql {
 		return select.toString();
 	}
 
-	private MultiSetMap<URI, Value> getWhereProps( QueryGraphElement v ) {
-		MultiSetMap<URI, Value> nodeEdgeVals = MultiSetMap.deepCopy( v.getAllValues() );
+	private MultiSetMap<IRI, Value> getWhereProps( QueryGraphElement v ) {
+		MultiSetMap<IRI, Value> nodeEdgeVals = MultiSetMap.deepCopy( v.getAllValues() );
 		nodeEdgeVals.remove( RDF.SUBJECT );
 
 		// ANYNODE and "" are placeholders, and we don't need to hold their places
 		// anymore at this point, so remove them
-		List<URI> toremove = new ArrayList<>();
-		for ( Map.Entry<URI, Set<Value>> en : nodeEdgeVals.entrySet() ) {
-			URI prop = en.getKey();
+		List<IRI> toremove = new ArrayList<>();
+		for ( Map.Entry<IRI, Set<Value>> en : nodeEdgeVals.entrySet() ) {
+			IRI prop = en.getKey();
 			Set<Value> values = en.getValue();
 
 			if ( v.isNode() ) {
@@ -117,7 +118,7 @@ public class GraphToSparql {
 			}
 		}
 
-		for ( URI remover : toremove ) {
+		for ( IRI remover : toremove ) {
 			nodeEdgeVals.remove( remover );
 		}
 
@@ -125,8 +126,8 @@ public class GraphToSparql {
 	}
 
 	private String makeOneValue( Value v ) {
-		if ( v instanceof URI ) {
-			return shortcut( URI.class.cast( v ) );
+		if ( v instanceof IRI ) {
+			return shortcut( IRI.class.cast( v ) );
 		}
 
 		Literal lit = Literal.class.cast( v );
@@ -154,7 +155,7 @@ public class GraphToSparql {
 		return sb.toString();
 	}
 
-	private String makeFilter( QueryGraphElement nodeedge, URI type, String nodevar,
+	private String makeFilter( QueryGraphElement nodeedge, IRI type, String nodevar,
 			String filterVal ) {
 		StringBuilder sb = new StringBuilder( "FILTER ( " );
 		sb.append( filterVal );
@@ -162,7 +163,7 @@ public class GraphToSparql {
 		return sb.toString();
 	}
 
-	private String buildOneConstraint( QueryGraphElement v, URI type,
+	private String buildOneConstraint( QueryGraphElement v, IRI type,
 			Set<Value> vals ) {
 		StringBuilder sb = new StringBuilder();
 
@@ -223,8 +224,8 @@ public class GraphToSparql {
 		StringBuilder sb = new StringBuilder( " WHERE  {\n" );
 		for ( QueryOrder qo : ordering ) {
 			QueryGraphElement v = qo.base;
-			URI prop = qo.property;
-			MultiSetMap<URI, Value> props = getWhereProps( v );
+			IRI prop = qo.property;
+			MultiSetMap<IRI, Value> props = getWhereProps( v );
 
 			if ( !props.containsKey( qo.property ) ) {
 				continue;
@@ -259,7 +260,7 @@ public class GraphToSparql {
 	}
 
 	private String buildEdgeTypeAndEndpoints( QueryGraphElement edge,
-			Set<Value> tvals, QueryNode src, QueryNode dst, Set<URI> otherprops ) {
+			Set<Value> tvals, QueryNode src, QueryNode dst, Set<IRI> otherprops ) {
 		String fromvar = "?" + src.getQueryId();
 		String linkvar = "?" + edge.getQueryId();
 		String tovar = "?" + dst.getQueryId();
@@ -267,7 +268,7 @@ public class GraphToSparql {
 		StringBuilder sb = new StringBuilder( "  " ).append( fromvar ).append( " " );
 
 		// if we have a non-generic edge between these two nodes, the sparql changes
-		Set<URI> specialprops = new HashSet<>( otherprops );
+		Set<IRI> specialprops = new HashSet<>( otherprops );
 		specialprops.removeAll( Arrays.asList( RDF.TYPE, RDFS.LABEL ) );
 		boolean useCustomEdge = !specialprops.isEmpty();
 
@@ -295,7 +296,7 @@ public class GraphToSparql {
 					sb.append( "| " );
 				}
 
-				sb.append( shortcut( URI.class.cast( v ) ) ).append( " " );
+				sb.append( shortcut( IRI.class.cast( v ) ) ).append( " " );
 			}
 		}
 		sb.append( tovar );
@@ -313,7 +314,7 @@ public class GraphToSparql {
 
 			sb.append( " VALUES " ).append( linkvar ).append( " { " );
 			for ( Value v : vals ) {
-				sb.append( shortcut( URI.class.cast( v ) ) ).append( " " );
+				sb.append( shortcut( IRI.class.cast( v ) ) ).append( " " );
 			}
 			sb.append( "}" );
 		}
@@ -329,7 +330,7 @@ public class GraphToSparql {
 		return sb.toString();
 	}
 
-	private String shortcut( URI type ) {
+	private String shortcut( IRI type ) {
 		if ( null == type ) {
 			return null;
 		}

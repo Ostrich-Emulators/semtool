@@ -19,7 +19,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  *
@@ -27,11 +27,11 @@ import org.eclipse.rdf4j.model.URI;
  */
 public final class GraphElementTreeModel extends DefaultTreeModel {
 
-	public static final URI FETCHING = Utility.makeInternalUri( "fetching" );
+	public static final IRI FETCHING = Utility.makeInternalIRI( "fetching" );
 	private static final Logger log = Logger.getLogger( GraphElementTreeModel.class );
 	private final IEngine engine;
-	private final Set<URI> fetched = new HashSet<>();
-	private final List<URI> concepts = new ArrayList<>();
+	private final Set<IRI> fetched = new HashSet<>();
+	private final List<IRI> concepts = new ArrayList<>();
 
 	public GraphElementTreeModel( IEngine eng ) {
 		super( new DefaultMutableTreeNode() );
@@ -45,7 +45,7 @@ public final class GraphElementTreeModel extends DefaultTreeModel {
 		StructureManager sm = StructureManagerFactory.getStructureManager( engine );
 
 		concepts.addAll( sm.getTopLevelConcepts() );
-		for ( URI concept : concepts ) {
+		for ( IRI concept : concepts ) {
 			DefaultMutableTreeNode node = new DefaultMutableTreeNode( concept );
 			DefaultMutableTreeNode fetching = new DefaultMutableTreeNode( FETCHING );
 			node.add( fetching );
@@ -55,20 +55,20 @@ public final class GraphElementTreeModel extends DefaultTreeModel {
 	}
 
 	public void populateInstances( DefaultMutableTreeNode parent ) {
-		URI uri = URI.class.cast( parent.getUserObject() );
-		if ( fetched.contains( uri ) ) {
+		IRI IRI = IRI.class.cast( parent.getUserObject() );
+		if ( fetched.contains( IRI ) ) {
 			return;
 		}
 
 		// okay, fetch the instances
-		fetched.add( uri );
+		fetched.add( IRI );
 
 		new SwingWorker<Void, Void>() {
-			private final List<URI> instances = new ArrayList<>();
+			private final List<IRI> instances = new ArrayList<>();
 
 			@Override
 			protected Void doInBackground() throws Exception {
-				instances.addAll( NodeDerivationTools.createInstanceList( uri, engine ) );
+				instances.addAll( NodeDerivationTools.createInstanceList( IRI, engine ) );
 				return null;
 			}
 
@@ -81,7 +81,7 @@ public final class GraphElementTreeModel extends DefaultTreeModel {
 				DefaultMutableTreeNode[] children = new DefaultMutableTreeNode[instances.size()];
 				int [] indexes = new int[children.length];
 
-				for ( URI u : instances ) {
+				for ( IRI u : instances ) {
 					children[i]=new DefaultMutableTreeNode( u );
 					indexes[i]=i;
 					parent.add( children[i++] );

@@ -74,7 +74,7 @@ public class InsightManagerImplTest {
 	@Test
 	public void testCreateFromRepository() throws Exception {
 		Repository repo = new SailRepository( new MemoryStore() );
-		repo.initialize();
+		repo.init();
 		RepositoryConnection rc = repo.getConnection();
 		rc.add( SRCFILE, null, RDFFormat.TURTLE );
 		rc.commit();

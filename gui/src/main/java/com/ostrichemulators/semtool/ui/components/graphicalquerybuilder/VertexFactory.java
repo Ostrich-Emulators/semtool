@@ -7,7 +7,7 @@ package com.ostrichemulators.semtool.ui.components.graphicalquerybuilder;
 
 import com.google.common.base.Supplier;
 import com.ostrichemulators.semtool.util.Utility;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 /**
@@ -16,7 +16,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
  */
 public class VertexFactory implements Supplier<QueryNode> {
 
-	private URI verttype;
+	private IRI verttype;
 
 	@Override
 	public QueryNode get() {
@@ -25,7 +25,7 @@ public class VertexFactory implements Supplier<QueryNode> {
 		return v;
 	}
 
-	public void setType( URI type ) {
+	public void setType( IRI type ) {
 		verttype = type;
 	}
 }

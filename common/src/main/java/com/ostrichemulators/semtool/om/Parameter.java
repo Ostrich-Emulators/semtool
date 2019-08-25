@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.eclipse.rdf4j.model.URI;
-import org.eclipse.rdf4j.model.impl.URIImpl;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * Holds a Parameter data for one Parameter of an Insight.
@@ -16,7 +16,7 @@ import org.eclipse.rdf4j.model.impl.URIImpl;
 public class Parameter implements Serializable {
 
 	private static final long serialVersionUID = 5672795936332918133L;
-	private URI uriId = null;
+	private IRI uriId = null;
 	private String strLabel = "";
 	private String strParameterType = "";
 	private String strDefaultQuery = "";
@@ -29,9 +29,9 @@ public class Parameter implements Serializable {
 		strLabel = label;
 	}
 
-	public Parameter( String strParameterURI, String strLabel, 
+	public Parameter( String strParameterURI, String strLabel,
 			String strParameterType, String strDefaultQuery ) {
-		uriId = new URIImpl( strParameterURI );
+		uriId = SimpleValueFactory.getInstance().createIRI( strParameterURI );
 		this.strLabel = strLabel;
 		this.strParameterType = strParameterType;
 		this.strDefaultQuery = strDefaultQuery;
@@ -49,16 +49,16 @@ public class Parameter implements Serializable {
 	}
 
 	//Parameter URI:
-	public URI getId() {
+	public IRI getId() {
 		return this.uriId;
 	}
 
-	public void setId( URI uriId ) {
+	public void setId( IRI uriId ) {
 		this.uriId = uriId;
 	}
 
 	public void setParameterId( String uriId ) {
-		setId( new URIImpl( uriId ) );
+		setId( SimpleValueFactory.getInstance().createIRI( uriId ) );
 	}
 
 	public String getParameterURI() {

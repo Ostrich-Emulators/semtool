@@ -16,6 +16,7 @@ import javax.swing.AbstractCellEditor;
 import javax.swing.JButton;
 import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 
@@ -29,8 +30,8 @@ public class ValueEditor extends AbstractCellEditor
 	private static final String EDIT = "edit";
 	private final JButton button = new JButton();
 	private Value value;
-	private Map<URI, String> types;
-	private URI type;
+	private Map<IRI, String> types;
+	private IRI type;
 	private boolean checked;
 	private QueryGraphElement nodeedge;
 
@@ -44,7 +45,7 @@ public class ValueEditor extends AbstractCellEditor
 		button.setBorderPainted( false );
 	}
 
-	public void setType( URI type ) {
+	public void setType( IRI type ) {
 		this.type = type;
 	}
 
@@ -52,7 +53,7 @@ public class ValueEditor extends AbstractCellEditor
 		checked = b;
 	}
 
-	public void setChoices( Map<URI, String> tt ) {
+	public void setChoices( Map<IRI, String> tt ) {
 		types = tt;
 	}
 
@@ -62,6 +63,7 @@ public class ValueEditor extends AbstractCellEditor
 
 	/**
 	 * Handles events from the editor button and from the dialog's OK button.
+	 * @param e
 	 */
 	@Override
 	public void actionPerformed( ActionEvent e ) {
@@ -75,7 +77,7 @@ public class ValueEditor extends AbstractCellEditor
 				}
 				else {
 					// editing a type
-					cv = ConstraintPanel.getValue( type, "Type", URI.class.cast( value ),
+					cv = ConstraintPanel.getValue( type, "Type", IRI.class.cast( value ),
 							types, checked );
 				}
 

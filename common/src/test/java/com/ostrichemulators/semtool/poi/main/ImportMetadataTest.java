@@ -5,18 +5,17 @@
  */
 package com.ostrichemulators.semtool.poi.main;
 
-import com.ostrichemulators.semtool.poi.main.ImportMetadata;
 import com.ostrichemulators.semtool.util.UriBuilder;
 import java.util.ArrayList;
 import java.util.List;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.eclipse.rdf4j.model.URI;
-import org.eclipse.rdf4j.model.impl.URIImpl;
 
 /**
  *
@@ -146,7 +145,7 @@ public class ImportMetadataTest {
 
 	@Test
 	public void testCtor() {
-		URI u = new URIImpl( "http://va.gov/test" );
+		IRI u = SimpleValueFactory.getInstance().createIRI( "http://va.gov/test" );
 		UriBuilder b = UriBuilder.getBuilder( u );
 		ImportMetadata im = new ImportMetadata( u, b, b );
 

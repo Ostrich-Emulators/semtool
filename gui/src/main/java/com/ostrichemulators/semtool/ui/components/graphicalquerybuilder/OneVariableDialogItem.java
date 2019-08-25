@@ -16,6 +16,7 @@ import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JOptionPane;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
@@ -26,16 +27,16 @@ import org.eclipse.rdf4j.model.Value;
  */
 public class OneVariableDialogItem extends AbstractAction {
 
-	private final URI property;
+	private final IRI property;
 	private final QueryGraphElement node;
 	private final String dlgtext;
 	private final GraphicalQueryPanel panel;
 	private final Set<Value> currvals;
-	private Map<URI, String> propTypeChoices;
-	private Collection<URI> choicesModel;
+	private Map<IRI, String> propTypeChoices;
+	private Collection<IRI> choicesModel;
 
 	public OneVariableDialogItem( QueryGraphElement node, GraphicalQueryPanel panel,
-			URI prop, String label, String tooltip, String dlgtext ) {
+			IRI prop, String label, String tooltip, String dlgtext ) {
 
 		super( label );
 		putValue( Action.SHORT_DESCRIPTION, tooltip );
@@ -51,7 +52,7 @@ public class OneVariableDialogItem extends AbstractAction {
 	}
 
 	public OneVariableDialogItem( QueryGraphElement nod, GraphicalQueryPanel panel,
-			URI prop, String label, String tooltip, String dlgtext, Map<URI, String> labels ) {
+			IRI prop, String label, String tooltip, String dlgtext, Map<IRI, String> labels ) {
 
 		super( label );
 		putValue( Action.SHORT_DESCRIPTION, tooltip );
@@ -66,8 +67,8 @@ public class OneVariableDialogItem extends AbstractAction {
 	}
 
 	public OneVariableDialogItem( QueryGraphElement nod, GraphicalQueryPanel panel,
-			URI prop, String label, String tooltip, String dlgtext,
-			Collection<URI> choicesQ ) {
+			IRI prop, String label, String tooltip, String dlgtext,
+			Collection<IRI> choicesQ ) {
 
 		super( label );
 		putValue( Action.SHORT_DESCRIPTION, tooltip );
@@ -86,8 +87,8 @@ public class OneVariableDialogItem extends AbstractAction {
 		ConstraintValueSet values = null;
 
 		if ( null != choicesModel ) {
-			Set<URI> uris = new HashSet<>( choicesModel );
-			propTypeChoices = Utility.getInstanceLabels( uris, panel.getEngine() );
+			Set<IRI> IRIs = new HashSet<>( choicesModel );
+			propTypeChoices = Utility.getInstanceLabels( IRIs, panel.getEngine() );
 
 			// if there are no property choices, don't show the dialog
 			if ( propTypeChoices.isEmpty() ) {
@@ -98,7 +99,7 @@ public class OneVariableDialogItem extends AbstractAction {
 			}
 
 			propTypeChoices.put( Constants.ANYNODE, "<Any>" );
-			propTypeChoices = Utility.sortUrisByLabel( propTypeChoices );
+			propTypeChoices = Utility.sortIrisByLabel( propTypeChoices );
 		}
 
 		if ( null == propTypeChoices ) {

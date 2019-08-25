@@ -49,8 +49,10 @@ import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.LiteralImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.BindingSet;
 
 /**
@@ -61,10 +63,10 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 
 	private static final Logger log = Logger.getLogger( DbMetadataPanel.class );
 	private IEngine engine;
-	private final Map<URI, JTextField> fieldlkp = new HashMap<>();
-	private URI baseuri = null;
+	private final Map<IRI, JTextField> fieldlkp = new HashMap<>();
+	private IRI baseuri = null;
 	private boolean loadable = false;
-	DefaultListModel<URI> subsetmodel = new DefaultListModel<>();
+	DefaultListModel<IRI> subsetmodel = new DefaultListModel<>();
 
 	/**
 	 * Creates new form DbPropertiesPanel
@@ -95,11 +97,12 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 		KeyAdapter ka = new KeyAdapter() {
 			@Override
 			public void keyTyped( KeyEvent e ) {
-				URI suri = null;
-				URI duri = null;
+				ValueFactory f = SimpleValueFactory.getInstance();
+				IRI suri = null;
+				IRI duri = null;
 				try {
-					suri = new URIImpl( schemans.getText() );
-					duri = new URIImpl( datans.getText() );
+					suri = f.createIRI( schemans.getText() );
+					duri = f.createIRI( datans.getText() );
 				}
 				catch ( Exception ex ) {
 					// don't care
@@ -120,7 +123,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 
 			@Override
 			public void mouseClicked( MouseEvent e ) {
-				final URI uri = subsets.getSelectedValue();
+				final IRI uri = subsets.getSelectedValue();
 				GridPlaySheet gps = new GridPlaySheet();
 
 				ListQueryAdapter<Value[]> q = new ListQueryAdapter( "SELECT ?p ?o { ?s ?p ?o }" ) {
@@ -150,7 +153,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 
 	private void doSave() {
 		int i = 1;
-		for ( Map.Entry<URI, JTextField> entry : fieldlkp.entrySet() ) {
+		for ( Map.Entry<IRI, JTextField> entry : fieldlkp.entrySet() ) {
 			if ( !( SEMTOOL.Database.equals( entry.getKey() )
 					|| SEMTOOL.ReificationModel.equals( entry.getKey() ) ) ) {
 				DbMetadataPanel.this.actionPerformed( new ActionEvent( entry.getValue(),
@@ -217,19 +220,19 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 
 		try {
 			MetadataQuery mq = new MetadataQuery();
-			Map<URI, Value> metadata = eng.query( mq );
+			Map<IRI, Value> metadata = eng.query( mq );
 			if ( metadata.containsKey( SEMTOOL.Database ) ) {
-				baseuri = URI.class.cast( metadata.get( SEMTOOL.Database ) );
+				baseuri = IRI.class.cast( metadata.get( SEMTOOL.Database ) );
 			}
 
 			if ( metadata.containsKey( SEMTOOL.ReificationModel ) ) {
-				URI reif = URI.class.cast( metadata.get( SEMTOOL.ReificationModel ) );
+				IRI reif = IRI.class.cast( metadata.get( SEMTOOL.ReificationModel ) );
 				metadata.put( SEMTOOL.ReificationModel,
-						new LiteralImpl( Utility.getInstanceLabel( reif, eng ) ) );
+						SimpleValueFactory.getInstance().createLiteral( Utility.getInstanceLabel( reif, eng ) ) );
 			}
 
-			for ( Map.Entry<URI, String> en : mq.asStrings().entrySet() ) {
-				URI pred = en.getKey();
+			for ( Map.Entry<IRI, String> en : mq.asStrings().entrySet() ) {
+				IRI pred = en.getKey();
 				String val = en.getValue();
 
 				if ( fieldlkp.containsKey( pred ) ) {
@@ -238,13 +241,13 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 			}
 
 			subsetmodel.clear();
-			OneVarListQueryAdapter<URI> q
-					= OneVarListQueryAdapter.getUriList( "SELECT ?o { ?base ?subset ?o }",
+			OneVarListQueryAdapter<IRI> q
+					= OneVarListQueryAdapter.getIriList( "SELECT ?o { ?base ?subset ?o }",
 							"o" );
 			q.bind( "base", engine.getBaseIri() );
 			q.bind( "subset", MetadataConstants.VOID_SUBSET );
-			List<URI> subsetUris = engine.query( q );
-			for ( URI u : subsetUris ) {
+			List<IRI> subsetUris = engine.query( q );
+			for ( IRI u : subsetUris ) {
 				subsetmodel.addElement( u );
 			}
 		}
@@ -290,7 +293,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
     jLabel1 = new javax.swing.JLabel();
     jLabel2 = new javax.swing.JLabel();
     jScrollPane2 = new javax.swing.JScrollPane();
-    subsets = new javax.swing.JList<URI>();
+    subsets = new javax.swing.JList<>();
     jLabel3 = new javax.swing.JLabel();
     schemans = new javax.swing.JTextField();
     datans = new javax.swing.JTextField();
@@ -499,7 +502,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
   private javax.swing.JTextField schemans;
   private javax.swing.JLabel slbl;
   private javax.swing.JTextField smss;
-  private javax.swing.JList<URI> subsets;
+  private javax.swing.JList<IRI> subsets;
   private javax.swing.JTextField summary;
   private javax.swing.JTextField title;
   private javax.swing.JLabel tlbl;
@@ -511,7 +514,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 	public void actionPerformed( ActionEvent ae ) {
 		final IEngine eng
 				= ( null == engine ? DIHelper.getInstance().getRdfEngine() : engine );
-		final URI uri = new URIImpl( ae.getActionCommand() );
+		final IRI uri = SimpleValueFactory.getInstance().createIRI( ae.getActionCommand() );
 		final String val = fieldlkp.get( uri ).getText();
 
 		try {
@@ -521,7 +524,7 @@ public class DbMetadataPanel extends javax.swing.JPanel implements ActionListene
 				public void exec( RepositoryConnection conn ) throws RepositoryException {
 					ValueFactory fac = conn.getValueFactory();
 					if ( uri.equals( SEMTOOL.Database ) ) {
-						baseuri = fac.createURI( val );
+						baseuri = fac.createIRI( val );
 						conn.add( baseuri, RDF.TYPE, SEMTOOL.Database );
 					}
 					else {

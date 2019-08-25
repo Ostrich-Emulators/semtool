@@ -23,7 +23,7 @@ import com.ostrichemulators.semtool.om.GraphElement;
 import com.ostrichemulators.semtool.util.MultiMap;
 import java.util.List;
 
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
@@ -33,7 +33,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
  */
 public class TooltipTransformer<T extends GraphElement> extends LabelTransformer<T> {
 
-	public TooltipTransformer( MultiMap<URI, URI> data ) {
+	public TooltipTransformer( MultiMap<IRI, IRI> data ) {
 		super( data );
 	}
 
@@ -42,7 +42,7 @@ public class TooltipTransformer<T extends GraphElement> extends LabelTransformer
 
 	@Override
 	public String apply( GraphElement vertex ) {
-		List<URI> propertiesList = super.getDisplayableProperties( vertex.getType() );
+		List<IRI> propertiesList = super.getDisplayableProperties( vertex.getType() );
 
 		String propertiesHTMLString = buildPropertyHTMLString( propertiesList, vertex );
 		if ( 0 == propertiesHTMLString.length() ) {
@@ -54,10 +54,10 @@ public class TooltipTransformer<T extends GraphElement> extends LabelTransformer
 		return popup;
 	}
 
-	private String buildPropertyHTMLString( List<URI> properties, GraphElement vertex ) {
+	private String buildPropertyHTMLString( List<IRI> properties, GraphElement vertex ) {
 		StringBuilder propertiesHTMLString = new StringBuilder();
 
-		for ( URI prop : properties ) {
+		for ( IRI prop : properties ) {
 			if ( vertex.hasProperty( prop ) ) {
 				Value val = vertex.getValue( prop );
 
@@ -70,7 +70,7 @@ public class TooltipTransformer<T extends GraphElement> extends LabelTransformer
 				}
 
 				String str = ( RDF.TYPE.equals( prop )
-						? getLabel( URI.class.cast( val ) ) : val.stringValue() );
+						? getLabel( IRI.class.cast( val ) ) : val.stringValue() );
 
 				propertiesHTMLString.append( str );
 			}

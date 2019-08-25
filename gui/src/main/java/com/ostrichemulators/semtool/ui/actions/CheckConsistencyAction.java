@@ -27,7 +27,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  *
@@ -73,8 +73,8 @@ public class CheckConsistencyAction extends DbAction {
 	}
 	
 	private void checkConsistency() {
-		List<URI> nodes = new ArrayList<>();
-		List<URI> rels = new ArrayList<>();
+		List<IRI> nodes = new ArrayList<>();
+		List<IRI> rels = new ArrayList<>();
 
 		try {
 			EngineConsistencyChecker checker = new EngineConsistencyChecker( getEngine(),
@@ -97,7 +97,7 @@ public class CheckConsistencyAction extends DbAction {
 			// or if we're checking across all types. Warn the user just in case
 			boolean across = checkwhat.isCheckAcrossSelected();
 			int checklimit = 0;
-			for ( URI uri : nodes ) {
+			for ( IRI uri : nodes ) {
 				int pos = checker.getItemsForType( uri );
 				if ( across ) {
 					checklimit += pos;
@@ -119,10 +119,10 @@ public class CheckConsistencyAction extends DbAction {
 
 			PlaySheetFrame psf = null;
 
-			Map<URI, String> labels = Utility.getInstanceLabels( nodes, getEngine() );
+			Map<IRI, String> labels = Utility.getInstanceLabels( nodes, getEngine() );
 			int progressPer = 100 / nodes.size();
 			int hiddenProgress = 0;
-			for ( URI concept : nodes ) {
+			for ( IRI concept : nodes ) {
 				int count = checker.getItemsForType( concept );
 				String msg = labels.get( concept ) + " (" + count + " items)";
 				log.debug( "checking " + msg );
@@ -138,7 +138,7 @@ public class CheckConsistencyAction extends DbAction {
 					hiddenProgress = 0; // nothing to hide anymore
 				}
 
-				MultiMap<URI, Hit> hits = checker.check( concept, 0.7f );
+				MultiMap<IRI, Hit> hits = checker.check( concept, 0.7f );
 				if ( !hits.isEmpty() ) {
 					if ( null == psf ) {
 						psf = new PlaySheetFrame( getEngine() );

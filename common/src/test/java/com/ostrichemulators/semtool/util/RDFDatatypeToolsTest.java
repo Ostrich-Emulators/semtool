@@ -7,17 +7,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.LiteralImpl;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 public class RDFDatatypeToolsTest {
+
+	private static final ValueFactory VF = SimpleValueFactory.getInstance();
 
 	@Before
 	public void setUp() throws Exception {
@@ -30,9 +31,9 @@ public class RDFDatatypeToolsTest {
 	@Test
 	public void testFigureColumnClassesFromData() {
 		List<Value[]> data = new LinkedList<>();
-		Value val1 = new LiteralImpl( "A label", XMLSchema.INTEGER );
-		Value val2 = new LiteralImpl( "Another label", XMLSchema.BOOLEAN );
-		Value val3 = new LiteralImpl( "Yet Another label", XMLSchema.DOUBLE );
+		Value val1 = VF.createLiteral( "A label", XMLSchema.INTEGER );
+		Value val2 = VF.createLiteral( "Another label", XMLSchema.BOOLEAN );
+		Value val3 = VF.createLiteral( "Yet Another label", XMLSchema.DOUBLE );
 		Value[] values = new Value[]{ val1, val2, val3 };
 		data.add( values );
 		//data.add(e)
@@ -44,7 +45,7 @@ public class RDFDatatypeToolsTest {
 
 	@Test
 	public void testGetClassForValue() {
-		Value val1 = new LiteralImpl( "A label", XMLSchema.FLOAT );
+		Value val1 = VF.createLiteral( "A label", XMLSchema.FLOAT );
 		Class<?> valClass = RDFDatatypeTools.getClassForValue( val1 );
 		assertEquals( valClass, Float.class );
 	}
@@ -52,7 +53,7 @@ public class RDFDatatypeToolsTest {
 	@Test
 	public void testParseXMLDatatype() {
 		String id = "someID";
-		URI theClass = XMLSchema.DOUBLE;
+		IRI theClass = XMLSchema.DOUBLE;
 		String input = "data\"3.0\"" + theClass.stringValue() + "\"";
 		Object returnedInstance = RDFDatatypeTools.parseXMLDatatype( input );
 		assertEquals( returnedInstance.getClass(), Double.class );
@@ -60,22 +61,22 @@ public class RDFDatatypeToolsTest {
 
 	@Test
 	public void testGetDatatype() {
-		Value val = new LiteralImpl( "A label", XMLSchema.FLOAT );
-		URI uri = RDFDatatypeTools.getDatatype( val );
+		Value val = VF.createLiteral( "A label", XMLSchema.FLOAT );
+		IRI uri = RDFDatatypeTools.getDatatype( val );
 		assertEquals( XMLSchema.FLOAT, uri );
 	}
 
 	@Test
 	public void testGetObjectFromValue() {
-		Value val1 = new LiteralImpl( "3.0", XMLSchema.FLOAT );
+		Value val1 = VF.createLiteral( "3.0", XMLSchema.FLOAT );
 		Object object = RDFDatatypeTools.getObjectFromValue( val1 );
 		assertEquals( Float.class, object.getClass() );
 	}
 
 	@Test
 	public void testIsNumericValue() {
-		Value val1 = new LiteralImpl( "A label", XMLSchema.FLOAT );
-		Value val2 = new LiteralImpl( "Another label", XMLSchema.BOOLEAN );
+		Value val1 = VF.createLiteral( "A label", XMLSchema.FLOAT );
+		Value val2 = VF.createLiteral( "Another label", XMLSchema.BOOLEAN );
 		assertTrue( RDFDatatypeTools.isNumericValue( val1 ) );
 		assertTrue( !RDFDatatypeTools.isNumericValue( val2 ) );
 	}
@@ -104,16 +105,15 @@ public class RDFDatatypeToolsTest {
 		String uriString = "http://www.w3.org/2001/XMLSchema#float";
 		Map<String, String> map = new HashMap<>();
 		map.put( "rdf", "http://www.w3.org/2001/" );
-		URI uri = RDFDatatypeTools.getUriFromRawString( uriString, map );
+		IRI uri = RDFDatatypeTools.getIriFromRawString( uriString, map );
 		assertEquals( uri, XMLSchema.FLOAT );
 	}
 
 	@Test
 	public void testGetRDFStringValue() {
-		ValueFactory vf = new ValueFactoryImpl();
 		Map<String, String> map = new HashMap<>();
 		map.put( "rdf", "http://www.w3.org/2001/" );
-		Value val = RDFDatatypeTools.getRDFStringValue( "3200", map, vf );
+		Value val = RDFDatatypeTools.getRDFStringValue( "3200", map, VF );
 		String stringVal = val.stringValue();
 		assertEquals( stringVal, "3200" );
 	}

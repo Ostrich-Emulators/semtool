@@ -7,9 +7,9 @@ package com.ostrichemulators.semtool.rdf.query.util.impl;
 
 import com.ostrichemulators.semtool.rdf.query.util.QueryExecutorAdapter;
 import org.apache.log4j.Logger;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -54,7 +54,7 @@ public class ModelQueryAdapter extends QueryExecutorAdapter<Model> {
 			getBindingNames().toArray( names );
 
 			Resource subject = null;
-			URI predicate = null;
+			IRI predicate = null;
 			Value object = set.getValue( names[2] );
 
 			if ( set.hasBinding( names[0] )
@@ -62,8 +62,8 @@ public class ModelQueryAdapter extends QueryExecutorAdapter<Model> {
 				subject = Resource.class.cast( set.getValue( names[0] ) );
 			}
 			if ( set.hasBinding( names[1] )
-					&& set.getValue( names[1] ) instanceof URI ) {
-				predicate = URI.class.cast( set.getValue( names[1] ) );
+					&& set.getValue( names[1] ) instanceof IRI ) {
+				predicate = IRI.class.cast( set.getValue( names[1] ) );
 			}
 
 			if ( !( null == subject || null == predicate || null == object ) ) {

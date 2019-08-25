@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.LiteralImpl;
@@ -43,12 +44,13 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 /**
  * Transforms the property label on a node vertex in the graph.
+ *
  * @param <T>
  */
 public class GqbLabelTransformer<T extends QueryGraphElement> extends LabelTransformer<T> {
 
-	private final Map<URI, String> labels = new HashMap<>();
-	private final Comparator<URI> comparator
+	private final Map<IRI, String> labels = new HashMap<>();
+	private final Comparator<IRI> comparator
 			= new PropComparator( RDF.SUBJECT, RDFS.LABEL, RDF.TYPE );
 	private IEngine engine;
 
@@ -78,7 +80,7 @@ public class GqbLabelTransformer<T extends QueryGraphElement> extends LabelTrans
 	 */
 	@Override
 	public String getText( QueryGraphElement vertex ) {
-		Map<URI, Set<Value>> properties = new HashMap<>( vertex.getAllValues() );
+		Map<IRI, Set<Value>> properties = new HashMap<>( vertex.getAllValues() );
 		properties.remove( RDF.SUBJECT );
 
 		if ( properties.isEmpty() ) {
@@ -95,10 +97,10 @@ public class GqbLabelTransformer<T extends QueryGraphElement> extends LabelTrans
 		html.append( "<html><!--" ).append( vertex.getIRI() ).append( "-->" );
 		boolean first = true;
 
-		List<URI> orderedProps = new ArrayList<>( properties.keySet() );
+		List<IRI> orderedProps = new ArrayList<>( properties.keySet() );
 		Collections.sort( orderedProps, comparator );
 
-		for ( URI property : orderedProps ) {
+		for ( IRI property : orderedProps ) {
 			Set<Value> values = properties.get( property );
 
 			for ( Value value : values ) {
@@ -142,12 +144,12 @@ public class GqbLabelTransformer<T extends QueryGraphElement> extends LabelTrans
 		return html.toString();
 	}
 
-	private void updateLabels( Map<URI, Set<Value>> properties ) {
-		Set<URI> props = new HashSet<>( properties.keySet() );
+	private void updateLabels( Map<IRI, Set<Value>> properties ) {
+		Set<IRI> props = new HashSet<>( properties.keySet() );
 		for ( Set<Value> os : properties.values() ) {
 			for ( Value o : os ) {
-				if ( o instanceof URI ) {
-					props.add( URI.class.cast( o ) );
+				if ( o instanceof IRI ) {
+					props.add( IRI.class.cast( o ) );
 				}
 			}
 		}

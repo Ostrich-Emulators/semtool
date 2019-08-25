@@ -6,7 +6,6 @@
 package com.ostrichemulators.semtool.rdf.engine.impl;
 
 import com.ostrichemulators.semtool.model.vocabulary.SEMPERS;
-import info.aduna.iteration.Iterations;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,7 +16,6 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -36,6 +34,7 @@ import com.ostrichemulators.semtool.om.Parameter;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.InsightManager;
 import com.ostrichemulators.semtool.om.Perspective;
+import static com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine.INFER;
 import com.ostrichemulators.semtool.rdf.engine.util.NodeDerivationTools;
 import static com.ostrichemulators.semtool.rdf.query.util.QueryExecutorAdapter.getDate;
 import com.ostrichemulators.semtool.rdf.query.util.impl.OneVarListQueryAdapter;
@@ -47,16 +46,22 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.ListIterator;
+import org.eclipse.rdf4j.common.iteration.Iterations;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.model.impl.StatementImpl;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryResult;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.rio.RDFParser;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.rio.turtle.TurtleParser;
+import org.eclipse.rdf4j.sail.Sail;
+import org.eclipse.rdf4j.sail.inferencer.fc.SchemaCachingRDFSInferencer;
+import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
 /**
  *
@@ -67,7 +72,7 @@ public class InsightManagerImpl implements InsightManager {
 	private static final Logger log = Logger.getLogger( InsightManagerImpl.class );
 
 	private UriBuilder urib = UriBuilder.getBuilder( SEMPERS.NAMESPACE );
-	private final Map<URI, Insight> insights = new HashMap<>();
+	private final Map<IRI, Insight> insights = new HashMap<>();
 	private final List<Perspective> perspectives = new ArrayList<>();
 
 	public InsightManagerImpl() {
@@ -124,10 +129,11 @@ public class InsightManagerImpl implements InsightManager {
 		RepositoryConnection rc = null;
 		try {
 			if ( !repo.isInitialized() ) {
-				repo.initialize();
+				repo.init();
 			}
 			rc = repo.getConnection();
-			imi.loadFromRepository( rc );
+			Model m = QueryResults.asModel( rc.getStatements( null, null, null ) );
+			imi.loadFromModel( m );
 		}
 		catch ( RepositoryException re ) {
 			log.error( re, re );
@@ -146,7 +152,15 @@ public class InsightManagerImpl implements InsightManager {
 		return imi;
 	}
 
-	public void loadFromRepository( RepositoryConnection rc ) {
+	public void loadFromModel( Model model ) {
+		// FIXME: we really don't need to create a new Repository for this, do we?
+		MemoryStore memstore = new MemoryStore();
+		Sail sail = new SchemaCachingRDFSInferencer( memstore );
+		Repository repo = new SailRepository( sail );
+		repo.init();
+		RepositoryConnection rc = repo.getConnection();
+		rc.add( model );
+
 		List<Perspective> persps = new ArrayList<>();
 		try {
 			RepositoryResult<Statement> rrs = rc.getStatements( null, RDF.TYPE,
@@ -154,7 +168,7 @@ public class InsightManagerImpl implements InsightManager {
 			List<Statement> stmts = Iterations.asList( rrs );
 			Map<Perspective, Integer> ordering = new HashMap<>();
 			for ( Statement s : stmts ) {
-				Perspective p = loadPerspective( URI.class.cast( s.getSubject() ), rc, urib );
+				Perspective p = loadPerspective( IRI.class.cast( s.getSubject() ), rc, urib );
 
 				List<Statement> slotstmts = Iterations.asList(
 						rc.getStatements( p.getId(), OLO.index, null, false ) );
@@ -197,7 +211,7 @@ public class InsightManagerImpl implements InsightManager {
 
 	@Override
 	public Perspective getSystemPerspective( IEngine eng ) {
-		Perspective persps = new Perspective( urib.uniqueUri(), "Generic Perspective",
+		Perspective persps = new Perspective( urib.uniqueIri(), "Generic Perspective",
 				"System Generated Generic Perspective" );
 
 		Insight metamodel = new Insight( "View the Database Metamodel", null,
@@ -206,15 +220,15 @@ public class InsightManagerImpl implements InsightManager {
 		Insight explore = new Insight( "Explore an instance of a selected node type",
 				"SELECT DISTINCT ?instance WHERE { ?instance ?s ?o }",
 				InsightOutputType.GRAPH );
-		explore.setId( urib.uniqueUri() );
+		explore.setId( urib.uniqueIri() );
 
 		Parameter concept = new Parameter( "Concept",
 				NodeDerivationTools.getConceptQuery( eng ) );
-		concept.setId( urib.uniqueUri() );
+		concept.setId( urib.uniqueIri() );
 
 		Parameter instance = new Parameter( "Instance",
 				"SELECT ?instance WHERE { ?instance a ?concept }" );
-		instance.setId( urib.uniqueUri() );
+		instance.setId( urib.uniqueIri() );
 
 		explore.setParameters( Arrays.asList( concept, instance ) );
 
@@ -225,7 +239,7 @@ public class InsightManagerImpl implements InsightManager {
 				+ "}";
 		Insight neighbor = new Insight( "Show One Neighbor Away from Selected Node",
 				nespql, InsightOutputType.GRAPH );
-		neighbor.setId( urib.uniqueUri() );
+		neighbor.setId( urib.uniqueIri() );
 		neighbor.setParameters( Arrays.asList( concept, instance ) );
 
 		persps.setInsights( Arrays.asList( metamodel, explore, neighbor ) );
@@ -248,7 +262,7 @@ public class InsightManagerImpl implements InsightManager {
 			Collection<Statement> paramIds = Iterations.asList( rc.getStatements( insight.getId(),
 					SPIN.constraint, null, false ) );
 			for ( Statement s : paramIds ) {
-				URI paramId = URI.class.cast( s.getObject() );
+				IRI paramId = IRI.class.cast( s.getObject() );
 				Parameter parameter = new Parameter();
 				parameter.setId( paramId );
 
@@ -256,7 +270,7 @@ public class InsightManagerImpl implements InsightManager {
 				Collection<Statement> data
 						= Iterations.asList( rc.getStatements( paramId, null, null, false ) );
 				for ( Statement d : data ) {
-					URI pred = d.getPredicate();
+					IRI pred = d.getPredicate();
 					Value val = d.getObject();
 
 					if ( RDFS.LABEL.equals( pred ) ) {
@@ -264,16 +278,16 @@ public class InsightManagerImpl implements InsightManager {
 					}
 					else if ( SPL.predicate.equals( pred ) ) {
 						List<Statement> preddata
-								= Iterations.asList( rc.getStatements( URI.class.cast( val ),
-												RDFS.LABEL, null, true ) );
+								= Iterations.asList( rc.getStatements( IRI.class.cast( val ),
+										RDFS.LABEL, null, true ) );
 						if ( !preddata.isEmpty() ) {
 							// parameter.setVariable( preddata.get( 0 ).getObject().stringValue() );
 						}
 					}
 					else if ( SP.query.equals( pred ) ) {
 						List<Statement> preddata
-								= Iterations.asList( rc.getStatements( URI.class.cast( val ),
-												SP.text, null, true ) );
+								= Iterations.asList( rc.getStatements( IRI.class.cast( val ),
+										SP.text, null, true ) );
 						if ( !preddata.isEmpty() ) {
 							parameter.setDefaultQuery( preddata.get( 0 ).getObject().stringValue() );
 						}
@@ -302,15 +316,15 @@ public class InsightManagerImpl implements InsightManager {
 					+ "  ?slot olo:item ?item ."
 					+ "  ?slot olo:index ?index . "
 					+ "} ORDER BY ?index";
-			OneVarListQueryAdapter<URI> orderquery
-					= OneVarListQueryAdapter.getUriList( query );
+			OneVarListQueryAdapter<IRI> orderquery
+					= OneVarListQueryAdapter.getIriList( query );
 			orderquery.bind( "perspective", perspective.getId() );
 			orderquery.addNamespace( OLO.PREFIX, OLO.NAMESPACE );
 
-			List<URI> insightUris
+			List<IRI> insightUris
 					= AbstractSesameEngine.getSelectNoEx( orderquery, rc, true );
 
-			for ( URI id : insightUris ) {
+			for ( IRI id : insightUris ) {
 				list.add( loadInsight( id, rc, urib ) );
 			}
 		}
@@ -319,11 +333,11 @@ public class InsightManagerImpl implements InsightManager {
 	}
 
 	@Override
-	public Insight getInsight( URI insightURI ) {
+	public Insight getInsight( IRI insightURI ) {
 		return insights.get( insightURI );
 	}
 
-	private static Insight loadInsight( URI insightURI, RepositoryConnection rc,
+	private static Insight loadInsight( IRI insightURI, RepositoryConnection rc,
 			UriBuilder urib ) {
 
 		Insight insight = null;
@@ -337,7 +351,7 @@ public class InsightManagerImpl implements InsightManager {
 			List<Statement> qstmts
 					= Iterations.asList( rc.getStatements( insightURI, SPIN.body, null, true ) );
 			if ( !qstmts.isEmpty() ) {
-				URI body = URI.class.cast( qstmts.get( 0 ).getObject() );
+				IRI body = IRI.class.cast( qstmts.get( 0 ).getObject() );
 				List<Statement> querys
 						= Iterations.asList( rc.getStatements( body, SP.text, null, true ) );
 				stmts.addAll( querys );
@@ -346,7 +360,7 @@ public class InsightManagerImpl implements InsightManager {
 			List<Statement> dvstmts
 					= Iterations.asList( rc.getStatements( insightURI, UI.dataView, null, true ) );
 			if ( !dvstmts.isEmpty() ) {
-				URI view = URI.class.cast( dvstmts.get( 0 ).getObject() );
+				IRI view = IRI.class.cast( dvstmts.get( 0 ).getObject() );
 				List<Statement> dvs
 						= Iterations.asList( rc.getStatements( view, UI.viewClass, null, true ) );
 				stmts.addAll( dvs );
@@ -372,7 +386,7 @@ public class InsightManagerImpl implements InsightManager {
 	}
 
 	@Override
-	public Perspective getPerspective( URI perspectiveURI ) {
+	public Perspective getPerspective( IRI perspectiveURI ) {
 		ListIterator<Perspective> lit = perspectives.listIterator();
 		while ( lit.hasNext() ) {
 			Perspective old = lit.next();
@@ -385,8 +399,8 @@ public class InsightManagerImpl implements InsightManager {
 	}
 
 	@Override
-	public URI add( Perspective p ) {
-		p.setId( urib.uniqueUri() );
+	public IRI add( Perspective p ) {
+		p.setId( urib.uniqueIri() );
 		perspectives.add( p );
 		return p.getId();
 	}
@@ -418,8 +432,8 @@ public class InsightManagerImpl implements InsightManager {
 	}
 
 	@Override
-	public URI add( Insight p ) {
-		p.setId( urib.uniqueUri() );
+	public IRI add( Insight p ) {
+		p.setId( urib.uniqueIri() );
 		insights.put( p.getId(), p );
 		return p.getId();
 	}
@@ -434,14 +448,14 @@ public class InsightManagerImpl implements InsightManager {
 		insights.remove( p.getId() );
 	}
 
-	private static Perspective loadPerspective( URI perspectiveURI, RepositoryConnection rc,
+	private static Perspective loadPerspective( IRI perspectiveURI, RepositoryConnection rc,
 			UriBuilder urib ) {
 		try {
 			Perspective perspective = new Perspective( perspectiveURI );
 			Collection<Statement> stmts
 					= Iterations.asList( rc.getStatements( perspectiveURI, null, null, false ) );
 			for ( Statement s : stmts ) {
-				URI pred = s.getPredicate();
+				IRI pred = s.getPredicate();
 				Value val = s.getObject();
 
 				if ( val instanceof Literal ) {
@@ -467,13 +481,13 @@ public class InsightManagerImpl implements InsightManager {
 		Insight insight = new Insight();
 
 		for ( Statement stmt : stmts ) {
-			URI pred = stmt.getPredicate();
+			IRI pred = stmt.getPredicate();
 			Value val = stmt.getObject();
 			if ( val instanceof Literal ) {
 				Literal obj = Literal.class.cast( val );
 
 				if ( RDFS.LABEL.equals( pred ) ) {
-					insight.setId( URI.class.cast( stmt.getSubject() ) );
+					insight.setId( IRI.class.cast( stmt.getSubject() ) );
 
 					insight.setLabel( obj.stringValue() );
 				}
@@ -491,13 +505,13 @@ public class InsightManagerImpl implements InsightManager {
 					insight.setCreator( obj.stringValue() );
 				}
 				else if ( DCTERMS.CREATED.equals( pred ) ) {
-					URI uri = obj.getDatatype();
+					IRI uri = obj.getDatatype();
 					if ( XMLSchema.DATE.equals( uri ) || XMLSchema.DATETIME.equals( uri ) ) {
 						insight.setCreated( getDate( Literal.class.cast( obj ).calendarValue() ) );
 					}
 				}
 				else if ( DCTERMS.MODIFIED.equals( pred ) ) {
-					URI uri = obj.getDatatype();
+					IRI uri = obj.getDatatype();
 					if ( XMLSchema.DATE.equals( uri ) || XMLSchema.DATETIME.equals( uri ) ) {
 						insight.setModified( getDate( Literal.class.cast( obj ).calendarValue() ) );
 					}
@@ -538,10 +552,10 @@ public class InsightManagerImpl implements InsightManager {
 
 		statements.addAll( coll.getStatements() );
 
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		for ( Perspective p : im.getPerspectives() ) {
 			statements.addAll( getStatements( p, user ) );
-			statements.add( new StatementImpl( p.getId(), OLO.index,
+			statements.add( vf.createStatement( p.getId(), OLO.index,
 					vf.createLiteral( idx++ ) ) );
 		}
 
@@ -561,12 +575,11 @@ public class InsightManagerImpl implements InsightManager {
 	public static Model getStatements( Perspective p, User user ) {
 		Model statements = new LinkedHashModel();
 		UriBuilder urib = UriBuilder.getBuilder( SEMPERS.NAMESPACE );
+		ValueFactory vf = SimpleValueFactory.getInstance();
 
 		// if we're creating statements, mark our repository as an insights db
-		statements.add( new StatementImpl( SEMPERS.INSIGHT_DB, RDF.TYPE,
+		statements.add( vf.createStatement( SEMPERS.INSIGHT_DB, RDF.TYPE,
 				SEMPERS.INSIGHT_CORE_TYPE ) );
-
-		ValueFactory vf = new ValueFactoryImpl();
 
 		if ( null == p.getId() ) {
 			p.setId( urib.build( p.getLabel() ) );
@@ -584,8 +597,8 @@ public class InsightManagerImpl implements InsightManager {
 			for ( Parameter a : i.getInsightParameters() ) {
 				final String pianame = piname + "-" + a.getLabel();
 
-				URI predicateUri = urib.build( pianame + "-pred" );
-				URI queryUri = urib.build( pianame + "-query" );
+				IRI predicateUri = urib.build( pianame + "-pred" );
+				IRI queryUri = urib.build( pianame + "-query" );
 
 				if ( null == a.getId() ) {
 					a.setId( urib.build( pianame ) );
@@ -607,22 +620,22 @@ public class InsightManagerImpl implements InsightManager {
 			ValueFactory vf, UriBuilder urib, User user ) {
 
 		Model statements = new LinkedHashModel();
-		URI pid = p.getId();
+		IRI pid = p.getId();
 		Date now = new Date();
 
-		statements.add( new StatementImpl( pid, RDF.TYPE, SEMPERS.Perspective ) );
-		statements.add( new StatementImpl( pid, RDFS.LABEL,
+		statements.add( vf.createStatement( pid, RDF.TYPE, SEMPERS.Perspective ) );
+		statements.add( vf.createStatement( pid, RDFS.LABEL,
 				vf.createLiteral( p.getLabel() ) ) );
 		if ( null != p.getDescription() ) {
-			statements.add( new StatementImpl( pid, DCTERMS.DESCRIPTION,
+			statements.add( vf.createStatement( pid, DCTERMS.DESCRIPTION,
 					vf.createLiteral( p.getDescription() ) ) );
 		}
 
-		statements.add( new StatementImpl( pid, DCTERMS.CREATED,
+		statements.add( vf.createStatement( pid, DCTERMS.CREATED,
 				vf.createLiteral( now ) ) );
-		statements.add( new StatementImpl( pid, DCTERMS.MODIFIED,
+		statements.add( vf.createStatement( pid, DCTERMS.MODIFIED,
 				vf.createLiteral( now ) ) );
-		statements.add( new StatementImpl( pid, DCTERMS.CREATOR,
+		statements.add( vf.createStatement( pid, DCTERMS.CREATOR,
 				vf.createLiteral( getAuthorInfo( user ) ) ) );
 
 		return statements;
@@ -632,39 +645,39 @@ public class InsightManagerImpl implements InsightManager {
 			ValueFactory vf, UriBuilder urib, User user ) {
 
 		Model statements = new LinkedHashModel();
-		URI iid = insight.getId();
+		IRI iid = insight.getId();
 
-		statements.add( new StatementImpl( iid, RDF.TYPE, SPIN.MagicProperty ) );
-		statements.add( new StatementImpl( iid, RDFS.LABEL,
+		statements.add( vf.createStatement( iid, RDF.TYPE, SPIN.MagicProperty ) );
+		statements.add( vf.createStatement( iid, RDFS.LABEL,
 				vf.createLiteral( insight.getLabel() ) ) );
 		if ( null != insight.getDescription() ) {
-			statements.add( new StatementImpl( iid, DCTERMS.DESCRIPTION,
+			statements.add( vf.createStatement( iid, DCTERMS.DESCRIPTION,
 					vf.createLiteral( insight.getDescription() ) ) );
 		}
 
 		if ( null != insight.getOutput() ) {
-			statements.add( new StatementImpl( iid, SEMPERS.INSIGHT_OUTPUT_TYPE,
+			statements.add( vf.createStatement( iid, SEMPERS.INSIGHT_OUTPUT_TYPE,
 					vf.createLiteral( insight.getOutput().toString() ) ) );
 		}
 
-		statements.add( new StatementImpl( iid, RDFS.SUBCLASSOF, SEMPERS.InsightProperties ) );
-		statements.add( new StatementImpl( iid, DCTERMS.CREATED,
+		statements.add( vf.createStatement( iid, RDFS.SUBCLASSOF, SEMPERS.InsightProperties ) );
+		statements.add( vf.createStatement( iid, DCTERMS.CREATED,
 				vf.createLiteral( null == insight.getCreated() ? new Date()
-								: insight.getCreated() ) ) );
-		statements.add( new StatementImpl( iid, DCTERMS.MODIFIED,
+						: insight.getCreated() ) ) );
+		statements.add( vf.createStatement( iid, DCTERMS.MODIFIED,
 				vf.createLiteral( new Date() ) ) );
-		statements.add( new StatementImpl( iid, DCTERMS.CREATOR,
+		statements.add( vf.createStatement( iid, DCTERMS.CREATOR,
 				vf.createLiteral( getAuthorInfo( user ) ) ) );
 
 		String sparql = insight.getSparql();
 
-		URI spinid = urib.build( insight.getLabel() + "-query" );
-		statements.add( new StatementImpl( iid, SPIN.body, spinid ) );
-		statements.add( new StatementImpl( spinid, SP.text,
+		IRI spinid = urib.build( insight.getLabel() + "-query" );
+		statements.add( vf.createStatement( iid, SPIN.body, spinid ) );
+		statements.add( vf.createStatement( spinid, SP.text,
 				vf.createLiteral( sparql ) ) );
 
 		// Insights can only have SELECT, CONSTRUCT, or DESCRIBE queries:
-		URI bodytype;
+		IRI bodytype;
 		if ( sparql.toUpperCase().startsWith( "DESCRIBE" ) ) {
 			bodytype = SP.Describe;
 		}
@@ -674,28 +687,28 @@ public class InsightManagerImpl implements InsightManager {
 		else {
 			bodytype = SP.Select;
 		}
-		statements.add( new StatementImpl( spinid, RDF.TYPE, bodytype ) );
+		statements.add( vf.createStatement( spinid, RDF.TYPE, bodytype ) );
 
 		return statements;
 	}
 
 	protected static Model getParameterStatements( Parameter parameter,
-			URI predicateUri, URI queryUri, ValueFactory vf, UriBuilder urib,
+			IRI predicateUri, IRI queryUri, ValueFactory vf, UriBuilder urib,
 			User user ) {
 
 		Model statements = new LinkedHashModel();
 
-		URI pid = parameter.getId();
+		IRI pid = parameter.getId();
 
-		statements.add( new StatementImpl( pid, RDFS.LABEL,
+		statements.add( vf.createStatement( pid, RDFS.LABEL,
 				vf.createLiteral( parameter.getLabel() ) ) );
 
-		statements.add( new StatementImpl( pid, SPL.predicate, predicateUri ) );
-		statements.add( new StatementImpl( pid, SP.query, queryUri ) );
+		statements.add( vf.createStatement( pid, SPL.predicate, predicateUri ) );
+		statements.add( vf.createStatement( pid, SP.query, queryUri ) );
 
-		statements.add( new StatementImpl( predicateUri, RDFS.LABEL,
+		statements.add( vf.createStatement( predicateUri, RDFS.LABEL,
 				vf.createLiteral( parameter.getLabel() ) ) );
-		statements.add( new StatementImpl( queryUri, SP.text,
+		statements.add( vf.createStatement( queryUri, SP.text,
 				vf.createLiteral( parameter.getDefaultQuery() ) ) );
 
 		return statements;
@@ -706,10 +719,10 @@ public class InsightManagerImpl implements InsightManager {
 		Model statements = new LinkedHashModel();
 		int idx = 0;
 		for ( Insight i : insights ) {
-			URI slot = urib.build( p.getLabel() + "-slot-" + Integer.toString( ++idx ) );
-			statements.add( new StatementImpl( p.getId(), OLO.slot, slot ) );
-			statements.add( new StatementImpl( slot, OLO.index, vf.createLiteral( idx ) ) );
-			statements.add( new StatementImpl( slot, OLO.item, i.getId() ) );
+			IRI slot = urib.build( p.getLabel() + "-slot-" + Integer.toString( ++idx ) );
+			statements.add( vf.createStatement( p.getId(), OLO.slot, slot ) );
+			statements.add( vf.createStatement( slot, OLO.index, vf.createLiteral( idx ) ) );
+			statements.add( vf.createStatement( slot, OLO.item, i.getId() ) );
 		}
 
 		return statements;
@@ -718,8 +731,9 @@ public class InsightManagerImpl implements InsightManager {
 	protected static Collection<Statement> getConstraintStatements( Insight ins,
 			Collection<Parameter> params ) {
 		Model statements = new LinkedHashModel();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		for ( Parameter p : params ) {
-			statements.add( new StatementImpl( ins.getId(), SPIN.constraint, p.getId() ) );
+			statements.add( vf.createStatement( ins.getId(), SPIN.constraint, p.getId() ) );
 		}
 		return statements;
 	}

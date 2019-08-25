@@ -6,6 +6,7 @@
 package com.ostrichemulators.semtool.om;
 
 import com.ostrichemulators.semtool.util.RDFDatatypeTools;
+import org.eclipse.rdf4j.model.IRI;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -13,8 +14,7 @@ import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.eclipse.rdf4j.model.URI;
-import org.eclipse.rdf4j.model.impl.URIImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
@@ -163,10 +163,10 @@ public class AbstractGraphElementTest {
 	public class TestNode extends AbstractGraphElement {
 
 		public TestNode() {
-			super( new URIImpl( "http://va.gov/test" ) );
+			super( SimpleValueFactory.getInstance().createIRI( "http://va.gov/test" ) );
 		}
 
-		public TestNode( URI id, URI type, String label ) {
+		public TestNode( IRI id, IRI type, String label ) {
 			super( id, type, label );
 		}
 

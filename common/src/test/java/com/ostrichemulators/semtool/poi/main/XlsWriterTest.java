@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.eclipse.rdf4j.model.IRI;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -26,10 +27,9 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.impl.LiteralImpl;
-import org.eclipse.rdf4j.model.impl.URIImpl;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
@@ -76,8 +76,9 @@ public class XlsWriterTest {
 
 	@Test
 	public void testWrite_ImportData_File() throws Exception {
+		final ValueFactory VF = SimpleValueFactory.getInstance();
 		ImportMetadata im = new ImportMetadata();
-		URI base = new URIImpl( "http://va.gov/importer" );
+		IRI base = VF.createIRI( "http://va.gov/importer" );
 		im.setBase( base );
 		im.setSchemaBuilder( base.stringValue() );
 		im.setDataBuilder( base.stringValue() );
@@ -89,7 +90,7 @@ public class XlsWriterTest {
 		LoadingSheetData lsd = LoadingSheetData.nodesheet( "sbj" );
 		lsd.addProperties( Arrays.asList( "xx", "yy" ) );
 		Map<String, Value> props = new HashMap<>();
-		props.put( "xx", new LiteralImpl( "test" ) );
+		props.put( "xx", VF.createLiteral( "test" ) );
 		LoadingNodeAndPropertyValues nap = lsd.add( "instance", props );
 		nap.setSubjectIsError( true );
 		data.add( lsd );
@@ -97,7 +98,7 @@ public class XlsWriterTest {
 		LoadingSheetData rsd = LoadingSheetData.relsheet( "sbjx", "objx", "relname" );
 		rsd.addProperties( Arrays.asList( "xxx", "yyy" ) );
 		Map<String, Value> propsx = new HashMap<>();
-		propsx.put( "xxx", new LiteralImpl( "1.0", XMLSchema.DOUBLE ) );
+		propsx.put( "xxx", VF.createLiteral( "1.0", XMLSchema.DOUBLE ) );
 		LoadingNodeAndPropertyValues rel = rsd.add( "relsbj", "relobj", propsx );
 		rel.setObjectIsError( true );
 		data.add( rsd );
@@ -110,7 +111,7 @@ public class XlsWriterTest {
 			POIReader rdr = new POIReader();
 			rdr.keepLoadInMemory( true );
 			ImportData imp = rdr.readOneFile( output );
-			assertEquals( base, imp.getMetadata().getSchemaBuilder().toUri() );
+			assertEquals( base, imp.getMetadata().getSchemaBuilder().toIRI() );
 			assertEquals( 2, imp.getSheetNames().size() );
 		}
 		finally {
@@ -120,12 +121,14 @@ public class XlsWriterTest {
 
 	@Test
 	public void testWrite_ImportData_File2() throws Exception {
+		final ValueFactory VF = SimpleValueFactory.getInstance();
+
 		ImportData data = new ImportData();
 
 		LoadingSheetData lsd = LoadingSheetData.nodesheet( "sbj" );
 		lsd.addProperties( Arrays.asList( "xx", "yy" ) );
 		Map<String, Value> props = new HashMap<>();
-		props.put( "xx", new LiteralImpl( "test" ) );
+		props.put( "xx", VF.createLiteral("test" ) );
 		LoadingNodeAndPropertyValues nap = lsd.add( "instance", props );
 		nap.setSubjectIsError( true );
 		data.add( lsd );
@@ -133,7 +136,7 @@ public class XlsWriterTest {
 		LoadingSheetData rsd = LoadingSheetData.relsheet( "sbjx", "objx", "relname" );
 		rsd.addProperties( Arrays.asList( "xxx", "yyy" ) );
 		Map<String, Value> propsx = new HashMap<>();
-		propsx.put( "xxx", new LiteralImpl( "1.0", XMLSchema.DOUBLE ) );
+		propsx.put( "xxx", VF.createLiteral( "1.0", XMLSchema.DOUBLE ) );
 		LoadingNodeAndPropertyValues rel = rsd.add( "relsbj", "relobj", propsx );
 		rel.setObjectIsError( true );
 		data.add( rsd );

@@ -14,7 +14,6 @@ import com.ostrichemulators.semtool.poi.main.ImportMetadata;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.ReificationStyle;
 import com.ostrichemulators.semtool.rdf.engine.impl.AbstractSesameEngine;
-import com.ostrichemulators.semtool.rdf.engine.impl.BigDataEngine;
 import com.ostrichemulators.semtool.rdf.engine.impl.SesameEngine;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineCreateBuilder;
 import com.ostrichemulators.semtool.rdf.engine.util.EngineLoader;
@@ -49,7 +48,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import org.apache.commons.io.FilenameUtils;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.impl.URIImpl;
 
 /**
@@ -87,7 +88,6 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 		}
 
 		impls.put( openrdf, SesameEngine.class );
-		impls.put( blazegraph, BigDataEngine.class );
 
 		Preferences prefs = Preferences.userNodeForPackage( getClass() );
 		file.setPreferencesKeys( prefs, "lastpath" );
@@ -465,13 +465,13 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 
 		Collection<File> files = file.getFiles();
 
-		URI defaultBase = null;
+		IRI defaultBase = null;
 		if ( null == mybase || mybase.isEmpty() || METADATABASEURI.equals( mybase ) ) {
-			Set<URI> uris = new HashSet<>();
+			Set<IRI> uris = new HashSet<>();
 			Preferences prefs = Preferences.userNodeForPackage( getClass() );
 			String basepref = prefs.get( "lastontopath", SEMONTO.NAMESPACE );
 			for ( String b : basepref.split( ";" ) ) {
-				uris.add( new URIImpl( b ) );
+				uris.add( SimpleValueFactory.getInstance().createIRI( b ) );
 			}
 
 			defaultBase = ( files.isEmpty() ? Constants.ANYNODE
@@ -496,10 +496,10 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 			// else {} // every file has a base URI specified
 		}
 		else {
-			defaultBase = new URIImpl( mybase );
+			defaultBase = SimpleValueFactory.getInstance().createIRI( mybase );
 		}
 
-		final URI defaultBaseUri = defaultBase;
+		final IRI defaultBaseUri = defaultBase;
 		String title = "Creating Database from " + ( file.getFilePaths().length > 1
 				? "multiple files" : file.getDelimitedPaths() );
 
@@ -602,11 +602,11 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 	 * @throws com.ostrichemulators.semtool.poi.main.ImportValidationException
 	 * @throws java.io.IOException
 	 */
-	public static URI getDefaultBaseUri( Collection<File> files, Collection<URI> choices )
+	public static IRI getDefaultBaseUri( Collection<File> files, Collection<IRI> choices )
 			throws ImportValidationException, IOException {
 		Set<String> bases = new HashSet<>();
 
-		URI choice = null;
+		IRI choice = null;
 		boolean everyFileHasBase = true;
 
 		for ( File f : files ) {
@@ -614,7 +614,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 			if ( null != reader ) { // triples files don't have custom readers
 				ImportMetadata metadata = reader.getMetadata( f );
 
-				URI baser = metadata.getBase();
+				IRI baser = metadata.getBase();
 				if ( null == baser ) {
 					everyFileHasBase = false;
 				}
@@ -633,7 +633,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 				JComboBox<String> box = new JComboBox<>();
 				box.addItem( "" );
 
-				for ( URI item : choices ) {
+				for ( IRI item : choices ) {
 					box.addItem( item.stringValue() );
 				}
 				box.setEditable( true );
@@ -654,7 +654,7 @@ public class ImportCreateDbPanel extends javax.swing.JPanel {
 					return null;
 				}
 
-				choice = new URIImpl( box.getSelectedItem().toString() );
+				choice = SimpleValueFactory.getInstance().createIRI( box.getSelectedItem().toString() );
 			}
 		}
 

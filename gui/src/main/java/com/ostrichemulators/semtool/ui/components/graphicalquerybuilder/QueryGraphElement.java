@@ -9,7 +9,7 @@ import com.ostrichemulators.semtool.om.GraphElement;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 /**
@@ -18,35 +18,35 @@ import org.eclipse.rdf4j.model.Value;
  */
 public interface QueryGraphElement extends GraphElement {
 
-	public boolean isSelected( URI prop );
+	public boolean isSelected( IRI prop );
 
-	public void setSelected( URI prop, boolean selected );
+	public void setSelected( IRI prop, boolean selected );
 
-	public boolean isOptional( URI prop );
+	public boolean isOptional( IRI prop );
 
-	public void setOptional( URI prop, boolean optional );
+	public void setOptional( IRI prop, boolean optional );
 
-	public Map<URI, Set<Value>> getAllValues();
+	public Map<IRI, Set<Value>> getAllValues();
 
-	public Set<Value> getValues( URI prop );
+	public Set<Value> getValues( IRI prop );
 
-	public void setProperty( URI prop, Object propValue );
+	public void setProperty( IRI prop, Object propValue );
 
-	public void setProperty( URI prop, Value v, boolean add );
+	public void setProperty( IRI prop, Value v, boolean add );
 
-	public void setProperties( URI prop, Collection<Value> vals );
+	public void setProperties( IRI prop, Collection<Value> vals );
 
-	public void setLabel( URI prop, String label );
+	public void setLabel( IRI prop, String label );
 
-	public String getLabel( URI prop );
+	public String getLabel( IRI prop );
 
 	public void setQueryId( String id );
 
 	public String getQueryId();
 
-	public void setFilter( URI prop, String str );
+	public void setFilter( IRI prop, String str );
 
-	public String getFilter( URI prop );
+	public String getFilter( IRI prop );
 	
-	public boolean hasFilter( URI prop );
+	public boolean hasFilter( IRI prop );
 }

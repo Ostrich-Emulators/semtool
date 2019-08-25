@@ -5,30 +5,28 @@ import static org.junit.Assert.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
-
-import com.hp.hpl.jena.rdf.model.impl.PropertyImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 public class PropComparatorTest {
 
-	private URI uri1 = null;
+	private IRI uri1 = null;
 	
-	private URI uri2 = null;
+	private IRI uri2 = null;
 	
-	private URI uri3 = null;
+	private IRI uri3 = null;
 	
 	private static final PropComparator COMPARATOR = new PropComparator();
 	
-	private static final ValueFactory FACTORY = new ValueFactoryImpl();
+	private static final ValueFactory FACTORY = SimpleValueFactory.getInstance();
 	
 	
 	@Before
 	public void setUp() throws Exception {
-		uri1 = FACTORY.createURI("rdf:is_a");
-		uri2 = FACTORY.createURI("rdf:is_a");
-		uri3 = FACTORY.createURI("rdf:part_of");
+		uri1 = FACTORY.createIRI("rdf:is_a");
+		uri2 = FACTORY.createIRI("rdf:is_a");
+		uri3 = FACTORY.createIRI("rdf:part_of");
 	}
 
 	@After

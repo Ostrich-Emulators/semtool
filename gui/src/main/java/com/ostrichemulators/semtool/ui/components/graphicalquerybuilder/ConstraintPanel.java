@@ -38,11 +38,12 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
 import org.apache.log4j.Logger;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.impl.LiteralImpl;
-import org.eclipse.rdf4j.model.impl.URIImpl;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 /**
@@ -52,7 +53,7 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 public class ConstraintPanel extends javax.swing.JPanel {
 
 	private static final Logger log = Logger.getLogger( ConstraintPanel.class );
-	private static final Map<Class<?>, URI> typelookup = new HashMap<>();
+	private static final Map<Class<?>, IRI> typelookup = new HashMap<>();
 
 	static {
 		typelookup.put( String.class, XMLSchema.STRING );
@@ -69,8 +70,8 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		return ( JOptionPane.YES_OPTION == ans );
 	}
 
-	private static ConstraintValueSet makeCVSet( String val, URI type,
-			URI property, boolean included ) {
+	private static ConstraintValueSet makeCVSet( String val, IRI type,
+			IRI property, boolean included ) {
 
 		List<String> newvals = ( val.contains( "|" )
 				? explode( val ) : Arrays.asList( val ) );
@@ -78,22 +79,23 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		ConstraintValueSet values = new ConstraintValueSet( included, property,
 				( newvals.size() > 1 ? JoinType.OR : JoinType.SINGLE ), val );
 
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		for ( String v : newvals ) {
 			values.add( ( XMLSchema.ANYURI == type
-					? new URIImpl( v ) : new LiteralImpl( v, type ) ) );
+					? vf.createIRI( v ) : vf.createLiteral( v, type ) ) );
 		}
 		return values;
 	}
 
-	public static ConstraintValueSet getValues( URI property, String label,
+	public static ConstraintValueSet getValues( IRI property, String label,
 			Collection<Value> value, boolean checked ) {
 		JTextField input = new JTextField();
 		if ( null != value ) {
 			input.setText( implode( value ) );
 		}
 
-		Map<URI, String> propmap = new HashMap<>();
-		propmap.put(property, Utility.getInstanceLabel( property,
+		Map<IRI, String> propmap = new HashMap<>();
+		propmap.put( property, Utility.getInstanceLabel( property,
 				DIHelper.getInstance().getRdfEngine() ) );
 
 		ConstraintPanel cp = new ConstraintPanel( property, label, input, checked,
@@ -101,39 +103,39 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		if ( showDialog( label, cp ) ) {
 
 			String val = input.getText();
-			URI type = cp.getType();
+			IRI type = cp.getType();
 			return makeCVSet( val, type, property, cp.isIncluded() );
 		}
 		return null;
 	}
 
-	public static ConstraintValueSet getValues( String label, Map<URI, String> propmap ) {
+	public static ConstraintValueSet getValues( String label, Map<IRI, String> propmap ) {
 		JTextField input = new JTextField();
 
 		ConstraintPanel cp = new ConstraintPanel( null, label, input, true,
 				(Value) null, propmap );
 		if ( showDialog( label, cp ) ) {
 			String val = input.getText();
-			URI type = cp.getType();
+			IRI type = cp.getType();
 
 			return makeCVSet( val, type, cp.getPropertyType(), cp.isIncluded() );
 		}
 		return null;
 	}
 
-	public static ConstraintValue getValue( URI property, String label, URI value,
-			Map<URI, String> choices, boolean checked ) {
-		choices = Utility.sortUrisByLabel( choices );
-		URI[] uris = choices.keySet().toArray( new URI[0] );
-		LabeledPairRenderer<URI> renderer
+	public static ConstraintValue getValue( IRI property, String label, IRI value,
+			Map<IRI, String> choices, boolean checked ) {
+		choices = Utility.sortIrisByLabel( choices );
+		IRI[] uris = choices.keySet().toArray( new IRI[0] );
+		LabeledPairRenderer<IRI> renderer
 				= LabeledPairRenderer.getUriPairRenderer().cache( choices );
 
-		Map<URI, String> propmap = new HashMap<>();
-		propmap.put(property, Utility.getInstanceLabel( property,
+		Map<IRI, String> propmap = new HashMap<>();
+		propmap.put( property, Utility.getInstanceLabel( property,
 				DIHelper.getInstance().getRdfEngine() ) );
 
 		if ( choices.size() > 5 ) {
-			JList<URI> list = new JList<>( uris );
+			JList<IRI> list = new JList<>( uris );
 			list.setCellRenderer( renderer );
 			list.setSelectedValue( value, true );
 			list.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
@@ -145,8 +147,8 @@ public class ConstraintPanel extends javax.swing.JPanel {
 			}
 		}
 		else {
-			DefaultComboBoxModel<URI> model = new DefaultComboBoxModel<>( uris );
-			JComboBox<URI> box = new JComboBox<>( model );
+			DefaultComboBoxModel<IRI> model = new DefaultComboBoxModel<>( uris );
+			JComboBox<IRI> box = new JComboBox<>( model );
 			box.setRenderer( renderer );
 			box.setSelectedItem( value );
 			ConstraintPanel cp = new ConstraintPanel( property, label, box, checked,
@@ -170,12 +172,12 @@ public class ConstraintPanel extends javax.swing.JPanel {
 	 * @param checked
 	 * @return
 	 */
-	public static ConstraintValueSet getValues( URI property, String label,
-			Collection<Value> values, Map<URI, String> choices, boolean checked ) {
-		choices = Utility.sortUrisByLabel( choices );
+	public static ConstraintValueSet getValues( IRI property, String label,
+			Collection<Value> values, Map<IRI, String> choices, boolean checked ) {
+		choices = Utility.sortIrisByLabel( choices );
 
-		URI[] uris = choices.keySet().toArray( new URI[0] );
-		Map<URI, Integer> choicepos = new HashMap<>();
+		IRI[] uris = choices.keySet().toArray( new IRI[0] );
+		Map<IRI, Integer> choicepos = new HashMap<>();
 		List<Integer> selections = new ArrayList<>();
 		for ( int i = 0; i < uris.length; i++ ) {
 			choicepos.put( uris[i], i );
@@ -184,14 +186,14 @@ public class ConstraintPanel extends javax.swing.JPanel {
 			}
 		}
 
-		LabeledPairRenderer<URI> renderer
+		LabeledPairRenderer<IRI> renderer
 				= LabeledPairRenderer.getUriPairRenderer().cache( choices );
 
-		Map<URI, String> propmap = new HashMap<>();
-		propmap.put(property, Utility.getInstanceLabel( property,
+		Map<IRI, String> propmap = new HashMap<>();
+		propmap.put( property, Utility.getInstanceLabel( property,
 				DIHelper.getInstance().getRdfEngine() ) );
 
-		JList<URI> list = new JList<>( uris );
+		JList<IRI> list = new JList<>( uris );
 		list.setCellRenderer( renderer );
 		for ( int idx : selections ) {
 			list.addSelectionInterval( idx, idx );
@@ -200,7 +202,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		ConstraintPanel cp = new ConstraintPanel( property, label,
 				new JScrollPane( list ), checked, values, propmap );
 		if ( showDialog( label, cp ) ) {
-			List<URI> vals = list.getSelectedValuesList();
+			List<IRI> vals = list.getSelectedValuesList();
 
 			ConstraintValueSet returns = new ConstraintValueSet( cp.isIncluded(), property,
 					( vals.size() > 1 ? JoinType.AND : JoinType.SINGLE ) );
@@ -214,8 +216,8 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		return null;
 	}
 
-	protected ConstraintPanel( URI proptype, String label, JComponent input,
-			boolean checked, Value valForType, Map<URI, String> propmap ) {
+	protected ConstraintPanel( IRI proptype, String label, JComponent input,
+			boolean checked, Value valForType, Map<IRI, String> propmap ) {
 		initComponents();
 
 		inputarea.setLayout( new BorderLayout() );
@@ -223,11 +225,11 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		this.label.setText( label );
 		include.setSelected( checked );
 
-		LabeledPairRenderer<URI> renderer
+		LabeledPairRenderer<IRI> renderer
 				= LabeledPairRenderer.getUriPairRenderer().cache( propmap );
-		propmap = Utility.sortUrisByLabel( propmap );
-		URI[] uris = propmap.keySet().toArray( new URI[0] );
-		DefaultComboBoxModel<URI> model = new DefaultComboBoxModel<>( uris );
+		propmap = Utility.sortIrisByLabel( propmap );
+		IRI[] uris = propmap.keySet().toArray( new IRI[0] );
+		DefaultComboBoxModel<IRI> model = new DefaultComboBoxModel<>( uris );
 
 		property.setModel( model );
 		property.setEditable( false );
@@ -237,8 +239,8 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		setType( valForType );
 	}
 
-	protected ConstraintPanel( URI proptype, String lbl, JComponent input,
-			boolean checked, Collection<Value> values, Map<URI, String> propmap ) {
+	protected ConstraintPanel( IRI proptype, String lbl, JComponent input,
+			boolean checked, Collection<Value> values, Map<IRI, String> propmap ) {
 		initComponents();
 
 		inputarea.setLayout( new BorderLayout() );
@@ -246,11 +248,11 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		label.setText( lbl );
 		include.setSelected( checked );
 
-		LabeledPairRenderer<URI> renderer
+		LabeledPairRenderer<IRI> renderer
 				= LabeledPairRenderer.getUriPairRenderer().cache( propmap );
-		propmap = Utility.sortUrisByLabel( propmap );
-		URI[] uris = propmap.keySet().toArray( new URI[0] );
-		DefaultComboBoxModel<URI> model = new DefaultComboBoxModel<>( uris );
+		propmap = Utility.sortIrisByLabel( propmap );
+		IRI[] uris = propmap.keySet().toArray( new IRI[0] );
+		DefaultComboBoxModel<IRI> model = new DefaultComboBoxModel<>( uris );
 
 		property.setModel( model );
 		property.setEditable( false );
@@ -265,7 +267,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		}
 	}
 
-	protected URI getPropertyType() {
+	protected IRI getPropertyType() {
 		return property.getItemAt( property.getSelectedIndex() );
 	}
 
@@ -273,7 +275,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		if ( null == o ) {
 			stringtype.setSelected( true );
 		}
-		else if ( o instanceof URI ) {
+		else if ( o instanceof IRI ) {
 			uritype.setSelected( true );
 		}
 		else {
@@ -295,14 +297,14 @@ public class ConstraintPanel extends javax.swing.JPanel {
 	 * @return The datatype, or null if the datatype is {@link XMLSchema#STRING},
 	 * or {@link XMLSchema#ANYURI} if "URI" was selected.
 	 */
-	public URI getType() {
+	public IRI getType() {
 		Enumeration<AbstractButton> radios = typegroup.getElements();
 		while ( radios.hasMoreElements() ) {
 			AbstractButton radio = radios.nextElement();
 			if ( radio.isSelected() ) {
 				String command = radio.getActionCommand();
 
-				for ( Map.Entry<Class<?>, URI> types : typelookup.entrySet() ) {
+				for ( Map.Entry<Class<?>, IRI> types : typelookup.entrySet() ) {
 					if ( types.getKey().getSimpleName().equalsIgnoreCase( command ) ) {
 						if ( XMLSchema.STRING.equals( types.getValue() ) ) {
 							return null;
@@ -346,7 +348,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
     datetype = new javax.swing.JRadioButton();
     jLabel2 = new javax.swing.JLabel();
     inputarea = new javax.swing.JPanel();
-    property = new javax.swing.JComboBox<URI>();
+    property = new javax.swing.JComboBox<>();
 
     label.setText("New Value");
 
@@ -435,7 +437,7 @@ public class ConstraintPanel extends javax.swing.JPanel {
   private javax.swing.JLabel jLabel2;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JLabel label;
-  private javax.swing.JComboBox<URI> property;
+  private javax.swing.JComboBox<IRI> property;
   private javax.swing.JRadioButton stringtype;
   private javax.swing.ButtonGroup typegroup;
   private javax.swing.JRadioButton uritype;
@@ -495,9 +497,9 @@ public class ConstraintPanel extends javax.swing.JPanel {
 
 		public final Value val;
 		public final boolean included;
-		public final URI property;
+		public final IRI property;
 
-		public ConstraintValue( Value val, boolean included, URI property ) {
+		public ConstraintValue( Value val, boolean included, IRI property ) {
 			this.val = val;
 			this.included = included;
 			this.property = property;
@@ -513,11 +515,11 @@ public class ConstraintPanel extends javax.swing.JPanel {
 		};
 
 		public final boolean included;
-		public final URI property;
+		public final IRI property;
 		public final JoinType joiner;
 		public final String raw;
 
-		public ConstraintValueSet( boolean included, URI property, JoinType joiner,
+		public ConstraintValueSet( boolean included, IRI property, JoinType joiner,
 				String raw ) {
 			this.included = included;
 			this.property = property;
@@ -525,11 +527,11 @@ public class ConstraintPanel extends javax.swing.JPanel {
 			this.raw = ( JoinType.SINGLE == joiner ? null : raw );
 		}
 
-		public ConstraintValueSet( boolean included, URI property, JoinType joiner ) {
+		public ConstraintValueSet( boolean included, IRI property, JoinType joiner ) {
 			this( included, property, joiner, null );
 		}
 
-		public ConstraintValueSet( boolean included, URI property, JoinType joiner,
+		public ConstraintValueSet( boolean included, IRI property, JoinType joiner,
 				Collection<Value> vals, String raw ) {
 			this( included, property, joiner, raw );
 			addAll( vals );

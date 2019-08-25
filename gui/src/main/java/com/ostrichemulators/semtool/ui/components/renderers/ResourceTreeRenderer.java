@@ -10,7 +10,7 @@ import java.awt.Component;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  * A renderer for DefaultMutableTreeNodes that have a Resource as a UserObject
@@ -58,12 +58,12 @@ public class ResourceTreeRenderer extends DefaultTreeCellRenderer {
 		DefaultMutableTreeNode dmtNode = DefaultMutableTreeNode.class.cast( value );
 		Object o = dmtNode.getUserObject();
 
-		if ( null == o || !( o instanceof URI ) ) {
+		if ( null == o || !( o instanceof IRI ) ) {
 			return super.getTreeCellRendererComponent( tree, o, selected, expanded,
 					leaf, row, hasFocus );
 		}
 
-		URI uri = URI.class.cast( dmtNode.getUserObject() );
+		IRI uri = IRI.class.cast( dmtNode.getUserObject() );
 		String text = ( useLabels && null != rlc
 				? rlc.get( uri )
 				: uri.getLocalName() );

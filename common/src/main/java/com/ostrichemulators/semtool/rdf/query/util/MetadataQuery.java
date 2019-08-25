@@ -8,13 +8,13 @@ package com.ostrichemulators.semtool.rdf.query.util;
 import com.ostrichemulators.semtool.model.vocabulary.SEMTOOL;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.DC;
 import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.BindingSet;
 import com.ostrichemulators.semtool.rdf.engine.api.MetadataConstants;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 /**
@@ -25,7 +25,7 @@ import org.eclipse.rdf4j.model.Value;
  *
  * @author ryan
  */
-public class MetadataQuery extends QueryExecutorAdapter<Map<URI, Value>> {
+public class MetadataQuery extends QueryExecutorAdapter<Map<IRI, Value>> {
 
 	public MetadataQuery() {
 		super( "SELECT ?db ?p ?o WHERE { ?db a ?dataset . ?db ?p ?o }" );
@@ -33,7 +33,7 @@ public class MetadataQuery extends QueryExecutorAdapter<Map<URI, Value>> {
 		bind("dataset", SEMTOOL.Database );
 	}
 
-	public MetadataQuery( URI uri ) {
+	public MetadataQuery( IRI uri ) {
 		super( "SELECT ?db ?p ?o WHERE { ?db a ?dataset . ?db ?p ?o }" );
 		result = new HashMap<>();
 		bind("dataset", SEMTOOL.Database );
@@ -41,10 +41,10 @@ public class MetadataQuery extends QueryExecutorAdapter<Map<URI, Value>> {
 		bind("p", ( SEMTOOL.Database.equals( uri ) ? RDF.TYPE : uri ) );
 	}
 
-	public Map<URI, String> asStrings() {
-		Map<URI, String> vals = new HashMap<>();
+	public Map<IRI, String> asStrings() {
+		Map<IRI, String> vals = new HashMap<>();
 
-		for ( Map.Entry<URI, Value> en : super.getResults().entrySet() ) {
+		for ( Map.Entry<IRI, Value> en : super.getResults().entrySet() ) {
 			vals.put( en.getKey(), en.getValue().stringValue() );
 		}
 
@@ -71,7 +71,7 @@ public class MetadataQuery extends QueryExecutorAdapter<Map<URI, Value>> {
 
 	@Override
 	public void handleTuple( BindingSet set, ValueFactory fac ) {
-		URI pred = fac.createURI( set.getValue( "p" ).stringValue() );
+		IRI pred = fac.createIRI( set.getValue( "p" ).stringValue() );
 		Value val = set.getValue( "o" );
 
 		// for baseuri, we need the subject, not the object
@@ -84,7 +84,7 @@ public class MetadataQuery extends QueryExecutorAdapter<Map<URI, Value>> {
 			// silently handle the old DC namespace (ignore our DC-specific URIs)
 			if ( !( MetadataConstants.DCT_CREATED.equals( pred )
 					|| MetadataConstants.DCT_MODIFIED.equals( pred ) ) ) {
-				pred = fac.createURI( DCTERMS.NAMESPACE, pred.getLocalName() );
+				pred = fac.createIRI( DCTERMS.NAMESPACE, pred.getLocalName() );
 			}
 		}
 

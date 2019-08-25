@@ -62,7 +62,7 @@ import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 /**
@@ -83,7 +83,7 @@ public class WeightDropDownButton extends JButton {
 	private boolean listsPopulated = false;
 	private GraphPlaySheet playSheet;
 	private LabeledPairTreeCellRenderer renderer;
-	private URI lastSelectedValue;
+	private IRI lastSelectedValue;
 
 	public WeightDropDownButton() {
 		this( GuiUtility.loadImageIcon( "width.png" ) );
@@ -120,8 +120,8 @@ public class WeightDropDownButton extends JButton {
 		renderer.setOpenIcon( null );
 		renderer.setLeafIcon( null );
 
-		Map<URI, String> displayNames = NodeEdgeNumberedPropertyUtility.getDisplayNameMap();
-		for ( URI key : displayNames.keySet() ) {
+		Map<IRI, String> displayNames = NodeEdgeNumberedPropertyUtility.getDisplayNameMap();
+		for ( IRI key : displayNames.keySet() ) {
 			renderer.cache( key, displayNames.get( key ) );
 		}
 
@@ -164,12 +164,12 @@ public class WeightDropDownButton extends JButton {
 	}
 
 	private <X extends GraphElement> void initMenus( JTree tree, int selectNum,
-			MultiMap<URI, X> nodesOrEdgesMapByType ) {
+			MultiMap<IRI, X> nodesOrEdgesMapByType ) {
 		tree.addTreeSelectionListener( getTreeSelectionListener( selectNum ) );
 		DefaultMutableTreeNode invisibleRoot = new DefaultMutableTreeNode( "not visible" );
 		tree.setModel( new DefaultTreeModel( invisibleRoot ) );
 
-		MultiSetMap<URI, URI> propertiesToAdd = buildPropertyDataset( nodesOrEdgesMapByType );
+		MultiSetMap<IRI, IRI> propertiesToAdd = buildPropertyDataset( nodesOrEdgesMapByType );
 		addPropertiesToTreeNode( propertiesToAdd, invisibleRoot );
 
 		for ( int i = 0; i < tree.getRowCount(); i++ ) {
@@ -183,14 +183,14 @@ public class WeightDropDownButton extends JButton {
 	 * properties to later add to the JTree. We use this intermediary data
 	 * structure because it gives us uniqueness and order for the elements.
 	 *
-	 * @param Map<URI, List<X>> nodesOrEdgesMapByType - the map of nodes or edges
+	 * @param Map<IRI, List<X>> nodesOrEdgesMapByType - the map of nodes or edges
 	 * keyed by type
 	 * @return Map<String, Set<String>> maps of the types of the nodes or edges to
 	 * the names of their numerical properties
 	 */
-	private <X extends GraphElement> MultiSetMap<URI, URI> buildPropertyDataset( Map<URI, List<X>> nodesOrEdgesMapByType ) {
-		MultiSetMap<URI, URI> propertiesToAdd = new MultiSetMap<>();
-		for ( Map.Entry<URI, List<X>> entry : nodesOrEdgesMapByType.entrySet() ) {
+	private <X extends GraphElement> MultiSetMap<IRI, IRI> buildPropertyDataset( Map<IRI, List<X>> nodesOrEdgesMapByType ) {
+		MultiSetMap<IRI, IRI> propertiesToAdd = new MultiSetMap<>();
+		for ( Map.Entry<IRI, List<X>> entry : nodesOrEdgesMapByType.entrySet() ) {
 			if ( entry.getValue().size() < 2 ) {
 				//we don't want to list items that are the only one of their type
 				continue;
@@ -217,9 +217,9 @@ public class WeightDropDownButton extends JButton {
 	 * @param ge
 	 * @return
 	 */
-	private static Set<URI> getNumberedProperties( GraphElement ge ) {
-		Set<URI> numbers = new HashSet<>();
-		for ( Map.Entry<URI, Value> en : ge.getValues().entrySet() ) {
+	private static Set<IRI> getNumberedProperties( GraphElement ge ) {
+		Set<IRI> numbers = new HashSet<>();
+		for ( Map.Entry<IRI, Value> en : ge.getValues().entrySet() ) {
 			Value v = en.getValue();
 			if ( RDFDatatypeTools.isNumericValue( v ) ) {
 				numbers.add( en.getKey() );
@@ -229,14 +229,14 @@ public class WeightDropDownButton extends JButton {
 		return numbers;
 	}
 
-	private void addPropertiesToTreeNode( MultiSetMap<URI, URI> propertiesToAdd,
+	private void addPropertiesToTreeNode( MultiSetMap<IRI, IRI> propertiesToAdd,
 			DefaultMutableTreeNode invisibleNodeRoot ) {
-		for ( Map.Entry<URI, Set<URI>> en : propertiesToAdd.entrySet() ) {
-			Set<URI> propertiesForThisNodeType = en.getValue();
+		for ( Map.Entry<IRI, Set<IRI>> en : propertiesToAdd.entrySet() ) {
+			Set<IRI> propertiesForThisNodeType = en.getValue();
 			if ( !propertiesForThisNodeType.isEmpty() ) {
 				DefaultMutableTreeNode nodeType = new DefaultMutableTreeNode( en.getKey() );
 				invisibleNodeRoot.add( nodeType );
-				for ( URI property : propertiesForThisNodeType ) {
+				for ( IRI property : propertiesForThisNodeType ) {
 					nodeType.add( new DefaultMutableTreeNode( property ) );
 				}
 			}
@@ -349,11 +349,11 @@ public class WeightDropDownButton extends JButton {
 				TreePath path = e.getPath();
 				DefaultMutableTreeNode typenode
 						= DefaultMutableTreeNode.class.cast( path.getPathComponent( 1 ) );
-				URI type = URI.class.cast( typenode.getUserObject() );
+				IRI type = IRI.class.cast( typenode.getUserObject() );
 
 				DefaultMutableTreeNode dmtn
 						= DefaultMutableTreeNode.class.cast( e.getPath().getLastPathComponent() );
-				URI prop = URI.class.cast( dmtn.getUserObject() );
+				IRI prop = IRI.class.cast( dmtn.getUserObject() );
 
 				if ( thisMode == edgeMode ) {
 					rescaleEdges( type, prop );
@@ -365,7 +365,7 @@ public class WeightDropDownButton extends JButton {
 		};
 	}
 
-	private void rescaleVertices( URI type, URI prop ) {
+	private void rescaleVertices( IRI type, IRI prop ) {
 		VertexShapeTransformer vst
 				= (VertexShapeTransformer) playSheet.getView().getRenderContext().getVertexShapeTransformer();
 		vst.setSizeMap( getWeightHash( playSheet.getVerticesByType().getNN( type ),
@@ -373,7 +373,7 @@ public class WeightDropDownButton extends JButton {
 		playSheet.getView().repaint();
 	}
 
-	private void rescaleEdges( URI type, URI prop ) {
+	private void rescaleEdges( IRI type, IRI prop ) {
 		EdgeStrokeTransformer est
 				= (EdgeStrokeTransformer) playSheet.getView().getRenderContext().getEdgeStrokeTransformer();
 		est.setEdges( getWeightHash( playSheet.getEdgesByType().getNN( type ),
@@ -387,13 +387,13 @@ public class WeightDropDownButton extends JButton {
 	 *
 	 * @param <X> the type of graph element we want to get
 	 * @param collection the list of items which may or may not be selected
-	 * @param selectedURI the URI which is currently selected
+	 * @param selectedURI the IRI which is currently selected
 	 * @param defaultScale the default scale of the graph elements
 	 * @return map of the nodes and weights
 	 */
 	@SuppressWarnings( "unchecked" )
 	public <X extends GraphElement> Map<X, Double>
-			getWeightHash( Collection<X> collection, URI selectedURI,
+			getWeightHash( Collection<X> collection, IRI selectedURI,
 					double defaultScale ) {
 
 		double minimumValue = .5, multiplier = 3;
@@ -459,7 +459,7 @@ public class WeightDropDownButton extends JButton {
 		return weightHash;
 	}
 
-	private boolean isUnselectionEvent( URI selectedValue ) {
+	private boolean isUnselectionEvent( IRI selectedValue ) {
 		if ( selectedValue == null ) {
 			//i don't think this should happen, but just in case
 			lastSelectedValue = null;

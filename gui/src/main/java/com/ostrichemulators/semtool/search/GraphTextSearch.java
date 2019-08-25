@@ -127,6 +127,7 @@ public class GraphTextSearch {
 				return;
 			}
 
+			// FIXME: handle boosts here
 			QueryParser alltextqp = new QueryParser( field, analyzer );
 			Query q = alltextqp.parse( sb.toString() );
 			log.debug( q );
@@ -322,11 +323,9 @@ public class GraphTextSearch {
 				String label = labels.get( pred );
 				String text = labels.get( en.getValue() );
 				Field f = new TextField( label, text, Field.Store.YES );
-				f.setBoost( boosts.getOrDefault( pred, 1f ) );
 				doc.add( f );
 
 				Field f2 = new TextField( pred.stringValue(), text, Field.Store.YES );
-				f2.setBoost( boosts.getOrDefault( pred, 1f ) );
 				doc.add( f2 );
 			}
 		}

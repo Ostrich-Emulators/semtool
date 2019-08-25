@@ -8,12 +8,12 @@ import org.apache.log4j.Logger;
 
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
-import org.eclipse.rdf4j.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.engine.api.InsightManager;
 import java.util.Properties;
+import org.eclipse.rdf4j.sail.inferencer.fc.SchemaCachingRDFSInferencer;
 
 public class ClusterEngine extends AbstractSesameEngine {
 
@@ -40,11 +40,11 @@ public class ClusterEngine extends AbstractSesameEngine {
 
 	@Override
 	protected void createRc( Properties props ) {
-		ForwardChainingRDFSInferencer inferencer
-				= new ForwardChainingRDFSInferencer( new MemoryStore() );
+		SchemaCachingRDFSInferencer inferencer
+				= new SchemaCachingRDFSInferencer( new MemoryStore() );
 		SailRepository repo = new SailRepository( inferencer );
 		try {
-			repo.initialize();
+			repo.init();
 			rc = repo.getConnection();
 		}
 		catch ( Exception e ) {

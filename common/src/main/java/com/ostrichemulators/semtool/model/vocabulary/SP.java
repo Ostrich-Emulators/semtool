@@ -1,10 +1,10 @@
 package com.ostrichemulators.semtool.model.vocabulary;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Namespace;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.NamespaceImpl;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleNamespace;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * Minimal vocabulary of the SPIN SPARQL Syntax schema.
@@ -31,47 +31,47 @@ public class SP {
 	 * An immutable {@link Namespace} constant that represents the SPIN SPARQL
 	 * Syntax schema namespace.
 	 */
-	public static final Namespace NS = new NamespaceImpl( PREFIX, NAMESPACE );
+	public static final Namespace NS = new SimpleNamespace( PREFIX, NAMESPACE );
 
 	// ----- Classes ------
 	/**
 	 * http://spinrdf.org/sp#Construct
 	 */
-	public final static URI Construct;
+	public final static IRI Construct;
 
 	/**
 	 * http://spinrdf.org/sp#Select
 	 */
-	public final static URI Select;
+	public final static IRI Select;
 
 	/**
 	 * http://spinrdf.org/sp#Describe
 	 */
-	public final static URI Describe;
+	public final static IRI Describe;
 
 	// ----- Properties ------
 	/**
 	 * http://spinrdf.org/sp#text
 	 */
-	public final static URI text;
+	public final static IRI text;
 
 	/**
 	 * http://spinrdf.org/sp#query
 	 */
-	public final static URI query;
+	public final static IRI query;
 
 	static {
-		final ValueFactory factory = ValueFactoryImpl.getInstance();
+		final ValueFactory factory = SimpleValueFactory.getInstance();
 
 		// ----- Classes ------
-		Construct = factory.createURI( NAMESPACE, "Construct" );
+		Construct = factory.createIRI( NAMESPACE, "Construct" );
 
-		Select = factory.createURI( NAMESPACE, "Select" );
-		Describe = factory.createURI( NAMESPACE, "Describe" );
+		Select = factory.createIRI( NAMESPACE, "Select" );
+		Describe = factory.createIRI( NAMESPACE, "Describe" );
 
 		// ----- Properties ------
-		text = factory.createURI( NAMESPACE, "text" );
+		text = factory.createIRI( NAMESPACE, "text" );
 
-		query = factory.createURI( NAMESPACE, "query" );
+		query = factory.createIRI( NAMESPACE, "query" );
 	}
 }

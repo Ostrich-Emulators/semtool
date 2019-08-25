@@ -19,7 +19,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import com.ostrichemulators.semtool.rdf.engine.api.IEngine;
 import com.ostrichemulators.semtool.rdf.query.util.MetadataQuery;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.repository.RepositoryException;
@@ -54,6 +53,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.TransferHandler;
 import javax.swing.plaf.LayerUI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 /**
@@ -93,7 +93,7 @@ public class RepositoryList extends JList<IEngine> {
 
 		StringBuilder sb = new StringBuilder();
 		try {
-			Map<URI, Value> metadata = eng.query( new MetadataQuery() );
+			Map<IRI, Value> metadata = eng.query( new MetadataQuery() );
 			Value summary = metadata.get( MetadataConstants.DCT_DESC );
 			if ( null != summary ) {
 				sb.append( "Summary: " ).append( summary.stringValue() );
@@ -343,7 +343,8 @@ public class RepositoryList extends JList<IEngine> {
 			fireIntervalAdded( e, engines.size() - 1, engines.size() - 1 );
 		}
 
-		public void addAll( Collection<IEngine> engins ) {
+		@Override
+		public void addAll( Collection<? extends IEngine> engins ) {
 			for ( IEngine eng : engins ) {
 				add( eng );
 			}

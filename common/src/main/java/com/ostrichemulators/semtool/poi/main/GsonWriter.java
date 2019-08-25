@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.io.output.WriterOutputStream;
@@ -60,7 +61,7 @@ public class GsonWriter implements GraphWriter {
 	}
 
 	public void write( ImportData data, Writer writer ) throws IOException {
-		write( data, new WriterOutputStream( writer ) );
+		write( data, new WriterOutputStream( writer, Charset.defaultCharset() ) );
 	}
 
 	public static Graph getGraph( ImportData data ) {

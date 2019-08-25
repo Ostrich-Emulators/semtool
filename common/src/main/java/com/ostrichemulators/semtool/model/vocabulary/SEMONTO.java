@@ -1,7 +1,7 @@
 package com.ostrichemulators.semtool.model.vocabulary;
 
 import org.eclipse.rdf4j.model.Namespace;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleNamespace;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -9,14 +9,14 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 public class SEMONTO {
 
 	/**
-	 * The SEMONTO Metamodel Base URI: http://semoss.org/ontologies
+	 * The SEMONTO Metamodel Base IRI: http://semoss.org/ontologies
 	 */
-	public final static String BASE_URI = "http://os-em.com/ontologies/semtool";
+	public final static String BASE_IRI = "http://os-em.com/ontologies/semtool";
 
 	/**
 	 * The SEMONTO Metamodel schema namespace: http://semoss.org/ontologies/
 	 */
-	public final static String NAMESPACE = BASE_URI + "/";
+	public final static String NAMESPACE = BASE_IRI + "/";
 
 	/**
 	 * Recommend prefix for the V-CAMP SEMONTO Tool namespace: "semoss"
@@ -33,18 +33,18 @@ public class SEMONTO {
 	/**
 	 * http://semoss.org/ontologies/Concept
 	 */
-	public final static URI Concept;
+	public final static IRI Concept;
 
 	/**
 	 * http://semoss.org/ontologies/Relation
 	 */
-	public final static URI Relation;
+	public final static IRI Relation;
 
 	// ----- Properties ------
 	/**
 	 * http://semoss.org/ontologies/has
 	 */
-	public static final URI has;
+	public static final IRI has;
 
 	static {
 		final ValueFactory factory = SimpleValueFactory.getInstance();

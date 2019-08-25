@@ -23,26 +23,26 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 /**
  * Used to compare two properties.
  */
-public class PropComparator implements Comparator<URI> {
+public class PropComparator implements Comparator<IRI> {
 
-	private final List<URI> ordered = new ArrayList<>();
+	private final List<IRI> ordered = new ArrayList<>();
 
 	public PropComparator() {
 		this( RDFS.LABEL, RDF.TYPE, RDF.SUBJECT );
 	}
 
-	public PropComparator( URI... uris ) {
+	public PropComparator( IRI... uris ) {
 		this( Arrays.asList( uris ) );
 	}
 
-	public PropComparator( List<URI> uris ) {
+	public PropComparator( List<IRI> uris ) {
 		ordered.addAll( uris );
 	}
 
@@ -58,9 +58,9 @@ public class PropComparator implements Comparator<URI> {
 	 * @return int Returns -1, 0, or 1
 	 */
 	@Override
-	public int compare( URI str1, URI str2 ) {
+	public int compare( IRI str1, IRI str2 ) {
 		// first, check if we're dealing with one of our specified order elements
-		for ( URI prop : ordered ) {
+		for ( IRI prop : ordered ) {
 			if ( str1.equals( prop ) ) {
 				return -1;
 			}

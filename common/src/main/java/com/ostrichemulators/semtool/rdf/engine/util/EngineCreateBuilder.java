@@ -13,7 +13,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  *
@@ -21,7 +21,7 @@ import org.eclipse.rdf4j.model.URI;
  */
 public class EngineCreateBuilder {
 
-	private URI defaultBaseUri;
+	private IRI defaultBaseUri;
 	private ReificationStyle reificationModel;
 	private File questions;
 	private final File topdir;
@@ -39,7 +39,7 @@ public class EngineCreateBuilder {
 		engine = engineName;
 	}
 
-	public EngineCreateBuilder setDefaultBaseUri( URI base, boolean override ) {
+	public EngineCreateBuilder setDefaultBaseUri( IRI base, boolean override ) {
 		defaultBaseUri = base;
 		defaultBaseOverridesFiles = override;
 		return this;
@@ -103,7 +103,7 @@ public class EngineCreateBuilder {
 		return new ArrayList<>( vocabularies );
 	}
 
-	public URI getDefaultBaseUri() {
+	public IRI getDefaultBaseUri() {
 		return defaultBaseUri;
 	}
 

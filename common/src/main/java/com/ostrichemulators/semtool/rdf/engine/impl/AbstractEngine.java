@@ -95,8 +95,8 @@ public abstract class AbstractEngine implements IEngine {
 
 		startLoading( prop );
 
-		String baseuristr = prop.getProperty( Constants.BASEURI_KEY, "" );
-		String owlstarter = prop.getProperty( Constants.SEMOSS_URI, null );
+		String baseuristr = prop.getProperty( Constants.BASEIRI_KEY, "" );
+		String owlstarter = prop.getProperty( Constants.SEMOSS_IRI, null );
 		if ( null == owlstarter ) {
 			log.warn( "no schema URI set...using " + SEMONTO.NAMESPACE );
 			owlstarter = SEMONTO.NAMESPACE;
@@ -316,7 +316,7 @@ public abstract class AbstractEngine implements IEngine {
 	}
 
 	public static final IRI getNewBaseUri() {
-		IRI baseuri = UriBuilder.getBuilder( "http://os-em.com/semtool/database/" ).uniqueUri();
+		IRI baseuri = UriBuilder.getBuilder( "http://os-em.com/semtool/database/" ).uniqueIri();
 		return baseuri;
 	}
 

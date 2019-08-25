@@ -19,7 +19,6 @@
  */
 package com.ostrichemulators.semtool.ui.helpers;
 
-import com.ostrichemulators.semtool.ui.components.renderers.LabeledPairTreeCellRenderer;
 import com.ostrichemulators.semtool.util.Constants;
 
 import java.util.HashMap;
@@ -27,13 +26,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 public class NodeEdgeNumberedPropertyUtility {
-	private static final Map<String, URI> localNameToURIHash = new HashMap<>();
-	private static final Map<URI, String> displayNameMap = new HashMap<>();
+	private static final Map<String, IRI> localNameToURIHash = new HashMap<>();
+	private static final Map<IRI, String> displayNameMap = new HashMap<>();
 	private static final Set<String> hidePropertySet = new HashSet<>();
 	private static final Set<String> keepPropertySet = new HashSet<>();
 
@@ -49,15 +48,15 @@ public class NodeEdgeNumberedPropertyUtility {
 		keepPropertySet.add("type");
 	}
 	
-	public static URI getURI(String key) {
+	public static IRI getURI(String key) {
 		return localNameToURIHash.get(key);
 	}
 	
-	public static Map<String, Object> transformProperties(Map<URI, Object> oldProperties, boolean useKeepProperties) {
+	public static Map<String, Object> transformProperties(Map<IRI, Object> oldProperties, boolean useKeepProperties) {
 		HashMap<String, Object> newProperties = new HashMap<>();
 		
-		for( Map.Entry<URI, Object> propEntry : oldProperties.entrySet() ) {
-			URI propertyURI = propEntry.getKey();
+		for( Map.Entry<IRI, Object> propEntry : oldProperties.entrySet() ) {
+			IRI propertyURI = propEntry.getKey();
 			String propertyName = propertyURI.getLocalName();
 			
 			if (displayNameMap.keySet().contains(propertyURI))
@@ -67,8 +66,8 @@ public class NodeEdgeNumberedPropertyUtility {
 			
 			if (useKeepProperties && keepPropertySet.contains(propertyName)) {
 				String valueAsString = propEntry.getValue() + "";
-				if (propEntry.getValue() instanceof URI)
-					valueAsString = ((URI) propEntry.getValue()).getLocalName();
+				if (propEntry.getValue() instanceof IRI)
+					valueAsString = ((IRI) propEntry.getValue()).getLocalName();
 				newProperties.put( propertyName, valueAsString );
 				localNameToURIHash.put( propertyName, propEntry.getKey() );
 				continue;
@@ -98,8 +97,8 @@ public class NodeEdgeNumberedPropertyUtility {
 
 		String stringval;
 
-		if ( propertyValue instanceof URI ) {
-			stringval = URI.class.cast( propertyValue ).getLocalName();
+		if ( propertyValue instanceof IRI ) {
+			stringval = IRI.class.cast( propertyValue ).getLocalName();
 		}
 		else if ( propertyValue instanceof Literal ) {
 			stringval = Literal.class.cast( propertyValue ).getLabel();
@@ -116,7 +115,7 @@ public class NodeEdgeNumberedPropertyUtility {
 		}
 	}
 
-	public static Map<URI, String> getDisplayNameMap() {
+	public static Map<IRI, String> getDisplayNameMap() {
 		return displayNameMap;
 	}
 	

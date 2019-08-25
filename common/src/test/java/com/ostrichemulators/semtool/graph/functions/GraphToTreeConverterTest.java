@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  *
@@ -34,10 +34,10 @@ public class GraphToTreeConverterTest {
 
 	private static final UriBuilder datab = UriBuilder.getBuilder( "http://semoss.va.gov/database/T44889381-85ce-43e3-893d-6267fd480660/" );
 	private static final UriBuilder owlb = UriBuilder.getBuilder( "http://semoss.org/ontologies/" );
-	private static final URI PRICE = owlb.build( "Price" );
-	private static final URI YUGO = datab.build( "Yugo" );
-	private static final URI YURI = datab.build( "Yuri" );
-	private static final URI YPY = datab.build( "Yuri_Purchased_Yugo" );
+	private static final IRI PRICE = owlb.build( "Price" );
+	private static final IRI YUGO = datab.build( "Yugo" );
+	private static final IRI YURI = datab.build( "Yuri" );
+	private static final IRI YPY = datab.build( "Yuri_Purchased_Yugo" );
 
 	public GraphToTreeConverterTest() {
 	}
@@ -61,17 +61,17 @@ public class GraphToTreeConverterTest {
 	@Test
 	public void testBfs() throws Exception {
 
-		DirectedGraph<URI, URI> graph = new DirectedSparseGraph<>();
+		DirectedGraph<IRI, IRI> graph = new DirectedSparseGraph<>();
 		graph.addVertex( YURI );
 		graph.addVertex( YUGO );
 		graph.addEdge( YPY, YURI, YUGO, EdgeType.DIRECTED );
 
-		Collection<URI> roots = Arrays.asList( YURI );
+		Collection<IRI> roots = Arrays.asList( YURI );
 		GraphToTreeConverter.Search search = GraphToTreeConverter.Search.BFS;
-		Forest<URI, URI> result = GraphToTreeConverter.convert( graph, roots, search );
+		Forest<IRI, IRI> result = GraphToTreeConverter.convert( graph, roots, search );
 		assertEquals( 1, result.getTrees().size() );
 
-		Tree<URI, URI> tree = result.getTrees().iterator().next();
+		Tree<IRI, IRI> tree = result.getTrees().iterator().next();
 		assertEquals( YURI, tree.getRoot() );
 		assertEquals( YUGO, tree.getChildren( YURI ).iterator().next() );
 	}
@@ -79,17 +79,17 @@ public class GraphToTreeConverterTest {
 	@Test
 	public void testDfs() throws Exception {
 
-		DirectedGraph<URI, URI> graph = new DirectedSparseGraph<>();
+		DirectedGraph<IRI, IRI> graph = new DirectedSparseGraph<>();
 		graph.addVertex( YURI );
 		graph.addVertex( YUGO );
 		graph.addEdge( YPY, YURI, YUGO, EdgeType.DIRECTED );
 
-		Collection<URI> roots = Arrays.asList( YURI );
+		Collection<IRI> roots = Arrays.asList( YURI );
 		GraphToTreeConverter.Search search = GraphToTreeConverter.Search.DFS;
-		Forest<URI, URI> result = GraphToTreeConverter.convert( graph, roots, search );
+		Forest<IRI, IRI> result = GraphToTreeConverter.convert( graph, roots, search );
 		assertEquals( 1, result.getTrees().size() );
 
-		Tree<URI, URI> tree = result.getTrees().iterator().next();
+		Tree<IRI, IRI> tree = result.getTrees().iterator().next();
 		assertEquals( YURI, tree.getRoot() );
 		assertEquals( YUGO, tree.getChildren( YURI ).iterator().next() );
 	}
@@ -97,14 +97,14 @@ public class GraphToTreeConverterTest {
 	@Test
 	public void testPrint() throws Exception {
 
-		DirectedGraph<URI, URI> graph = new DirectedSparseGraph<>();
+		DirectedGraph<IRI, IRI> graph = new DirectedSparseGraph<>();
 		graph.addVertex( YURI );
 		graph.addVertex( YUGO );
 		graph.addEdge( YPY, YURI, YUGO, EdgeType.DIRECTED );
 
-		Collection<URI> roots = Arrays.asList( YURI );
+		Collection<IRI> roots = Arrays.asList( YURI );
 		GraphToTreeConverter.Search search = GraphToTreeConverter.Search.DFS;
-		Forest<URI, URI> result = GraphToTreeConverter.convert( graph, roots, search );
+		Forest<IRI, IRI> result = GraphToTreeConverter.convert( graph, roots, search );
 
 		Logger log = Logger.getLogger( GraphToTreeConverter.class );
 		StringWriter stringy = new StringWriter();

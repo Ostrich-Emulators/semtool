@@ -11,7 +11,7 @@ import com.ostrichemulators.semtool.poi.main.LoadingSheetData.LoadingNodeAndProp
 import com.ostrichemulators.semtool.rdf.engine.util.QaChecker;
 import java.util.Map;
 import org.apache.log4j.Logger;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -31,7 +31,7 @@ public class W3CEdgeModeler extends AbstractEdgeModeler {
 	}
 
 	@Override
-	public URI addRel( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
+	public IRI addRel( LoadingNodeAndPropertyValues nap, Map<String, String> namespaces,
 			LoadingSheetData sheet, ImportMetadata metas, RepositoryConnection myrc )
 			throws RepositoryException {
 
@@ -49,21 +49,21 @@ public class W3CEdgeModeler extends AbstractEdgeModeler {
 					= sheet.new LoadingNodeAndPropertyValues( srawlabel );
 			addNode( filler, namespaces, sheet, metas, myrc );
 		}
-		URI subject = getCachedInstance( stype, srawlabel );
+		IRI subject = getCachedInstance( stype, srawlabel );
 
 		if ( !hasCachedInstance( otype, orawlabel ) ) {
 			LoadingSheetData lsd = LoadingSheetData.nodesheet( sheet.getName(), otype );
 			LoadingNodeAndPropertyValues filler = lsd.add( orawlabel );
 			addNode( filler, namespaces, lsd, metas, myrc );
 		}
-		URI object = getCachedInstance( otype, orawlabel );
+		IRI object = getCachedInstance( otype, orawlabel );
 
 		// ... and get a relationship that ties them together
 		QaChecker.RelationCacheKey connectorkey = new QaChecker.RelationCacheKey( nap.getSubjectType(),
 				nap.getObjectType(), sheet.getRelname(), nap.getSubject(), nap.getObject() );
 
 		if ( !hasCachedRelation( connectorkey ) ) {
-			URI connector = null;
+			IRI connector = null;
 			if ( nap.isEmpty() ) {
 				connector = getCachedRelationClass( relname );
 			}
@@ -80,7 +80,7 @@ public class W3CEdgeModeler extends AbstractEdgeModeler {
 
 		myrc.add( subject, getCachedRelationClass( relname ), object );
 
-		URI connector = getCachedRelation( connectorkey );
+		IRI connector = getCachedRelation( connectorkey );
 		if ( metas.isAutocreateMetamodel() && !nap.isEmpty() ) {
 			ValueFactory vf = myrc.getValueFactory();
 
@@ -88,7 +88,7 @@ public class W3CEdgeModeler extends AbstractEdgeModeler {
 			myrc.add( connector, RDFS.LABEL, vf.createLiteral( srawlabel + " "
 					+ sheet.getRelname() + " " + orawlabel ) );
 
-			URI pred = getCachedRelationClass( sheet.getRelname() );
+			IRI pred = getCachedRelationClass( sheet.getRelname() );
 
 			myrc.add( connector, RDF.SUBJECT, subject );
 			myrc.add( connector, RDF.PREDICATE, pred );

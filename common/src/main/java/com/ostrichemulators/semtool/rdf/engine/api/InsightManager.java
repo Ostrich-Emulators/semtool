@@ -7,11 +7,11 @@ package com.ostrichemulators.semtool.rdf.engine.api;
 
 import java.util.Collection;
 
-import org.eclipse.rdf4j.model.URI;
 
 import com.ostrichemulators.semtool.om.Insight;
 import com.ostrichemulators.semtool.om.Perspective;
 import java.util.List;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  *
@@ -46,7 +46,7 @@ public interface InsightManager {
 	 * @throws IllegalArgumentException if a perspective with the given id is not
 	 * found
 	 */
-	public Perspective getPerspective( URI id );
+	public Perspective getPerspective( IRI id );
 
 	/**
 	 * Retrieves the given insight from the datastore
@@ -56,7 +56,7 @@ public interface InsightManager {
 	 * @throws IllegalArgumentException if an insight with the given id is not
 	 * found
 	 */
-	public Insight getInsight( URI id );
+	public Insight getInsight( IRI id );
 
 	/**
 	 * Adds a completely-new Insights
@@ -65,7 +65,7 @@ public interface InsightManager {
 	 *
 	 * @return the URI of the new insight
 	 */
-	public URI add( Insight ins );
+	public IRI add( Insight ins );
 
 	public void remove( Insight ins );
 
@@ -78,7 +78,7 @@ public interface InsightManager {
 	 *
 	 * @return the URI of the new perspective
 	 */
-	public URI add( Perspective p );
+	public IRI add( Perspective p );
 
 	public void remove( Perspective p );
 

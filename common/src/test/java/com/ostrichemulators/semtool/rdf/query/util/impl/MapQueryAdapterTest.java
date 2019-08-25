@@ -7,16 +7,14 @@ package com.ostrichemulators.semtool.rdf.query.util.impl;
 
 import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
 import java.util.Map;
+import org.eclipse.rdf4j.model.IRI;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.LiteralImpl;
-import org.eclipse.rdf4j.model.impl.StatementImpl;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -37,7 +35,7 @@ public class MapQueryAdapterTest {
 		eng = InMemorySesameEngine.open();
 		RepositoryConnection rc = eng.getRawConnection();
 		rc.begin();
-		rc.add( new StatementImpl( RDFS.DOMAIN, RDFS.LABEL, new LiteralImpl( "test" ) ) );
+		rc.add( rc.getValueFactory().createStatement( RDFS.DOMAIN, RDFS.LABEL, rc.getValueFactory().createLiteral( "test" ) ) );
 		rc.commit();
 	}
 
@@ -58,7 +56,7 @@ public class MapQueryAdapterTest {
 	public void testClear() {
 		MapQueryAdapterImpl mapper 
 				= new MapQueryAdapterImpl("SELECT ?a ?b WHERE { ?a rdfs:label ?b }");
-		Map<URI, String> results = eng.queryNoEx( mapper );		
+		Map<IRI, String> results = eng.queryNoEx( mapper );
 		assertEquals( "test", results.get( RDFS.DOMAIN ) );
 
 		results.clear();
@@ -69,11 +67,11 @@ public class MapQueryAdapterTest {
 	public void testAdd() {
 		MapQueryAdapterImpl mapper 
 				= new MapQueryAdapterImpl("SELECT ?a ?b WHERE { ?a rdfs:label ?b }");
-		Map<URI, String> results = eng.queryNoEx( mapper );		
+		Map<IRI, String> results = eng.queryNoEx( mapper );
 		assertEquals( "test", results.get( RDFS.DOMAIN ) );
 	}
 
-	public class MapQueryAdapterImpl extends MapQueryAdapter<URI, String> {
+	public class MapQueryAdapterImpl extends MapQueryAdapter<IRI, String> {
 
 		public MapQueryAdapterImpl( String sparq ) {
 			super( sparq );
@@ -81,7 +79,7 @@ public class MapQueryAdapterTest {
 
 		@Override
 		public void handleTuple( BindingSet set, ValueFactory fac ) {
-			add( URI.class.cast( set.getValue( "a" ) ),
+			add( IRI.class.cast( set.getValue( "a" ) ),
 					set.getValue( "b" ).stringValue() );
 		}
 	}

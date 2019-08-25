@@ -6,7 +6,7 @@
 package com.ostrichemulators.semtool.rdf.engine.api;
 
 import com.ostrichemulators.semtool.util.Constants;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  *
@@ -18,13 +18,13 @@ public enum ReificationStyle {
 	SEMTOOL( com.ostrichemulators.semtool.model.vocabulary.SEMTOOL.SEMTOOL_Reification ),
 	W3C( com.ostrichemulators.semtool.model.vocabulary.SEMTOOL.W3C_Reification ),
 	RDR( com.ostrichemulators.semtool.model.vocabulary.SEMTOOL.RDR_Reification );
-	public final URI uri;
+	public final IRI uri;
 
-	ReificationStyle( URI u ) {
+	ReificationStyle( IRI u ) {
 		uri = u;
 	}
 
-	public static ReificationStyle fromUri( URI u ) {
+	public static ReificationStyle fromUri( IRI u ) {
 		if ( null == u ) {
 			return LEGACY;
 		}

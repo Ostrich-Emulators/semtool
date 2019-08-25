@@ -35,7 +35,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  * This class extends downstream processing in order to convert the graph into
@@ -144,18 +144,18 @@ public class GraphToTreeConverter<V, E> {
 	 * uri-to-edge lookup
 	 * @return a valid tree, no matter what
 	 */
-	public Tree<URI, URI> convert( DirectedGraph<V, E> graph,
-			V root, Map<URI, V> vlookup, Map<URI, E> elookup ) {
+	public Tree<IRI, IRI> convert( DirectedGraph<V, E> graph,
+			V root, Map<IRI, V> vlookup, Map<IRI, E> elookup ) {
 
-		DelegateTree<URI, URI> tree = new DelegateTree<>();
-		Map<V, URI> revlkp = new HashMap<>();
+		DelegateTree<IRI, IRI> tree = new DelegateTree<>();
+		Map<V, IRI> revlkp = new HashMap<>();
 
 		ArrayDeque<V> deque = new ArrayDeque<>();
 		Queue<V> todo = ( Search.DFS == method
 				? Collections.asLifoQueue( deque )
 				: deque );
 
-		URI rootu = Utility.getUniqueIri();
+		IRI rootu = Utility.getUniqueIri();
 		vlookup.put( rootu, root );
 		revlkp.put( root, rootu );
 		tree.setRoot( rootu );
@@ -166,7 +166,7 @@ public class GraphToTreeConverter<V, E> {
 		todo.add( root );
 		while ( !todo.isEmpty() ) {
 			V v = todo.poll();
-			URI srcuri = revlkp.get( v );
+			IRI srcuri = revlkp.get( v );
 			// once we visit a node, we can never end
 			// up there again, or we're not acyclic
 			edgesToSkip.addAll( graph.getInEdges( v ) );
@@ -177,8 +177,8 @@ public class GraphToTreeConverter<V, E> {
 			for ( E e : outgoings ) {
 				V child = graph.getOpposite( v, e );
 
-				URI edgeuri = Utility.getUniqueIri();
-				URI tgturi = Utility.getUniqueIri();
+				IRI edgeuri = Utility.getUniqueIri();
+				IRI tgturi = Utility.getUniqueIri();
 
 				elookup.put( edgeuri, e );
 				vlookup.put( tgturi, child );

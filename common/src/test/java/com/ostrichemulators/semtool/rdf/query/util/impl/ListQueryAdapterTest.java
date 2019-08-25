@@ -14,14 +14,13 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.StatementImpl;
-import org.eclipse.rdf4j.model.impl.URIImpl;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  *
@@ -30,20 +29,20 @@ import com.ostrichemulators.semtool.rdf.engine.impl.InMemorySesameEngine;
 public class ListQueryAdapterTest {
 
 	private static final InMemorySesameEngine engine;
-	private static final URI ENTITYONE
-			= new URIImpl( "http://www.7delta.com/entities#one" );
-	private static final URI TYPEONE
-			= new URIImpl( "http://www.7delta.com/types#one" );
-	private static final URI TYPEB
-			= new URIImpl( "http://www.7delta.com/booltype" );
-	private static final URI TYPED
-			= new URIImpl( "http://www.7delta.com/doubletype" );
-	private static final URI TYPES
-			= new URIImpl( "http://www.7delta.com/stringtype" );
-	private static final URI TYPEI
-			= new URIImpl( "http://www.7delta.com/inttype" );
-	private static final URI TYPEA
-			= new URIImpl( "http://www.7delta.com/datetype" );
+	private static final IRI ENTITYONE
+			= SimpleValueFactory.getInstance().createIRI( "http://www.7delta.com/entities#one" );
+	private static final IRI TYPEONE
+			= SimpleValueFactory.getInstance().createIRI( "http://www.7delta.com/types#one" );
+	private static final IRI TYPEB
+			= SimpleValueFactory.getInstance().createIRI( "http://www.7delta.com/booltype" );
+	private static final IRI TYPED
+			= SimpleValueFactory.getInstance().createIRI( "http://www.7delta.com/doubletype" );
+	private static final IRI TYPES
+			= SimpleValueFactory.getInstance().createIRI( "http://www.7delta.com/stringtype" );
+	private static final IRI TYPEI
+			= SimpleValueFactory.getInstance().createIRI( "http://www.7delta.com/inttype" );
+	private static final IRI TYPEA
+			= SimpleValueFactory.getInstance().createIRI( "http://www.7delta.com/datetype" );
 	private static final Date date = new Date();
 
 	private final ListQueryAdapter<IdObj> queryer
@@ -71,13 +70,13 @@ public class ListQueryAdapterTest {
 			}
 
 			ValueFactory vf = rc.getValueFactory();
-			rc.add( new StatementImpl( ENTITYONE, RDF.TYPE, TYPEONE ) );
-			rc.add( new StatementImpl( ENTITYONE, TYPEB, vf.createLiteral( true ) ) );
-			rc.add( new StatementImpl( ENTITYONE, TYPED, vf.createLiteral( 1.0 ) ) );
-			rc.add( new StatementImpl( ENTITYONE, TYPEI, vf.createLiteral( 1 ) ) );
-			rc.add( new StatementImpl( ENTITYONE, TYPES, vf.createLiteral( "string" ) ) );
-			rc.add( new StatementImpl( ENTITYONE, TYPES, vf.createLiteral( "cuerda", "es" ) ) );
-			rc.add( new StatementImpl( ENTITYONE, TYPEA, vf.createLiteral( xmlcal ) ) );
+			rc.add( rc.getValueFactory().createStatement( ENTITYONE, RDF.TYPE, TYPEONE ) );
+			rc.add( rc.getValueFactory().createStatement( ENTITYONE, TYPEB, vf.createLiteral( true ) ) );
+			rc.add( rc.getValueFactory().createStatement( ENTITYONE, TYPED, vf.createLiteral( 1.0 ) ) );
+			rc.add( rc.getValueFactory().createStatement( ENTITYONE, TYPEI, vf.createLiteral( 1 ) ) );
+			rc.add( rc.getValueFactory().createStatement( ENTITYONE, TYPES, vf.createLiteral( "string" ) ) );
+			rc.add( rc.getValueFactory().createStatement( ENTITYONE, TYPES, vf.createLiteral( "cuerda", "es" ) ) );
+			rc.add( rc.getValueFactory().createStatement( ENTITYONE, TYPEA, vf.createLiteral( xmlcal ) ) );
 		}
 		catch ( Exception e ) {
 		}

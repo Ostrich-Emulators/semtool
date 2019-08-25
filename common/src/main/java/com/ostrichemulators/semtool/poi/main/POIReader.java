@@ -33,8 +33,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.impl.URIImpl;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * Loading data into SEMOSS using Microsoft Excel Loading Sheet files
@@ -43,11 +42,12 @@ public class POIReader implements ImportFileReader {
 
 	private static final Logger logger = Logger.getLogger( POIReader.class );
 	private boolean keepLoadInMemory = false;
+	private static final ValueFactory VF = SimpleValueFactory.getInstance();
 
 	public static ImportData readNonloadingSheet( File file ) throws IOException {
 		ImportData d
 				= readNonloadingSheet( new XSSFWorkbook( new FileInputStream( file ) ) );
-		d.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
+		d.getMetadata().setSourceOfData( VF.createIRI( file.toURI().toString() ) );
 		return d;
 	}
 
@@ -84,7 +84,6 @@ public class POIReader implements ImportFileReader {
 			}
 
 			// lastly, fill the sheets
-			ValueFactory vf = new ValueFactoryImpl();
 			for ( int r = 0; r <= rows; r++ ) {
 				Row row = sheet.getRow( r );
 				if ( null != row ) {
@@ -94,7 +93,7 @@ public class POIReader implements ImportFileReader {
 					for ( int c = 1; c <= lastpropcol; c++ ) {
 						String val = getString( row.getCell( c ) );
 						if ( !val.isEmpty() ) {
-							propmap.put( Integer.toString( c ), vf.createLiteral( val ) );
+							propmap.put( Integer.toString( c ), VF.createLiteral( val ) );
 						}
 					}
 
@@ -117,7 +116,7 @@ public class POIReader implements ImportFileReader {
 		try {
 			reader = new LowMemXlsReader( file );
 			ImportMetadata data = reader.getMetadata();
-			data.setSourceOfData( new URIImpl( file.toURI().toString() ) );
+			data.setSourceOfData( VF.createIRI( file.toURI().toString() ) );
 			return data;
 		}
 		finally {
@@ -136,7 +135,7 @@ public class POIReader implements ImportFileReader {
 			rdr.keepSheetDataInMemory( keepLoadInMemory );
 			ImportData d = rdr.getData();
 
-			d.getMetadata().setSourceOfData( new URIImpl( file.toURI().toString() ) );
+			d.getMetadata().setSourceOfData( VF.createIRI( file.toURI().toString() ) );
 			logger.debug( "finished reading file: " + file );
 			return d;
 		}

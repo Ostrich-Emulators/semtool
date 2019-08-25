@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 /**
@@ -49,14 +49,14 @@ public class ChartItPlaySheet extends BrowserPlaySheet2 {
 	}
 	
 	public void pullData(GraphPlaySheet gps) {
-		Map<URI, List<SEMOSSVertex>> nodeHash = gps.getVerticesByType();
+		Map<IRI, List<SEMOSSVertex>> nodeHash = gps.getVerticesByType();
 		Map<String, List<SEMOSSVertex>> nodeHashAsLocalNames = new HashMap<>();
 		
-		for(URI nodeType:nodeHash.keySet()) {
+		for(IRI nodeType:nodeHash.keySet()) {
 			for (SEMOSSVertex node:nodeHash.get(nodeType)) {
-				Map<URI, Object> originalProps = new HashMap<>();
-				Map<URI, Value> vals = node.getValues();
-				for ( Map.Entry<URI, Value> en : vals.entrySet() ) {
+				Map<IRI, Object> originalProps = new HashMap<>();
+				Map<IRI, Value> vals = node.getValues();
+				for ( Map.Entry<IRI, Value> en : vals.entrySet() ) {
 					originalProps.put( en.getKey(),
 							RDFDatatypeTools.getObjectFromValue( en.getValue() ) );
 				}

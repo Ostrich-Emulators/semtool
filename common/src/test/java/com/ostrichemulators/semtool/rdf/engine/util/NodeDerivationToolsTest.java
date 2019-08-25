@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import org.eclipse.rdf4j.model.IRI;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -18,7 +19,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -36,12 +36,12 @@ public class NodeDerivationToolsTest {
 			= UriBuilder.getBuilder( "http://os-em.com/semtool/database/Ke42d9335-1c26-475a-96bd-9bde6a2ab5e5/" );
 
 	private static final File LOADFILE = new File( "src/test/resources/test12.nt" );
-	private static final URI HUMAN = OWLB.build( "Human_Being" );
-	private static final URI CAR = OWLB.build( "Car" );
-	private static final URI PURCHASE = OWLB.build( "Purchased" );
-	private static final URI YUGO = DATAB.build( "Yugo" );
-	private static final URI YURI = DATAB.build( "Yuri" );
-	private static final URI YPY = DATAB.build( "Yuri_Purchased_Yugo" );
+	private static final IRI HUMAN = OWLB.build( "Human_Being" );
+	private static final IRI CAR = OWLB.build( "Car" );
+	private static final IRI PURCHASE = OWLB.build( "Purchased" );
+	private static final IRI YUGO = DATAB.build( "Yugo" );
+	private static final IRI YURI = DATAB.build( "Yuri" );
+	private static final IRI YPY = DATAB.build( "Yuri_Purchased_Yugo" );
 	private static InMemorySesameEngine engine;
 
 	public NodeDerivationToolsTest() {
@@ -71,8 +71,8 @@ public class NodeDerivationToolsTest {
 
 	@Test
 	public void testGetConnectedConceptTypes_3args_1() {
-		Set<URI> expResult = new HashSet<>( Arrays.asList( CAR ) );
-		Set<URI> result
+		Set<IRI> expResult = new HashSet<>( Arrays.asList( CAR ) );
+		Set<IRI> result
 				= new HashSet<>( NodeDerivationTools.getConnectedConceptTypes( YURI, engine, true ) );
 		assertEquals( expResult, result );
 
@@ -85,8 +85,8 @@ public class NodeDerivationToolsTest {
 
 	@Test
 	public void testGetConnectedConceptTypes_3args_2() {
-		Set<URI> expResult = new HashSet<>( Arrays.asList( CAR ) );
-		Set<URI> result = new HashSet<>( NodeDerivationTools.
+		Set<IRI> expResult = new HashSet<>( Arrays.asList( CAR ) );
+		Set<IRI> result = new HashSet<>( NodeDerivationTools.
 				getConnectedConceptTypes( Arrays.asList( YURI ), engine, true ) );
 		assertEquals( expResult, result );
 
@@ -101,16 +101,15 @@ public class NodeDerivationToolsTest {
 	@Test
 	public void testGetInstancesNoPropsAvailable() throws Exception {
 		// this is just extra stuff that shouldn't be returned in the tests
-		final URI REL = OWLB.getRelationIri().build();
-		final URI EXTRA = OWLB.build( "AnotherRelType" );
-		final URI EXTRAIMPL = DATAB.build( "AnotherRel" );
+		final IRI REL = OWLB.getRelationIri().build();
+		final IRI EXTRA = OWLB.build( "AnotherRelType" );
+		final IRI EXTRAIMPL = DATAB.build( "AnotherRel" );
 
-		final URI ALAN = DATAB.build( "Alan" );
-		final URI CADILLAC = DATAB.build( "Cadillac" );
+		final IRI ALAN = DATAB.build( "Alan" );
+		final IRI CADILLAC = DATAB.build( "Cadillac" );
 
 		engine.getRawConnection().add( EXTRA, RDFS.SUBPROPERTYOF, REL );
 		engine.getRawConnection().add( EXTRAIMPL, RDF.TYPE, REL );
-
 
 		Model expected = new LinkedHashModel();
 		expected.add( YURI, YPY, YUGO );
