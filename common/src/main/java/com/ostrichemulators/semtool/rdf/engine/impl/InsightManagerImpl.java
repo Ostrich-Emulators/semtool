@@ -159,7 +159,9 @@ public class InsightManagerImpl implements InsightManager {
 		Repository repo = new SailRepository( sail );
 		repo.init();
 		RepositoryConnection rc = repo.getConnection();
+		rc.begin();
 		rc.add( model );
+		rc.commit();
 
 		List<Perspective> persps = new ArrayList<>();
 		try {

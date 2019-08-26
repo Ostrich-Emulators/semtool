@@ -61,8 +61,7 @@ public class ImportInsightsAction extends DbAction {
 	protected boolean preAction( ActionEvent ae ) {
 		Preferences prefs
 				= Preferences.userNodeForPackage( ImportInsightsAction.class );
-		File emptypref = FileBrowsePanel.getLocationForEmptyPref( prefs,
-				"lastinsightsimp" );
+		File emptypref = FileBrowsePanel.getLocationForEmptyPref( prefs, "lastinsightsimp" );
 		JFileChooser chsr = new JFileChooser( emptypref );
 		chsr.setDialogTitle( "Select Insights File" );
 		chsr.setApproveButtonText( "Import" );
